@@ -1,50 +1,4 @@
 <!DOCTYPE html>
-
-<!--
-UX tighten: coverage dedupe, align row, editor toolbar, tools tray scroll
-- Phase 0: safe anchor comments added (AGENT_TOOLBAR_PRIMARY, TOOLBAR_TOOLS_TRAY, AGENT_DRAFT_HEADER, COMPOSE_HEADER, COVERAGE_CARDS)
-- Phase 1: agentCoverageBar → compact meta line; removed duplicate "Response quality" chip row
-- Phase 2: Align + Target compact one-line row in Agent + Compose panels
-- Phase 3: Undo/Redo + Align promoted to first-class toolbar; DevLab moved to hidden tools tray
-- Phase 4: toolPocketGrid gets internal scroll; tray padding tightened; header sticky
-- Phase 5: Fix/Apply buttons show Applied ✓; counters refresh on action
--->
-<!--
-MIRRORFLOW INTERNAL (not user-facing)
-Build: UI-lock v1i → v24 (phrase library upgrade: empathy, delivering good news, saying sorry, reassurance, closing)
-- UI-lock v27.1: Agent Intent "Everyday Language" upgrade — expanded casual signals for AI_GOOD_NEWS/AI_FACT_CONFIRM/AI_CLOSE (all sorted, great news, shout if you need, just to confirm etc.), positional close enforcement fix (GAP_CLOSE_NOT_AT_END now fires correctly when AI_CLOSE detected in wrong zone), new helper functions (MF_splitSentences, MF_getCloseStartIndex, MF_findAllOccurrences, MF_captureHitContext), MF_detectAgentToneRisks (overpromise/defensive/aggressive detection), tone risk gap wiring (GAP_TONE_OVERPROMISE/GAP_TONE_DEFENSIVE/GAP_TONE_AGGRESSIVE), mf-pack-agent-phrases-v1 (structured phrase families + tone risk vocab scaffold), 12 new regression fixtures (A19–A30).
-- UI-lock v27.2: Cleanup + Phase 3.4 + Phase 3.5 — removed duplicate mf-pack-agent-phrases-v1 (positionHint version) + duplicate MF_detectAgentToneRisks; Phase 3.4: MF_packIntegrityStatus + integrity-aware Send Ready gate (amber pill when pack integrity fails); Phase 3.5: Engine X-ray Dev-only panel (intent evidence + hits[], gap obligations, message type, coverage, pack status, cache stats).
-- UI-lock v27.1: Agent Intent v27.1 "Everyday Language" — mf-pack-agent-phrases-v1 (phrase families: primary/secondary/negations/softeners), MF_loadAgentPhrasePack + MF_buildAgentPhraseIndex + MF_findAllOccurrences + MF_captureHitContext + MF_splitSentences + MF_getCloseStartIndex, MF_detectAgentToneRisks (overpromise/defensive/vagueTimeline/aggressive), hits[]/viaPattern/positionScore on all intent results, negation-guard window (±80 chars) in overlap resolver, provenance fields (resolvedFrom/resolvedAs/resolvedReason), expanded closeSignals (everyday variants: shout if, is that okay, want me to proceed), getPackSig extended to all packs (agentIntents+gapRules+agentPhrases), 22 new fixtures A19–A40, GAP_TONE_OVERPROMISE + GAP_TONE_DEFENSIVE gap IDs.
-- UI-lock v27.0: Agent Intent v27 — MF_detectAgentPatterns (pattern-based Medium confidence for Explain/Timeline/Instruct), MF_resolveAgentIntentOverlaps (polarity-aware Fact Confirm↔Good/Bad disambiguation), GAP_CLOSE_NOT_AT_END (end-weighted close enforcement: close must be in last 2 sentences), MF_detectAgentMessageType + MF_validateAgentStructure (message-type validation layer: STATUS_UPDATE / BAD_NEWS / GOOD_NEWS / REDIRECT structural gap checks), agentMessageType in engine result, 8 new regression fixtures (A11–A18), message-type badge + 'pattern' tag in Agent tab UI.
-- UI-lock v26.0: Agent Intent & Gap Detection (Phase A–E) — two new packs (mf-pack-agent-intents-v1, mf-pack-gap-rules-v1), MF_buildPositionMap, MF_matchAndScoreAgentIntents, MF_detectAgentGaps, 10 agent intent chips in Agent tab, 11 structural gap rules with Fix/Compose buttons, tone hint + fill-missing chips in Composer, 10 new regression fixtures (A01–A10), evaluate() extended for agentIntentIn/agentGapsInclude/agentGapsExclude.
-- UI-lock v25.0: Intelligence Engine v2 — Full intent family system (10 families), weighted scoring engine (keyword×3 + variant×2 + contextual×2 + anchor×1 + proximity/diversity bonuses), emotion layer (6 emotions with intensity/persistence), coverage obligation matrix (bidirectional customer→agent cross-reference), gap detection with severity grading, suggestive output language framework. Experience tab enhanced with intent analysis cards showing confidence bands + evidence + overlaps, emotional signals section, and inline coverage check. Agent tab enhanced with per-intent coverage breakdown and quick-fix buttons. Coverage bar now engine-aware.
-- UI-lock v23.1: CX Insights — analysis patched (all-caps detection, expanded complaint/vuln signals, frustrating stem, polite-opener word-boundary fix, say catch-all) | v23: — Agent audit upgraded (grammar/punctuation, customer addressal check, stat bar, considerations); Experience upgraded (what they're saying / what they mean / stress read / tone pill); Compose now skeleton-only with [bracket placeholders] and notice banner.
-Purpose: lock the tri-layout UI/Phone placement/Utilities hub and keep wiring stable before deeper engine work.
-
-INTERNAL CHANGELOG
-- UI-lock v1q (P3B→P3D): Compose depth slider (1–9) + structured blocks, short-message intelligence, and Agent micro-guidance.
-- UI-lock v1n: Agent tab upgraded with Writing Health section (short-thread essentials + gap-fix actions + clarity/tone flags).
-- UI-lock v1o (P0→P3D): Hotfix — Agent tab blank guard: error-boundary mounts for sub-keys + safe MFCX pack fallback.
-- UI-lock v1p: Fix — Agent tab render crash (snap not defined) + applyIssue made state-first.
-- UI-lock v1k: Insights resilience — added Snapshot + per-tab Render Guard (writer/experience/compose), plus safe experience signals caching.
-- UI-lock v1l: Hotfix — fixed Insights script syntax (extra brace) that prevented core JS from running; kept Snapshot + per-tab Guard intact.
-- UI-lock v1m: Hotfix — fixed mf-improvements-patch demo string literal (multiline) to prevent script parse failure.
-- UI-lock v1j: Pass 2 — CX tab routing + render gates (Writer: Agent audit chips only (Customer signals in Experience); UK/US + Jargon render only in their tabs; Experience gated).
-- UI-lock v1j: Phone bars now use solid, theme-tinted surfaces (no black bars; clear/frosted affects panels only).
-- UI-lock v1d: Fixed Phone™ scaling on window resize (updatePhoneScale now wired correctly).
-- UI-lock v1d: Anchored .phone-wrap (position + scaled box) to prevent clipping/cropping.
-- UI-lock v1d: Status time now renders immediately on load.
-- UI-lock v1d: Customer input now triggers render for live Insights signals.
-- UI-lock v1: Insights panel uses flex column layout on all breakpoints; Utilities hub pinned to bottom.
-- UI-lock v1: Removed Focus modes placeholder card from Insights (header buttons remain).
-- UI-lock v1: Phone panel body now flex:1 to guarantee vertical centring at all viewport heights.
-- UI-lock v1: Persistence scope reduced to UI settings only (no draft/transcript restore). Editors always start blank.
-- UI-lock v1: When Preview is OFF, show typing indicator instead of a live preview bubble in transcript.
-Notes for future phases:
-- Keep Phase-F scheduler/recompute pipeline untouched unless explicitly required.
-- Add editor tool wiring incrementally (format, highlights, spacing) behind small, isolated functions.
-- ChatFlow (drag/reorder) should be implemented as a thin layer over state.messages with stable IDs.
--->
 <html lang="en-GB">
 <head>
 <meta charset="utf-8"/>
@@ -114,7 +68,6 @@ Notes for future phases:
       --orbs-int: 1;
       --stars-int: 1;
 
-
       /* Bubble colours */
       --bub-agent: rgba(122,180,255,.20);
       --bub-agent-stroke: rgba(122,180,255,.35);
@@ -122,14 +75,16 @@ Notes for future phases:
       --bub-cust-stroke: rgba(255,255,255,.12);
 
       /* Phone bar tints (solid, theme-aware; phone remains opaque) */
-      /* Static fallbacks for browsers without color-mix() support (Chrome <111, Firefox <113) */
       --phoneBarA: #111827;
       --phoneBarB: #0b1020;
       --phoneBarStroke: rgba(255,255,255,.12);
-      /* Progressive enhancement: override with color-mix where supported */
-      --phoneBarA: color-mix(in srgb, var(--bg1) 78%, var(--accent) 22%);
-      --phoneBarB: color-mix(in srgb, var(--bg0) 86%, var(--accent2) 14%);
-      --phoneBarStroke: color-mix(in srgb, var(--stroke) 70%, var(--accent) 30%);
+    }
+    @supports (color-mix(in srgb, red, blue)) {
+      :root {
+        --phoneBarA: color-mix(in srgb, var(--bg1) 78%, var(--accent) 22%);
+        --phoneBarB: color-mix(in srgb, var(--bg0) 86%, var(--accent2) 14%);
+        --phoneBarStroke: color-mix(in srgb, var(--stroke) 70%, var(--accent) 30%);
+      }
     }
 
     *{ box-sizing:border-box; }
@@ -162,9 +117,6 @@ Notes for future phases:
         opacity: .92;
       }
     }
-
-
-    /* Subtle blur drift (kept) */
 
     .bg-fx{
       position:fixed;
@@ -289,7 +241,6 @@ Notes for future phases:
 .utilitiesHub .iconbtn:active{ transform: translateY(0px) scale(.98); }
 .iconbtn svg{ opacity:.95; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
 
-    
 /* utilities: Anim icon (matches dice) */
 .iconbtn{ color: rgba(255,255,255,.92); }
 #diceBtn{ color: rgba(255,255,255,.94); }
@@ -341,7 +292,6 @@ Notes for future phases:
   100%{ transform: translate3d(0,0,0); }
 }
 body.mf-mode-nudge .app{ animation: mfModeNudge 220ms ease-out; }
-
 
     .utilitiesHub .swatch{ width: 12px; height:  12px; }
     .utilitiesHub .textsize{
@@ -530,10 +480,7 @@ body[data-focus="editor"] #agentDraft{
 /* Kill any orphan/empty rows that may appear between blocks */
 .char-count-row:empty,
 .phone-text-size-row:empty,
-.toolbar:empty,
-.dock:empty,
-.dock-left:empty,
-.dock-right:empty{
+.toolbar:empty{
   display:none !important;
   margin:0 !important;
   padding:0 !important;
@@ -725,24 +672,6 @@ body[data-focus="editor"] #agentDraft{
     .pillbtn.danger{ border-color: rgba(255,120,120,.35); background: rgba(255,120,120,.10); }
     .pillbtn.danger:hover{ background: rgba(255,120,120,.14); }
 
-    /* Dock */
-    .dock{
-      margin-top: 8px;
-      padding: 8px 10px;
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.12);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-      flex-wrap:wrap;
-    }
-    .dock-left, .dock-mid, .dock-right{
-      display:flex; align-items:center; gap: 8px; flex-wrap:wrap;
-      min-width: 0;
-    }
     .mini{
       border: 1px solid rgba(255,255,255,.14);
       background: rgba(0,0,0,.14);
@@ -808,7 +737,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
 }
 .modeswitch button:focus-visible{ outline:2px solid rgba(255,255,255,.25); outline-offset:2px; }
 
-
     /* Swatches */
     .swatches{
       display:flex;
@@ -829,7 +757,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       100%{ box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 0 0 0 rgba(255,165,64,.00); }
     }
 
-    
 .swatch{
   width: 20px; height: 20px;
   border-radius: 999px;
@@ -887,7 +814,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       min-height:0;
     }
 
-    
     /* ===============================
        Phone Truth Layer — Shell System
        (Clean shell)
@@ -934,7 +860,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       z-index:1;
     }
 
-    /* Micro highlight — subtle, never a second border */
     /* Keep child stacking predictable */
     .phone-inner > *{ position: relative; z-index: 2; }
 .statusbar{
@@ -1161,7 +1086,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       flex: 0 0 auto;
     }
 
-
 /* Option 1: Phone™ rolling customer replies
    - Only triggers when agent draft is empty
    - Tap the send-dot to step to the next customer reply */
@@ -1300,7 +1224,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       .phone-wrap{ /* scaling handled globally via --phone-scale (see updatePhoneScale) */ }
       .textsize{ padding-bottom: 6px; }
     }
-    /* --- P1c: Utilities hub + slimmer toolbars --- */
 
     /* Keep phone frame stable (no squash) */
     .phone-panel-body{ justify-content:center; }
@@ -1315,10 +1238,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
     }
     .classic-toolbar.insertbar{ margin-top: 8px; gap: 8px; flex-wrap: wrap; }
 
-    /* Dock = two rows (stats then actions) */
-    .dock{ flex-direction: column; align-items: stretch; gap: 10px; }
-    .dock-left, .dock-right{ width: 100%; justify-content:flex-start; }
-
     /* Preview button becomes icon-only */
     .pillbtn.iconpill{
       min-width: 34px;
@@ -1329,13 +1248,10 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       gap: 6px;
     }
 
-    
-    /* Utilities hub at bottom of Insights (moved to global styles in UI-lock v1) */
 /* Slightly slimmer minis + buttons in dock */
     .mini{ padding: 8px 10px; border-radius: 999px; }
     .pillbtn{ padding: 9px 12px; border-radius: 999px; }
 
-  
     /* --- P1d: Phone scaling ---
        Scaling is driven by updatePhoneScale() which sets --phone-scale on :root.
        - .phone-wrap uses scaled layout size (prevents clipping)
@@ -1476,7 +1392,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
   border-color: rgba(255,120,160,.35);
 }
 
-
     /* === P1c: Pin Utilities hub to bottom of Insights (non-overlapping) === */
     .panel[data-panel="insights"] .panel-body{
       padding: 12px;
@@ -1498,7 +1413,6 @@ body[data-tmode="twilight"] .modeswitch button[data-active="true"]{
       margin-top: auto; /* push to bottom when content is short */
     }
 
-
 /* === UIlock v2 patch: Dice-only sky + motion translucency === */
 .swatches{ display:none !important; }
 body[data-motion="on"] .panel{
@@ -1507,8 +1421,6 @@ body[data-motion="on"] .panel{
 body[data-motion="on"] .panel::before{
   opacity: .75;
 }
-
-
 
 /* D-4B Agent audit (minimal UI) */
 .cx-audit{ margin: 10px 0 6px; }
@@ -1542,7 +1454,6 @@ body[data-motion="on"] .panel::before{
 .mf-fix .audit-row{ position:relative; }
 .mf-fix .audit-row.pulse{ box-shadow: 0 0 0 3px rgba(var(--accentRGB), .24); }
 
-
 /* === UI polish: lighter glass + scrollbars (v2f) === */
 :root{
   --panelA: rgba(12, 18, 26, .46);
@@ -1567,7 +1478,6 @@ body[data-glass="clear"]{
   --shadow: rgba(0,0,0,.16);
   --panelBlur: 1px;
 }
-
 
 .panel{
   background: linear-gradient(180deg, var(--panelA), var(--panelB));
@@ -1616,7 +1526,6 @@ body[data-glass="clear"]{
   background: linear-gradient(180deg, rgba(255,255,255,.42), rgba(255,255,255,.18));
 }
 
-
 /* Toolbar: center + compact stats + separator */
 .panel[data-panel="draft"] .classic-toolbar{ justify-content: center !important; }
 .panel[data-panel="draft"] .classic-toolbar .vsep{
@@ -1636,7 +1545,6 @@ body[data-glass="clear"]{
   font-weight: 700;
   margin-left: 6px;
 }
-
 
 /* === Toolbar Pocket (customizable tools, max 2 rows) === */
 
@@ -1781,10 +1689,6 @@ body[data-glass="clear"]{
   opacity: .65;
   flex: 0 0 auto;
 }
-/* reclaim vertical space: dock actions now live in toolbar */
-.dock-right{ display:none !important; }
-
-
 /* === Compact Utilities (match new toolbar sizing) === */
 .utilitiesHub{
   padding: 8px 8px !important;
@@ -1807,7 +1711,6 @@ body[data-glass="clear"]{
 }
 .utilitiesTitle{ margin-bottom: 6px !important; font-size: 10px !important; }
 
-
 /* === MF:UI: Editor toolbar notch + hard order lock extras === */
 .toolbarWrap{ position: relative; }
 #draftToolbar{ position: relative; padding-right: 44px; } /* space for notch */
@@ -1828,7 +1731,6 @@ body[data-glass="clear"]{
   opacity: 0.92;
 }
 #btnToolPocket:hover{ transform: translateY(-1px); opacity: 1; }
-
 
     /* ===== Utilities Modals (UI-only) ===== */
     .util-pill{
@@ -1965,7 +1867,6 @@ body[data-glass="clear"]{
     .mf-changelogTop{ display:flex; justify-content:space-between; gap: 10px; font-size: 12px; opacity:.9; }
     .mf-changelogBullets{ margin: 8px 0 0 18px; }
 
-    
     /* ===== Dev Lab (Visibility Manager) ===== */
     .mf-devGrid{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     @media (max-width: 860px){ .mf-devGrid{ grid-template-columns: 1fr; } }
@@ -2174,7 +2075,6 @@ body[data-glass="clear"]{
       margin-bottom: 8px;
     }
 
-
 /* === Writer Insights actions (Jump / Hide / Apply / Ignore) === */
 .insight-group{display:flex; align-items:center; justify-content:space-between; padding:8px 2px 2px; margin-top:2px;}
 .insight-group .t{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(240,248,255,.60);}
@@ -2194,8 +2094,6 @@ body[data-glass="clear"]{
   background:rgba(255,120,120,.08);
 }
 .meta.meta2{opacity:.85; margin-top:2px;}
-
-
 
 /* ===== Phase A: Portal header + CX mode toggles ===== */
 .panel[data-panel="phone"] .panel-header.portal-header{
@@ -2229,7 +2127,6 @@ body[data-glass="clear"]{
   padding:0;
   border-radius: 11px;
 }
-
 
 .cx-lens{margin:2px 0 10px}
 /* CX Insights mode row */
@@ -2353,7 +2250,6 @@ body[data-glass="clear"]{
   animation: mftab-glow-pulse 2.8s ease-in-out infinite;
 }
 
-/* ── Tab badges: Compose count hidden, Auditor uses glow ─────────────────── */
 /* Compose counter — hidden, tab label alone is enough */
 #composeCount {
   display: none !important;
@@ -2374,7 +2270,6 @@ body[data-glass="clear"]{
   box-shadow: 0 0 0 2px rgba(255,150,60,.18), 0 0 14px rgba(255,150,60,.22) !important;
   color: rgba(255,220,160,.98) !important;
 }
-/* Sol day mode equivalents */
 /* show one CX card at a time */
 .panel[data-panel="insights"] .card[data-cx]{ display:none; }
 .panel[data-panel="insights"][data-cxmode="experience"] .card[data-cx="experience"]{ display:block; }
@@ -2382,9 +2277,6 @@ body[data-glass="clear"]{
 .panel[data-panel="insights"][data-cxmode="writer"] .card[data-cx="writer"]{ display:block; }
 .panel[data-panel="insights"][data-cxmode="libraries"] .card[data-cx="libraries"]{ display:block; }
 .panel[data-panel="insights"][data-cxmode="auditor"] .card[data-cx="auditor"]{ display:block; }
-
-
-
 
 /* === MF:UI: Theme-dynamic glow borders (Lite-safe) === */
 body[data-glass="clear"] .shell,
@@ -2416,7 +2308,6 @@ body[data-glass="clear"] .pane{
 .editor-box:focus-within{
   box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 0 18px rgba(var(--accentRGB), .10);
 }
-
 
 /* ---------------------------------------------------------------------
    D-4D — Inline Flagging Overlay (Lite-safe)
@@ -2451,7 +2342,6 @@ body[data-glass="clear"] .pane{
   outline: 1px solid rgba(255,255,255,0.05);
 }
 
-
 .ta-overlay .hl-jargon{
   background: rgba(255, 162, 92, 0.08);
   box-shadow: inset 0 -1px 0 rgba(255, 162, 92, 0.62);
@@ -2475,7 +2365,6 @@ body[data-glass="clear"] .pane{
     0 10px 26px rgba(0,0,0,0.28);
   animation: mfPulseFlash 720ms ease-out 1;
 }
-
 
 .ta-tip{
   position:absolute;
@@ -2536,9 +2425,6 @@ body[data-glass="clear"] .pane{
   animation: mfPulseFlash 720ms ease-out 1;
 }
 
-
-
-
 /* === Option B: Experience tab structure tightening (Customer signals) === */
 .sig-wrap{display:flex;flex-direction:column;gap:10px}
 .sig-intro{padding:8px 10px;border:1px dashed var(--stroke2);border-radius:14px;color:var(--muted);font-size:12px;letter-spacing:.2px}
@@ -2548,8 +2434,6 @@ body[data-glass="clear"] .pane{
 .sig-head .count{font-size:12px;color:var(--muted)}
 .sig-empty{padding:6px 10px;color:var(--muted);font-size:13px}
 
-
-/* === Readability Overrides (Theme-aware) === */
 /* Keep Twilight as-is (dark, high-contrast) */
 body[data-theme="twilight"] .panel[data-panel="draft"] textarea,
 body[data-theme="twilight"] .panel[data-panel="draft"] .editor textarea,
@@ -2559,29 +2443,9 @@ body[data-theme="twilight"] .panel[data-panel="draft"] .agent textarea{
   backdrop-filter: none !important;
 }
 
-/* Day (SOL): iPhone-glass input panels — soft neutral grey, single shade */
-/* Day (SOL) — visibility: ensure input text + helper UI stays readable */
-/* Day + Glass(clear): more background show-through (still readable) */
-/* Phone Preview — Day readability pass (icons + header text) */
-/* Header avatar + meta */
-/* Bubbles + input bar */
-
 /* ─────────────────────────────────────────
-   SOL legacy swap + targeted fixes
+   SOL targeted fixes
    ───────────────────────────────────────── */
-      body[data-tmode="sol"]::after{
-        content:"";
-        position:fixed;
-        inset:0;
-        pointer-events:none;
-        background:
-          radial-gradient(900px 640px at 50% -12%, rgba(255,255,255,.14), transparent 62%),
-          radial-gradient(820px 620px at 12% 18%, rgba(255,205,140,.12), transparent 60%),
-          radial-gradient(900px 700px at 88% 22%, rgba(180,220,255,.10), transparent 60%);
-        mix-blend-mode: screen;
-        opacity: .92;
-      }
-
 body[data-tmode="sol"] .modeswitch button[data-active="true"]{
   background: radial-gradient(120% 140% at 20% 20%, rgba(255,182,72,.30), rgba(255,125,35,.14));
 }
@@ -2651,13 +2515,9 @@ body[data-tmode="sol"] .mf-pattern{
 }
 body[data-tmode="sol"] #bgParticles{ opacity: .18 !important; }
 
-
-
 /* Sunset switch trick: warm Sol layers, cool Twilight layers, smoothly */
 .bg-fx, .mf-pattern, #bgParticles{ transition: filter .85s ease, opacity .85s ease, background .85s ease; }
 body[data-tmode="sol"] .bg-fx, body[data-tmode="sol"] .mf-pattern, body[data-tmode="sol"] #bgParticles{ filter: saturate(1.06) hue-rotate(-8deg); } body[data-tmode="twilight"] .bg-fx, body[data-tmode="twilight"] .mf-pattern, body[data-tmode="twilight"] #bgParticles{ filter: saturate(.94) hue-rotate(8deg); }
-
-
 
 /* Sol phone spice pass — richer bar tones + bubble pop */
 body[data-tmode="sol"] .statusbar{
@@ -2714,9 +2574,6 @@ body[data-tmode="sol"] .sendbtn{
 body[data-theme="twilight"] .phone-inner{
   background: linear-gradient(180deg, rgba(24,28,42,1), rgba(8,10,16,1)) !important;
 }
-
-
-
 
 /* Sol phone — subtle colourway adaptation (Twilight-style, but softer)
    Uses current theme accents so each Sol colourway gets its own gentle tint. */
@@ -2812,7 +2669,6 @@ body[data-tmode="sol"] .phone-send{
 .mf-stress-med{ background:rgba(255,180,50,.15); border-color:rgba(255,180,50,.32); color:#ffd98c; }
 .mf-stress-low{ background:rgba(80,220,120,.13); border-color:rgba(80,220,120,.28); color:#8fffc0; }
 .dot-vuln{ background:rgba(255,180,50,.65) !important; }
-
 
 /* ---------- Compose (CX tab) ---------- */
 .badge{
@@ -3019,7 +2875,6 @@ body[data-tmode="sol"] .phone-send{
   .mf-compose-ta{ min-height: 320px; }
   .mf-autodraft-ta{ min-height: 180px; opacity: .92; }
 
-  /* [MF:P3A] Compose Suggestions */
   /* P3E: Embedded Blocks Tray (Option A) */
   .mf-compose-tray{
     margin-top: 12px;
@@ -3229,8 +3084,6 @@ body[data-tmode="sol"] .phone-send{
     box-shadow: 0 10px 24px rgba(0,0,0,.12);
   }
 
-
-
 /* [MF:LITE_INSIGHTS_GUARDS v1] Per-tab error fallback */
 .mf-taberr{
   padding: 12px;
@@ -3257,8 +3110,6 @@ body[data-tmode="sol"] .phone-send{
   gap: 8px;
   margin-top: 10px;
 }
-
-
 
 /* =========================================================
    MF v25 — Intelligence Engine v2 UI Styles
@@ -3583,12 +3434,10 @@ body[data-tmode="sol"] .phone-send{
   animation: mf-score-pulse .7s ease-out;
 }
 
-
 /* =========================================================
    MF v23.3 — QoL: Send Ready · Coverage · Smart Tab · Ignore · Vuln Pulse
    ========================================================= */
 
-/* --- Send Ready Pill --- */
 /* Phase 3.4: Integrity-fail state — amber warning instead of red/green */
 #mfSendReady[data-integrity-fail="true"] { border-color: rgba(255,180,50,.55) !important; }
 #mfSendReady[data-integrity-fail="true"] #mfSendReadyDot { background: rgba(255,180,50,.9) !important; }
@@ -3735,7 +3584,6 @@ body[data-tmode="sol"] .phone-send{
   display: none; /* clean by default, pulse handles feedback */
 }
 
-
 /* =========================================================
    MF v23.4 — Tab badges · Keyboard shortcuts · Phrase search · Tab memory
    ========================================================= */
@@ -3841,7 +3689,6 @@ body[data-tmode="sol"] .phone-send{
   pointer-events: none;
 }
 
-
 /* ============================================================
    MF v23.5 — Auditor card term display
    ============================================================ */
@@ -3923,9 +3770,6 @@ body[data-tmode="sol"] .phone-send{
 .insight-box .insight-item:last-child {
   border-bottom: none;
 }
-
-/* --- .k label variants — stamped at render time --- */
-/* Default .k: already 650 weight, fine */
 
 /* Flag key (Agent draft quality, any amber warning) */
 .k-flag {
@@ -4146,7 +3990,6 @@ body[data-tmode="sol"] .phone-send{
   font-style: italic;
   letter-spacing: .01em;
 }
-/* SOL day mode: make pills legible on light background */
 /* --- Agent stat bar — make value number more legible --- */
 .mf-agent-stat-val {
   font-size: 17px;
@@ -4479,7 +4322,6 @@ body[data-tmode="sol"] .phone-send{
   color: rgba(235,245,255,.42);
   margin-top: 1px;
 }
-/* SOL overrides for health rows */
 /* v28.3 Combo card highlight */
 .mf-v28-combo-card {
   border-left: 3px solid rgba(100,180,255,.35);
@@ -4669,7 +4511,6 @@ body[data-tmode="sol"] .phone-send{
   font-size: 11px;
   text-align: center;
 }
-/* SOL DAY overrides for v28 sections */
 /* MF:PHASE1: Compact coverage meta line */
 .mf-cov-meta {
   display: flex;
@@ -4750,7 +4591,6 @@ body[data-tmode="sol"] .phone-send{
   color: var(--accent);
 }
 .pillbtn.align-pill:hover { background: rgba(122,180,255,.20); }
-
 
 /* ─────────────────────────────────────────
    SOL Enhancement Pack — luxury daylight glass
@@ -5685,7 +5525,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
   //     data.intentFamilies / data.emotionLayer / data.softPrefixes / data.gapSuggestionTemplates
   // ---------------------------------------------------------------
   const MF_packLoader = (function(){
-    const LEGACY_ENGINE_ID = "mf-pack-engine-v2"; // backward compat (older builds)
     const DEF_VERSION = "2.0.0";
 
     function _isDevOn(){
@@ -5833,7 +5672,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
       return out;
     }
 
-
     function _validateAgentIntentsPack(obj){
       const out={ok:true,errors:[],warnings:[]};
       const ai = obj && obj.data && obj.data.agentIntents;
@@ -5875,7 +5713,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
       out.meta.validation = { ok: out.ok, errors: out.errors.slice(), warnings: out.warnings.slice() };
       return out;
     }
-
 
     function _validateAgentPhrasesPack(obj){
       const errs=[]; const warns=[];
@@ -5931,25 +5768,7 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
       return { pack: fb, status: val };
     }
 
-    function _loadLegacyIfNeeded(){
-      // If new pack tags are missing but legacy exists, attempt to split legacy pack into subpacks on the fly.
-      const hasNew = document.getElementById("mf-pack-intents-v2") || document.getElementById("mf-pack-emotions-v2") || document.getElementById("mf-pack-coverage-v2") || document.getElementById("mf-pack-patches-v2") || document.getElementById("mf-pack-agent-intents-v1") || document.getElementById("mf-pack-gap-rules-v1");
-      if (hasNew) return;
-      const legacy = _readEmbeddedJSON(LEGACY_ENGINE_ID);
-      if (!legacy || !legacy.data) return;
-      try{
-        const d = legacy.data || {};
-        // Create ad-hoc embedded caches to keep engine running deterministically
-        _cacheSet("MF_PACK_CACHE_intents_v2",  { meta:{id:"mf-intents-v2", version: legacy.meta && legacy.meta.version || DEF_VERSION, format:1, sha256:"", source:"legacy-split"}, data:{ intentFamilies: d.intentFamilies || [] } });
-        _cacheSet("MF_PACK_CACHE_emotions_v2", { meta:{id:"mf-emotions-v2", version: legacy.meta && legacy.meta.version || DEF_VERSION, format:1, sha256:"", source:"legacy-split"}, data:{ emotionLayer: d.emotionLayer || [] } });
-        _cacheSet("MF_PACK_CACHE_coverage_v2", { meta:{id:"mf-coverage-v2", version: legacy.meta && legacy.meta.version || DEF_VERSION, format:1, sha256:"", source:"legacy-split"}, data:{ softPrefixes: d.softPrefixes || [] } });
-        _cacheSet("MF_PACK_CACHE_patches_v2",  { meta:{id:"mf-patches-v2", version: legacy.meta && legacy.meta.version || DEF_VERSION, format:1, sha256:"", source:"legacy-split"}, data:{ gapSuggestionTemplates: d.gapSuggestionTemplates || {} } });
-      }catch(e){}
-    }
-
     function loadEngineV2(){
-      _loadLegacyIfNeeded();
-
       const DEV = _isDevOn();
       const STRICT = _isStrictOn();
 
@@ -6063,7 +5882,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
     }catch(e){}
   })();
 
-
   // Data packs (loaded, but exposed as the original const names for compatibility)
   const MF_AGENT_INTENTS  = (MF_ENGINE_PACK && MF_ENGINE_PACK.data && Array.isArray(MF_ENGINE_PACK.data.agentIntents)) ? MF_ENGINE_PACK.data.agentIntents : [];
   const MF_GAP_RULES      = (MF_ENGINE_PACK && MF_ENGINE_PACK.data && Array.isArray(MF_ENGINE_PACK.data.gapRules))     ? MF_ENGINE_PACK.data.gapRules     : [];
@@ -6080,12 +5898,10 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
   // ---------------------------------------------------------------
     // MF_INTENT_FAMILIES loaded via MF_ENGINE_PACK (mf-pack-engine-v2)
 
-
   // ---------------------------------------------------------------
   // LAYER 2: EMOTION DEFINITIONS (separate from intent)
   // ---------------------------------------------------------------
     // MF_EMOTION_LAYER loaded via MF_ENGINE_PACK (mf-pack-engine-v2)
-
 
   // ---------------------------------------------------------------
   // LAYER 3: NORMALIZER + TOKENIZER
@@ -6179,7 +5995,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
     const raw = String(text || "").trim();
     if (!raw) return { cleaned:"", tokens:[], original: raw };
 
-
     // [MF:CACHE] normalize+tokenize memoization
     try{
       const ck = MF_CACHE.key("norm", raw, "");
@@ -6211,7 +6026,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
   function MF_matchAndScoreIntents(text){
     const { cleaned, tokens } = MF_normalize(text);
     if (!tokens.length) return [];
-
 
     // [MF:CACHE] intent scoring memoization (depends on packs)
     let __mf_intent_ck = null;
@@ -6349,7 +6163,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
   function MF_detectEmotions(text){
     const { cleaned } = MF_normalize(text);
     if (!cleaned) return [];
-
 
     // [MF:CACHE] emotion detector memoization (depends on packs)
     let __mf_emo_ck = null;
@@ -6523,10 +6336,8 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
   // ---------------------------------------------------------------
     // MF_SOFT_PREFIXES loaded via MF_ENGINE_PACK (mf-pack-engine-v2)
 
-
   function MF_generateGapSuggestion(gap){
     const templates = (MF_ENGINE_PACK && MF_ENGINE_PACK.data && MF_ENGINE_PACK.data.gapSuggestionTemplates) ? MF_ENGINE_PACK.data.gapSuggestionTemplates : {};
-
 
     return templates[gap.cover] || `Consider addressing: ${gap.label}.`;
   }
@@ -6969,7 +6780,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
       }
     }
 
-
     // v27.1: Tone risk gaps
     if (typeof MF_detectAgentToneRisks === "function") {
       const _toneRisks = MF_detectAgentToneRisks(raw);
@@ -7099,8 +6909,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
     }
     return result.filter(i => i.band && i.rawScore >= 1).sort((a,b) => b.rawScore - a.rawScore);
   }
-
-
 
   function MF_isInCloseWindow(charIndex, textLength, opts) {
     const pct = (opts && typeof opts.closeWindowPct === "number") ? opts.closeWindowPct : 0.25;
@@ -7327,7 +7135,6 @@ Thanks for reaching out, how can I help?" rows="14"></textarea>
       hasAgent: !!agent
     };
   }
-
 
   const MFCX_CONTENT = {
     version: "mfcx-lite-content-1.0",
@@ -7735,7 +7542,6 @@ If you tell me the key outcome you want (for example: faster timeline, clearer c
       ].join("\n\n");
     }
 
-    
   // -------------------------------
   // Experience snapshot helper (Compose auto-draft)
   // NOTE: Compose auto-draft calls this ONLY when customer text is non-empty.
@@ -7799,7 +7605,6 @@ If you tell me the key outcome you want (for example: faster timeline, clearer c
     const sentences = t.split(/[.!?]+/).filter(s=>s.trim().length).length;
     return (sentences <= 2 && words <= 40) || chars <= 220;
   }
-
 
 function MF_buildAutoDraft(customerText, pack, opts){
     // [COMPOSE v23] Skeleton-only builder. Every block uses [bracket placeholders].
@@ -7912,7 +7717,6 @@ function MF_buildAutoDraft(customerText, pack, opts){
     if (out.length > 2200) return out.slice(0, 2190).trim() + "...";
     return out;
   }
-
 
   // --------------------------------
   // Compose tray (assemble → commit)
@@ -8274,7 +8078,6 @@ function MF_buildAutoDraft(customerText, pack, opts){
     // Close on outside click
     setTimeout(() => window.addEventListener("mousedown", (e)=>{ if(!m.contains(e.target)) closeMenu(); }, { once:true }), 0);
   }
-
 
 function MF_detectMissing(agentText, customerText, signals, intents, topQuestions){
     const a = String(agentText||"").toLowerCase();
@@ -8861,7 +8664,6 @@ function MF_detectMissing(agentText, customerText, signals, intents, topQuestion
     return { words, chars, paras, sentences };
   }
 
-  
   // -------------------------------------------------------
   // [MF:CONTEXT_GUARD v1] Authenticated in-app messaging context
   // MirrorFlow Lite assumes the customer is logged in and the conversation is tied to their account.
@@ -8928,7 +8730,6 @@ function MF_detectEssentials(customerText){
     const stC = MF_textStats(c);
     const flags = [];
 
-    
     if (stA.words && stA.words <= 22){
       flags.push({ key:"Very short draft", val:"If this is the first reply, add next steps and one clarifying question." });
     }
@@ -9048,7 +8849,6 @@ function MF_detectEssentials(customerText){
     return "";
   }
 
-
   /* ================================================================
      MF v28.3 — CLOSING QUESTION DETECTOR
      Returns true if the agent draft already contains a closing
@@ -9079,7 +8879,6 @@ function MF_detectEssentials(customerText){
     if (/\?$/.test(last) && last.length > 10) return true;
     return false;
   }
-
 
   /* ================================================================
      MF v28.3 — COMBO FIX SELECTION LAYER
@@ -9298,7 +9097,6 @@ function MF_detectEssentials(customerText){
     return selected;
   }
 
-
   // ── Fix 1: Pre-Draft Guidance Builder ──────────────────────────────────
   // When agent draft is empty/short, produce starter guidance from customer analysis
   function MF_buildAgentStarterInsights(customerText, lens){
@@ -9342,7 +9140,6 @@ function MF_detectEssentials(customerText){
     };
   }
   window.MF_buildAgentStarterInsights = MF_buildAgentStarterInsights;
-
 
   function MF_renderAgentHealthSection(payload){
     /* ================================================================
@@ -9515,7 +9312,6 @@ function MF_detectEssentials(customerText){
       return row;
     }
 
-
     /* ═══════════════════════════════════════════════════════
        ① AUDITOR  (flat — no header label)
        ═══════════════════════════════════════════════════════ */
@@ -9534,7 +9330,6 @@ function MF_detectEssentials(customerText){
       } catch(_ab){}
       sec.appendChild(audBody);
     } catch(_audErr){}
-
 
     /* ═══════════════════════════════════════════════════════
        ② DRAFT HEALTH  (flat — merged Structure + Writing + Send)
@@ -9672,13 +9467,8 @@ function MF_detectEssentials(customerText){
       } catch(_dhi){ sec.appendChild(draftSec.wrap); }
     } catch(_healthErr){}
 
-
-
     return sec;
   }
-
-
-
 
   const ENGINE = (() => {
     const B = ENGINE_BUNDLE || {};
@@ -9926,8 +9716,6 @@ function MF_detectEssentials(customerText){
     },
   ];
 
-
-
   const MF_BG_PRESETS = {
     twilight: {
       name: "twilight",
@@ -9961,7 +9749,6 @@ function MF_detectEssentials(customerText){
       palettes: SOL_BG_PALETTES
     }
   };
-
 
   function mfGetBgPresetForTheme(themeMode){
     if (themeMode === "twilight") {
@@ -10040,8 +9827,6 @@ function MF_detectEssentials(customerText){
     return p;
   }
 
-  
-
   // Demo customer replies (edit freely). Used by Option 1 rolling-reply mode.
   // Behaviour: only when agent draft is empty, tapping the Phone™ send-dot steps to the next reply.
   const DEMO_CUSTOMER_REPLIES = [
@@ -10078,7 +9863,6 @@ function MF_detectEssentials(customerText){
     "If your reply looks like a WhatsApp rant, breathe and rewrite it.",
     "The spellchecker is your co-pilot. You still fly the message.",
   ];
-
 
   // --- Lite CX content backbone (Phase 1/2 seed) ---
   // Neutral, composable primitives (no prescriptions, no auto-write).
@@ -10207,14 +9991,12 @@ function MF_detectEssentials(customerText){
     }
   ];
 
-
   const PLACEHOLDERS = {
     initialCustomer: "Hi, I need help with my claim.",
     initialAgent: "Hi,\nThanks for reaching out, how can I help?",
     defaultCustomer: "Type the customer's message here…",
     defaultAgent: "Write your message here…"
   };
-
 
   function setupAgentTips(){
     const line = el.phoneTipline;
@@ -10353,9 +10135,6 @@ function MF_detectEssentials(customerText){
     lastEdited: "agent",
     hasCommitted: false,
     placeholdersMode: "initial",
-
-
-    
 
     errLog: [],
     devlab: { errors: [] },
@@ -10599,7 +10378,6 @@ btnIndent: document.getElementById("btnIndent"),
     });
   }
 
-
   function setCSSVars(vars){
     const root = document.documentElement.style;
     for (const k in vars) root.setProperty(k, vars[k]);
@@ -10669,7 +10447,6 @@ btnIndent: document.getElementById("btnIndent"),
     } catch (e) {}
   }
 
-  
 function paintSkySwatches(){
   const list = THEMES[state.themeMode] || [];
   // paint the 5 sky theme swatches so they’re visually distinct (no default-white buttons)
@@ -10723,7 +10500,6 @@ function applyTheme(opts={}){
       "--accent2": __bgPreset.css["--bg-c4"] || vars["--accent2"]
     });
 
-
     // Readability guard — ensure core text tokens exist per mode (some palettes only set accents/panels)
     const __isLightUI = (mode === "sol");
     if(__isLightUI){
@@ -10750,7 +10526,6 @@ function applyTheme(opts={}){
       if(!vars["--bub-cust-stroke"]) vars["--bub-cust-stroke"] = "rgba(255,255,255,.12)";
     }
 
-    
     // SOL softness: reduce harsh whites (background + panels) to a pastel grey-blue
     if(__isLightUI){
       const _softTarget = {r:242,g:246,b:252,a:1};
@@ -10826,7 +10601,6 @@ function applyTheme(opts={}){
     document.documentElement.style.setProperty("--phone-font-scale", String(scale));
     el.ts.forEach((b, i) => b.dataset.active = (i === state.textSize) ? "true" : "false");
   }
-
 
 // --- P1d: Phone scaling (fit without stretch) ---
 function updatePhoneScale(){
@@ -11005,7 +10779,6 @@ function tweenCSSVars(targetVars, duration=1200, onFrame){
   requestAnimationFrame(step);
 }
 
-
   function setFocus(mode){
     document.body.dataset.focus = mode; // none | phone | editor
     if (mode === "editor") setTimeout(() => el.agentDraft.focus(), 0);
@@ -11029,7 +10802,6 @@ function tweenCSSVars(targetVars, duration=1200, onFrame){
     textarea.value = next;
     const cursor = start + left.length + selected.length + right.length;
     textarea.setSelectionRange(cursor, cursor);
-
 
 function insertMarkdownLink(textarea){
   const v = textarea.value || "";
@@ -11131,8 +10903,6 @@ function insertMarkdownLink(textarea){
     }
     return n;
   }
-
-
 
   function listUKUSFindings(text){
     const t = (text || "");
@@ -11380,7 +11150,6 @@ function insertMarkdownLink(textarea){
       return m;
     }
 
-
   // --- D-4C: Issue Contract Helpers (safe + additive) ---
   function _safeStr(x, fallback="") { return (typeof x === "string") ? x : fallback; }
 
@@ -11555,8 +11324,6 @@ function insertMarkdownLink(textarea){
       }
     }
 
-  
-
 // D-4F — Ignore/Hide persistence + Card↔Draft Apply parity (additive, gated)
 const D4F_LS_IGNORE_RULES = "mf_lite_ignore_rules_v1";
 const D4F_LS_HIDDEN_ISSUES = "mf_lite_hidden_issues_v1";
@@ -11598,7 +11365,6 @@ function hiddenIssuesLoad(){
 
 function hiddenIssuesSave(){
   try{ if(state.ignore && state.ignore.hidden) d4fSaveSet(D4F_LS_HIDDEN_ISSUES, state.ignore.hidden); }catch(e){}
-
 
 // D-4G — Dev Lab Visibility Manager (additive; no CX panel changes)
 function d4gParseSetFromLS(key){
@@ -11818,7 +11584,6 @@ function d4gRenderVisibilityManager(){
   });
 }
 
-
 // --------------------------------
 // Dev Lab — Error Log (lite-safe)
 // --------------------------------
@@ -11869,7 +11634,6 @@ window.addEventListener("unhandledrejection", (ev)=>{
     MF_logError("promise", ev.reason || new Error("Unhandled rejection"));
   }catch(_){}
 });
-
 
 // Lightweight pipeline health-check: logs missing bindings after each analysis/render pass
 function MF_healthCheck(stage){
@@ -12090,7 +11854,6 @@ function ignoreIssue(issue) {
       toast("Applied all UK spellings.");
     }
 
-  
   function renderWriterIssues() {
       // Writer issues are sourced from state.analysis.writer.issues (kind: "ukus" | "jargon")
       const targets = {
@@ -12437,7 +12200,6 @@ function ignoreIssue(issue) {
             if (!resolved.trim()) return;
             MF_insertIntoAgentDraft(resolved, ctx, { raw: true });
           };
-
 
           const searchInput = document.createElement("input");
           searchInput.type = "text";
@@ -12806,7 +12568,6 @@ function ignoreIssue(issue) {
       return;
     }
 
-
 function listClarityFlags(text){
     const t = (text || "").trim();
     if (!t) return [];
@@ -13114,9 +12875,6 @@ function listClarityFlags(text){
     return out;
   }
 
-
-
-
   function setList(container, items){
     if (!container) return;
     container.innerHTML = "";
@@ -13145,9 +12903,6 @@ function listClarityFlags(text){
       container.appendChild(row);
     }
   }
-
-
-  
 
 // ---------------------------------------------------------------------
 // D-4D — Inline flagging in Agent Draft (Lite-safe)
@@ -13355,7 +13110,6 @@ function syncAgentDraftOverlayScroll() {
   try { positionDraftTipToSeg(state.__draftFocusSeg); } catch(_e){}
 }
 
-
 let __d4dOverlayStyleKey = "";
 function syncDraftOverlayMetrics(){
   const ta = el.agentDraft;
@@ -13419,7 +13173,6 @@ function positionDraftTipToSeg(seg){
   tip.style.top = `${top}px`;
   tip.style.bottom = "auto";
 }
-
 
 function _d4dFindSegAtPos(pos) {
   if (typeof pos !== "number") return null;
@@ -13546,7 +13299,6 @@ function d4eApplyFocused(){
   scheduleRender();
 }
 
-
 function showDraftTip(seg) {
   const tip = el.agentDraftTip;
   if (!tip || !seg) return;
@@ -13648,9 +13400,6 @@ function draftFocusFromCaret(userInitiated) {
   }
 }
 
-
-
-
   // [MF:LITE_INSIGHTS_GUARDS v1] Snapshot + per-tab safe rendering
   // Goal: keep CX Insights resilient (a single panel error should not brick the whole render pass).
   state.tabErrors = state.tabErrors || {};
@@ -13733,7 +13482,6 @@ function render() {
       }
       // Dev sub-links hidden (consolidated in DevLab)
     }catch(_e){ /* ignore */ }
-
 
     if (el.previewToggle && el.previewState){
       el.previewToggle.setAttribute("aria-pressed", String(!!state.previewOn));
@@ -13823,7 +13571,6 @@ function render() {
       }catch(e){
         state.mfcx = null;
       }
-
 
       // Auditor tab count badges
       if (el.auditorUKUSN) el.auditorUKUSN.textContent = String(writer.counts.ukus);
@@ -14027,7 +13774,6 @@ function render() {
       }
     }scrollToBottom();
 
-
     updateCxDebug();
 
     // Keep inputs synced
@@ -14179,7 +13925,6 @@ function render() {
 
     return { saying, meaning, stressLevel, stressLabel, toneDesc, wordCount };
   }
-
 
   // ====================================================================
   // MF_renderAuditorTab -- Auditor tab renderer (UK/US + Jargon + Style)
@@ -14919,7 +14664,6 @@ function render() {
     wrap.appendChild(emoSec);
   }
 
-
   // -------------------------------------------------------
   // Recommended inserts (existing logic)
   // -------------------------------------------------------
@@ -14973,7 +14717,6 @@ function render() {
     }
   }
   wrap.appendChild(rec);
-
 
   // Top questions
   const qs = MF_el("div","mf-sec");
@@ -15221,7 +14964,6 @@ function render() {
       // ---- compose options (tone + length)
       state.composeOpts = state.composeOpts || { tone: "warm", len: "medium", depth: 4 };
 
-
       // Disclaimer first (most important — must be seen before everything)
 
       // [Phase 1B] Generic suggestions when customer is empty
@@ -15468,7 +15210,6 @@ function render() {
         }
       } catch(_dcErr){}
 
-
       const statusStrip = MF_el("div", "mf-composer-status-strip");
 
       // Tone read
@@ -15600,10 +15341,6 @@ function render() {
     }
 }
 
-
-
-
-
   function addMessage(role, text) {
     const t = safeText(text).trim();
     if (!t) return false;
@@ -15667,7 +15404,6 @@ function render() {
     persistSave(true);
     }, 420);
   }
-
 
   function clearAll() {
     state.messages = [];
@@ -16285,7 +16021,6 @@ function setPanelTranslucency(on){
   root.setProperty("--panelHeaderB", on ? "rgba(0,0,0,.03)" : "rgba(0,0,0,.06)");
 }
 
-
   // Minimal render scheduler (prevents spam)
   let _rAF = 0;
   function scheduleRender(){
@@ -16312,7 +16047,6 @@ function setPanelTranslucency(on){
     });
   }
 
-  
   // Phase-F bridge helpers (safe to call even if the scheduler hasn't loaded yet)
   function MF_phaseFTrigger(reason, opts){
     try{
@@ -16357,7 +16091,6 @@ function setPanelTranslucency(on){
     setTimeout(() => box.classList.remove("pulse"), 650);
   }
 
-
 // Utilities: fidget / widget feedback (force animation on every click)
 function fidget(elm, cls){
   if(!elm) return;
@@ -16396,11 +16129,9 @@ function pickRandomThemeInMode(mode, opts={}){
   persistSave(true);
 }
 
-
     // Track active composer for previews
   el.customerMsg.addEventListener("focus", () => { state.lastEdited = "customer"; scheduleRender(); });
   el.agentDraft.addEventListener("focus", () => { state.lastEdited = "agent"; scheduleRender(); });
-
 
   // CX Insights mode switching (accessible tabs)
 
@@ -16707,7 +16438,6 @@ function pickRandomThemeInMode(mode, opts={}){
       }
     }catch(e){}
 
-
     // Scope queries to the CX Insights panel to avoid side effects
     const root = el.insightsPanel || document;
     const btns = Array.from(root.querySelectorAll('.modebtn[data-cxmode]'));
@@ -16769,8 +16499,6 @@ function pickRandomThemeInMode(mode, opts={}){
     ].filter(Boolean).join("");
   }
 
-
-
   // Wire mode buttons
   (function(){
     const btns = Array.from(document.querySelectorAll('.modebtn[data-cxmode]'));
@@ -16827,9 +16555,6 @@ function pickRandomThemeInMode(mode, opts={}){
     if (prevBtn) prevBtn.addEventListener("click", (e)=>{ e.preventDefault(); jumpCard(-1); });
     if (nextBtn) nextBtn.addEventListener("click", (e)=>{ e.preventDefault(); jumpCard(1); });
   })();
-
-
-
 
   // D-4J -- Jargon header controls (jump next/prev; parity with UK/US)
   (function(){
@@ -16924,8 +16649,6 @@ let _histTimer = 0;
     }
   });
 
-
-
   // D-4D -- Inline flagging overlay: keep mirror layer in sync (Lite-safe)
   el.agentDraft.addEventListener("scroll", syncAgentDraftOverlayScroll);
   el.agentDraft.addEventListener("mouseup", () => requestAnimationFrame(() => draftFocusFromCaret(true)));
@@ -16989,7 +16712,6 @@ el.checkerBtn.addEventListener("click", () => {
     });
   }
 
-
   el.pasteBtn.addEventListener("click", doPaste);
   el.copyBtn.addEventListener("click", doCopy);
 
@@ -17045,7 +16767,6 @@ el.ts.forEach((b) => {
     });
   }
 
-
   if (el.glassToggle){
     el.glassToggle.addEventListener("click", () => {
       state.glassMode = (state.glassMode === "clear") ? "frosted" : "clear";
@@ -17080,7 +16801,6 @@ el.ts.forEach((b) => {
     });
   })();
 
-
   // Enable ChatFlow drag-reorder
   bindChatflowDnD();
 
@@ -17094,7 +16814,6 @@ el.ts.forEach((b) => {
     if (ta === el.customerMsg) state.drafts.customer = ta.value;
     else state.drafts.agent = ta.value;
   };
-
 
 const adjustIndent = (ta, dir) => {
   const v = ta.value || "";
@@ -17144,7 +16863,6 @@ const adjustIndent = (ta, dir) => {
   }
 };
 
-
   // Ensure toolbar targets the last edited box
   ["focus","click","input"].forEach(evt => {
     el.customerMsg.addEventListener(evt, () => { state.lastEdited = "customer"; });
@@ -17166,7 +16884,6 @@ const adjustIndent = (ta, dir) => {
     if (ta === el.agentDraft) histPush(state.drafts.agent);
     scheduleRender();
   });
-
 
 el.btnUnderline?.addEventListener("click", () => {
   const ta = getActiveTA();
@@ -17224,7 +16941,6 @@ el.btnLink?.addEventListener("click", () => {
     scheduleRender();
   });
 
-
 el.btnIndent?.addEventListener("click", () => {
   const ta = getActiveTA();
   adjustIndent(ta, +1);
@@ -17240,8 +16956,6 @@ el.btnOutdent?.addEventListener("click", () => {
   if (ta === el.agentDraft) histPush(state.drafts.agent);
   scheduleRender();
 });
-
-
 
   // MF:PHASE3: Sequence draft function — paragraph-aware, line-break preserving
   // ════════════════════════════════════════════════════════════════════════
@@ -17720,7 +17434,6 @@ el.btnOutdent?.addEventListener("click", () => {
     toast("Cleaned");
   });
 
-
   el.btnReplies.addEventListener("click", () => {
     openComposeMenu(el.btnReplies, QUICK_REPLIES, (t) => {
       insertAtCursor(el.agentDraft, t);
@@ -17882,7 +17595,6 @@ el.btnOutdent?.addEventListener("click", () => {
     persistLoad();
     try{ ignoreRulesLoad(); }catch(e){}
     try{ hiddenIssuesLoad(); }catch(e){}
-
 
     // Defaults safety
     if (typeof state.motionOn !== "boolean") state.motionOn = false;
@@ -18585,7 +18297,6 @@ setMotion(state.motionOn);
   }
   .mf-ui-seal-badge strong{ color: rgba(255,255,255,.92); font-weight: 650; }
 
-
   /* ================================
      UI TIGHTENING — DRAFT TOOLBARS (v3)
      Purely visual: reduces vertical spacing + button density.
@@ -18647,8 +18358,6 @@ setMotion(state.motionOn);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.14) !important;
   }
 
-
-
   /* ================================
      UI RHYTHM + REORDER (v4)
      - Tighten vertical spacing between Customer → Toolbars → Agent
@@ -18656,7 +18365,6 @@ setMotion(state.motionOn);
      - Pure CSS: no DOM edits, no engine touches
      ================================ */
 
-  
   /* When quick inserts are merged into the format toolbar */
   .panel[data-panel="draft"] .classic-toolbar[role="toolbar"]{
     flex-wrap: wrap !important;
@@ -18732,7 +18440,6 @@ setMotion(state.motionOn);
   opacity: .9 !important;
 }
 
-
 .mf-toolbar-break{
   flex: 0 0 100% !important;
   width: 100% !important;
@@ -18743,44 +18450,6 @@ setMotion(state.motionOn);
 .panel[data-panel="draft"] #btnHighlight,
 .panel[data-panel="draft"] #btnCode,
 .panel[data-panel="draft"] #btnRule{ display:none !important; }
-/* Dock becomes a mini-insights + quick inserts row */
-.panel[data-panel="draft"] .dock-left{
-  display:flex !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 6px !important;
-  min-width: 0 !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  scrollbar-width: none !important;
-
-}
-.panel[data-panel="draft"] .dock-left::-webkit-scrollbar{ height: 0px; width: 0px; }
-.panel[data-panel="draft"] .dock{
-  flex-wrap: nowrap !important;
-}
-.panel[data-panel="draft"] .dock-left .mini{
-  height: 21px !important;
-  min-height: 21px !important;
-  padding: 0 8px !important;
-  font-size: 11px !important;
-  border-radius: 999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  line-height: 1 !important;
-}
-
-.panel[data-panel="draft"] .dock-left .pillbtn{
-  height: 21px !important;
-  min-height: 21px !important;
-  padding: 0 8px !important;
-  font-size: 11px !important;
-}
-.panel[data-panel="draft"] .dock-right:empty{
-  display:none !important;
-}
-
 /* Checker pill lives in Utilities bar now */
 .panel[data-panel="draft"] .utilities-bar #checkerBtn{
   height: 21px !important;
@@ -18792,11 +18461,6 @@ setMotion(state.motionOn);
   margin-right: 8px !important;
   white-space: nowrap !important;
 }
-
-
-
-
-
 
 /* =========================================
    Toolbar Alignment Fix (MirrorFlow Editor)
@@ -18820,8 +18484,6 @@ setMotion(state.motionOn);
 }
 .panel[data-panel="draft"] .classic-toolbar::before{ left: 0 !important; }
 .panel[data-panel="draft"] .classic-toolbar::after{ right: 0 !important; }
-
-
 
 /* =========================================
    Phone Frame V2 (MirrorFlow Viewer)
@@ -18887,7 +18549,6 @@ setMotion(state.motionOn);
   opacity: .92 !important;
 }
 
-
 /* === Option B: Experience tab structure tightening (Customer signals) === */
 .sig-wrap{display:flex;flex-direction:column;gap:10px}
 .sig-intro{padding:8px 10px;border:1px dashed var(--stroke2);border-radius:14px;color:var(--muted);font-size:12px;letter-spacing:.2px}
@@ -18896,7 +18557,6 @@ setMotion(state.motionOn);
 .sig-head .label{font-weight:700;font-size:12px;letter-spacing:.35px;text-transform:uppercase;color:var(--text)}
 .sig-head .count{font-size:12px;color:var(--muted)}
 .sig-empty{padding:6px 10px;color:var(--muted);font-size:13px}
-
 
 @keyframes twilightDrift {
   0% { background-position: 0% 0%; }
@@ -18909,7 +18569,6 @@ body[data-theme="twilight"] {
   transition: background-image 0.6s ease;
   animation: twilightDrift 18s ease-in-out infinite alternate;
 }
-
 
 /* ================================================================
    MF v23.7 — Libraries tab layout
@@ -19423,7 +19082,6 @@ body[data-theme="twilight"] {
     badge.style.opacity = ok ? '0.55' : '0.85';
   }
 
-  
   // ---------- UI-only DOM layout helpers ----------
   let __draftToolbarMerged = false;
   
@@ -19532,7 +19190,6 @@ function mergeDraftToolbarsOnce(){
     }
   }
 
-
   // Remove any compact icon duplicates for paste/copy/clear in the toolbar,
   // keeping the (moved) pill buttons for consistency.
   const killDup = (label, keepEl) => {
@@ -19600,7 +19257,6 @@ function enforceDraftStackOrder(){
   }
   return true;
 }
-
 
     // Phone shell picker (cycles phone frame styles)
   (function initPhoneShellPicker(){
@@ -19762,7 +19418,6 @@ function enforceDraftStackOrder(){
     }catch(e){}
   };
 
-
   function resolveUtilModalEls(){
     modal.overlay = document.getElementById("mfModalOverlay");
     modal.title   = document.getElementById("mfModalTitle");
@@ -19854,7 +19509,6 @@ function enforceDraftStackOrder(){
       window.addEventListener("touchend", onEnd);
     };
     attachSheetDrag();
-
 
     modal.overlay.addEventListener("click", (e)=>{
       if(e.target === modal.overlay) closeModal();
@@ -20157,7 +19811,6 @@ function enforceDraftStackOrder(){
   } else {
     initUtilModals();
   }
-
 
 })();
 </script>
@@ -20587,7 +20240,6 @@ I'm really sorry it took this long.`
 })();
 </script>
 
-
 <!-- ===== Dev Lab — Redirect to DevLab (backward compat) ===== -->
 <div aria-hidden="true" class="mf-popup" id="modal-dev">
   <div aria-labelledby="mfDevTitle" aria-modal="true" class="mf-popupCard" role="dialog" style="max-width:400px">
@@ -20612,7 +20264,6 @@ I'm really sorry it took this long.`
     </div>
   </div>
 </div>
-
 
 <!-- ===== DevLab — Consolidated Dev Tools (Phase 2) ===== -->
 <div aria-hidden="true" class="mf-popup" id="modal-devlab">
@@ -20848,7 +20499,6 @@ I'm really sorry it took this long.`
   </div>
 </div>
 
-
 <!-- ===== Dev Utilities — Packs (Lite-safe :target popup) ===== -->
 <div aria-hidden="true" class="mf-popup" id="modal-packs">
   <div aria-labelledby="mfPacksTitle" aria-modal="true" class="mf-popupCard" role="dialog">
@@ -20882,7 +20532,6 @@ I'm really sorry it took this long.`
     </div>
   </div>
 </div>
-
 
 <!-- ===== Dev Utilities — Snapshots (Lite-safe :target popup) ===== -->
 <div aria-hidden="true" class="mf-popup" id="modal-snapshots">
@@ -20924,8 +20573,6 @@ I'm really sorry it took this long.`
     </div>
   </div>
 </div>
-
-
 
 <!-- ===== Dev Utilities — Engine X-ray (Phase 3.5) ===== -->
 <div class="mf-popup" id="modal-xray" role="dialog" aria-modal="true" aria-labelledby="mfXrayTitle" tabindex="-1">
@@ -21120,8 +20767,6 @@ I'm really sorry it took this long.`
     }
   }
 
-  
-
   function buildPacksPayload(){
     // Build an exportable object that includes meta + data per pack (deterministic order).
     let pack = null;
@@ -21206,7 +20851,6 @@ I'm really sorry it took this long.`
     }
   }
 
-
 function doRefresh(){ render(); }
 
   function toggleStrict(){
@@ -21229,9 +20873,6 @@ function doRefresh(){ render(); }
   setTimeout(render, 40);
 })();
 </script>
-
-
-
 
 <script>
 // [MF:DEVUTIL_SNAPSHOTTER v1] Offline snapshot export + compare (Dev Utilities)
@@ -21415,7 +21056,6 @@ function doRefresh(){ render(); }
     if (diff){ diff.style.display="none"; diff.innerHTML=""; }
   }
 
-  
   function doCompareAB(){
     const outBox=document.getElementById("mfSnapOutBox");
     const inBox=document.getElementById("mfSnapInBox");
@@ -21472,7 +21112,6 @@ function doRefresh(){ render(); }
     if (!hasDiff) report += "<div class='mf-taberr-msg' style='margin-top:8px;'>No differences detected between Snapshot A and Snapshot B outputs.</div>";
     setDiffBox("<div class='mf-taberr-title'>"+(hasDiff ? ("Snapshot A/B diff detected ("+sev+")") : "Snapshot A/B match")+"</div>"+report);
   }
-
 
   function doCompare(){
     const inBox=document.getElementById("mfSnapInBox");
@@ -22571,10 +22210,6 @@ function doRefresh(){ render(); }
   }
 })();
 </script>
-
-
-
-
 
 <!-- [MF:DEMO_MESSAGES v2] — expanded demo messages (40 scenarios) for CX engine stress-testing -->
 <script>
@@ -24206,7 +23841,6 @@ Also, the hire car company said I need to return it by Friday — is that right?
   } else {
     setTimeout(boot, 200);
   }
-
 
   // Expose helpers for toolbar / question-mark / DevLab buttons
   window.MF_shuffleDemoMessage = MF_shuffleDemoMessage;
