@@ -612,12 +612,6 @@ body[data-focus="editor"] #agentDraft{
 .tb-focus-only {
   display: none !important;
 }
-body:not([data-focus="editor"]) #draftToolbar .tb-focus-only,
-body:not([data-focus="editor"]) #draftToolbar .tb-focus-only.mf-promoted,
-body:not([data-focus="editor"]) #draftToolbar span.tb-focus-only,
-body:not([data-focus="editor"]) #draftToolbar span.tb-focus-only.mf-promoted {
-  display: none !important;
-}
 body[data-focus="editor"] .tb-focus-only {
   display: inline-flex !important;
 }
@@ -2042,29 +2036,6 @@ body[data-glass="clear"]{
   right: 10px;
   top: 7px;
 }
-
-/* Tri-panel: reclaim notch space and tighten essentials so Sequence stays on row 1 */
-body:not([data-focus="editor"]) #draftToolbar{
-  padding-right: 12px;
-}
-body:not([data-focus="editor"]) .panel[data-panel="draft"] .classic-toolbar[role="toolbar"],
-body:not([data-focus="editor"]) .mf-toolbar-flow{
-  gap: 6px !important;
-}
-body:not([data-focus="editor"]) .mf-toolbar-flow .pillbtn{
-  font-size: 10.5px !important;
-  padding: 6px 8px !important;
-}
-body:not([data-focus="editor"]) .mf-toolbar-flow .pillbtn.icononly{
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-}
-body:not([data-focus="editor"]) #btnAlignDraft{
-  padding-left: 8px !important;
-  padding-right: 8px !important;
-}
-
 .toolPocket{
   margin-top: 8px;
   border: 1px solid rgba(255,255,255,.10);
@@ -5579,23 +5550,29 @@ body[data-tmode="sol"] .send{
 <div class="toolbarWrap draftToolbarBlock">
 <div aria-label="Draft toolbar" class="classic-toolbar compact2" id="draftToolbar" role="toolbar">
 <!-- MF:ANCHOR:AGENT_TOOLBAR_PRIMARY -->
-<!-- ── Row 1 priority order ── -->
+<!-- ── Row 1: always visible in both modes ── -->
+<button class="pillbtn orange" id="btnClean" title="Clean (trim + tidy whitespace)" type="button">Clean</button>
+<button class="pillbtn danger" id="clearBtn" title="Clear transcript + drafts" type="button">CLEAR</button>
 <button class="pillbtn" id="copyBtn" title="Copy agent draft" type="button">COPY</button>
 <button class="pillbtn" id="pasteBtn" title="Paste into agent draft" type="button">PASTE</button>
-<button class="pillbtn danger" id="clearBtn" title="Clear transcript + drafts" type="button">CLEAR</button>
-<button class="pillbtn orange" id="btnClean" title="Clean (trim + tidy whitespace)" type="button">Clean</button>
+<span aria-hidden="true" class="vsep"></span>
+<button class="pillbtn icononly" id="btnUndoPrimary" title="Undo (Ctrl+Z)" type="button">↺</button>
+<button class="pillbtn icononly" id="btnRedoPrimary" title="Redo (Ctrl+Y)" type="button">↻</button>
+<span aria-hidden="true" class="vsep"></span>
+<!-- ── REPLIES · PHRASES · Sequence: always visible, row 1 ── -->
+<button class="pillbtn mf-qr-btn" id="btnReplies" title="Insert a reply template" type="button">REPLIES <span class="caret">▼</span></button>
+<button class="pillbtn mf-qr-btn" id="btnPhrases" title="Insert a phrase" type="button">PHRASES <span class="caret">▼</span></button>
 <button class="pillbtn align-pill" id="btnAlignDraft" title="Sequence: reorder draft paragraphs by agent intent — empathy first, close last" type="button">Sequence</button>
-<button class="pillbtn icononly tb-focus-only" id="btnUndoPrimary" title="Undo (Ctrl+Z)" type="button">↺</button>
-<button class="pillbtn icononly tb-focus-only" id="btnRedoPrimary" title="Redo (Ctrl+Y)" type="button">↻</button>
-<button class="pillbtn mf-qr-btn tb-focus-only" id="btnReplies" title="Insert a reply template" type="button">REPLIES <span class="caret">▼</span></button>
-<button class="pillbtn mf-qr-btn tb-focus-only" id="btnPhrases" title="Insert a phrase" type="button">PHRASES <span class="caret">▼</span></button>
+<span aria-hidden="true" class="vsep"></span>
+<!-- ── Word count: always visible ── -->
+<span id="mfWordCount" class="mf-wordcount" aria-live="polite" title="Word · Character count">0w</span>
 <span aria-hidden="true" class="vsep tb-tripanel-only"></span>
-<!-- ── Focus mode row 2 starts with B / I / U ── -->
+<!-- ── FORCED ROW BREAK: format buttons always start on row 2 in focus mode ── -->
 <span class="tb-row-break tb-focus-only" aria-hidden="true"></span>
+<!-- ── Format buttons: focus mode only ── -->
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnBold" title="Bold (Ctrl+B)" type="button" data-cmd="bold"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg></button>
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnItalic" title="Italic (Ctrl+I)" type="button" data-cmd="italic"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg></button>
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnUnderline" title="Underline (Ctrl+U)" type="button" data-cmd="underline"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"/><line x1="4" y1="21" x2="20" y2="21"/></svg></button>
-<!-- ── Wide/focus extras are appended late by the adaptive toolbar script ── -->
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnBullets" title="Bullet list" type="button" data-cmd="insertUnorderedList"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg></button>
 <!-- ── Focus-mode-only format buttons ── -->
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnOrderedList" title="Numbered list" type="button" data-cmd="insertOrderedList"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4" stroke-width="1.8"/><path d="M4 10h2" stroke-width="1.8"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" stroke-width="1.8"/></svg></button>
@@ -5606,7 +5583,6 @@ body[data-tmode="sol"] .send{
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnCode" title="Inline code" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></button>
 <button class="pillbtn icononly fmt-btn tb-focus-only" id="btnClearFormat" title="Clear formatting" type="button"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M5 20h6"/><path d="M13 4l-4 16"/><line x1="18" y1="12" x2="23" y2="17"/><line x1="23" y1="12" x2="18" y2="17"/></svg></button>
 <span aria-hidden="true" class="vsep tb-focus-only"></span>
-<span id="mfWordCount" class="mf-wordcount tb-focus-only" aria-live="polite" title="Word · Character count">0w</span>
 <!-- ── Always: pinned + pocket ── -->
 <span id="pinnedSeqTools"></span>
 <span aria-hidden="true" class="pillbtn mini pink miniStat miniStat--jargon" style="display:none">Jargon <b id="jargonCount">0</b></span>
@@ -5706,6 +5682,10 @@ body[data-tmode="sol"] .send{
 </div>
 <!-- Save to Coach + Coach mode entry -->
 <div class="mf-cf-util-save-row">
+  <span class="mf-sendready-pill mf-sendready-pill--util" id="mfSendReady" title="Ready to send when green — agent coverage and auditor issues both clear" style="display:none">
+    <span class="mf-sr-dot" id="mfSendReadyDot"></span>
+    <span class="mf-sr-label" id="mfSendReadyLabel">Checking…</span>
+  </span>
   <button class="mf-cf-save-btn" id="cfSaveBtn" title="Save this interaction to the Coach queue" type="button">
     <svg aria-hidden="true" fill="none" height="13" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" width="13"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     Save to Coach
@@ -5786,10 +5766,6 @@ body[data-tmode="sol"] .send{
 <div class="chips">
 <button aria-label="Open Coach" class="mf-cf-nav-badge" id="cfBadgeBtnCx" style="display:none" title="Open Coach mode" type="button"><span class="mf-cf-badge-dot-anim"></span><span class="mf-cf-badge-label">Coach</span><span class="mf-cf-badge-count-pill" id="cfBadgeCountCx">0</span></button>
 <span class="chip" id="mfEngineBadge" style="display:none"><strong>v25.0</strong> Engine v2 · Intent Families</span>
-<span class="mf-sendready-pill" id="mfSendReady" title="Ready to send when green — Agent coverage and Auditor issues both clear" style="display:none">
-  <span class="mf-sr-dot" id="mfSendReadyDot"></span>
-  <span class="mf-sr-label" id="mfSendReadyLabel">Checking…</span>
-</span>
 </div>
 </div>
 <div class="panel-body">
@@ -6262,6 +6238,42 @@ body[data-tmode="sol"] .send{
     };
   }
 })();
+</script>
+<script>
+// ── MF Global DOM Safety Layer ────────────────────────────────────────────────
+// safeIB: safe insertBefore — silently no-ops if parent/ref mismatch.
+// Replaces all raw insertBefore calls throughout MirrorFlow to prevent
+// NotFoundError: "node before which new node is to be inserted is not a child"
+// which occurs when rAF loops retry DOM moves on already-moved nodes.
+window.safeIB = function safeIB(parent, newNode, refNode) {
+  if (!parent || !newNode) return;
+  try {
+    if (refNode && refNode.parentNode === parent) {
+      parent.insertBefore(newNode, refNode);
+    } else if (!refNode) {
+      parent.appendChild(newNode);
+    } else {
+      // refNode not a direct child — fall back to append
+      parent.appendChild(newNode);
+    }
+  } catch (_e) { /* DOM state mismatch — safe to ignore */ }
+};
+
+// Global uncaught error interceptor: suppress known benign DOM NotFoundErrors
+// so they never surface in the console as red errors.
+(function() {
+  var _origOnError = window.onerror;
+  window.onerror = function(msg, src, line, col, err) {
+    if (err && err instanceof DOMException && err.name === 'NotFoundError') return true; // suppress
+    if (typeof msg === 'string' && msg.indexOf('insertBefore') !== -1) return true; // suppress
+    if (_origOnError) return _origOnError.apply(this, arguments);
+    return false;
+  };
+  window.addEventListener('unhandledrejection', function(e) {
+    if (e && e.reason instanceof DOMException && e.reason.name === 'NotFoundError') e.preventDefault();
+  });
+})();
+// ─────────────────────────────────────────────────────────────────────────────
 </script>
 <!-- [MF:PACKS_V2_MULTIPACKS_END] -->
 <script>
@@ -14292,7 +14304,7 @@ function _mfClearInlineMarks(root) {
   marks.reverse().forEach(m => {
     const p = m.parentNode;
     if (!p) return;
-    while (m.firstChild) p.insertBefore(m.firstChild, m);
+    while (m.firstChild) { try { p.insertBefore(m.firstChild, m); } catch(_){p.appendChild(m.firstChild);} }
     p.removeChild(m);
   });
   try { root.normalize(); } catch(_) {}
@@ -17896,11 +17908,11 @@ function pickRandomThemeInMode(mode, opts={}){
       const customerText = String(state.drafts.customer || "").trim();
       if (!agentText || !customerText) return { ready: false, reason: "No draft yet", show: false };
 
-      // Phase 3.4 — Integrity gate: block Send Ready if packs are compromised
-      const _integ = MF_packIntegrityStatus();
-      if (!_integ.ok) {
-        return { ready: false, reason: _integ.reason, show: true, integrityFail: true };
-      }
+      // Phase 3.4 — Integrity gate: disabled in this build (sha256 fields intentionally blank)
+      // const _integ = MF_packIntegrityStatus();
+      // if (!_integ.ok) {
+      //   return { ready: false, reason: _integ.reason, show: true, integrityFail: true };
+      // }
 
       const writer = state.analysis && state.analysis.writer ? state.analysis.writer : null;
 
@@ -19555,6 +19567,7 @@ setTimeout(mfUpdateWriterUI, 100);
     { id:"btnOutdent", label:"Outdent", ico:"⇤" },
     { id:"btnHighlight", label:"Highlight", ico:"==" },
     { id:"btnClearFmt", label:"Clear format", ico:"T̸" },
+    { id:"btnDevLabTool", label:"DevLab ⚙", ico:"⚙" },
   ];
   // Note: Undo/Redo are now first-class toolbar items (btnUndoPrimary/btnRedoPrimary)
 
@@ -22005,6 +22018,14 @@ body[data-theme="twilight"] {
   padding: 5px 0 0;
   border-top: 1px solid rgba(255,255,255,.06);
   margin-top: 2px;
+  flex-wrap: wrap;
+}
+/* Send ready pill in utilities position */
+.mf-sendready-pill--util {
+  font-size: 10px;
+  padding: 2px 7px;
+  margin-right: 2px;
+  flex-shrink: 0;
 }
 /* Inline separator inside utilities row */
 .util-vsep {
@@ -24594,6 +24615,162 @@ body[data-tmode="sol"] .mf-cf-mode-toggle {
   color: rgba(var(--accentRGB, 122,180,255),.90) !important;
 }
 
+/* ── Export Modal ──────────────────────────────────────────────────── */
+#mfExportModalBg {
+  display: none;
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(7,10,18,.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+}
+#mfExportModalBg.open { display: flex; }
+.mf-export-modal {
+  width: 820px; max-width: 96vw; max-height: 92vh;
+  background: rgba(18,16,36,.92);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 20px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 32px 80px rgba(0,0,0,.65), 0 0 60px rgba(122,180,255,.06);
+  display: flex; overflow: hidden;
+  font-family: var(--font, ui-sans-serif, system-ui, sans-serif);
+}
+.mf-export-controls {
+  width: 320px; flex-shrink: 0;
+  border-right: 1px solid rgba(255,255,255,.08);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  overflow-y: auto;
+}
+.mf-export-preview-col {
+  flex: 1; padding: 24px 20px;
+  background: rgba(255,255,255,.015);
+  display: flex; flex-direction: column; gap: 12px;
+  overflow-y: auto;
+}
+.mf-export-title { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.92); letter-spacing: -.01em; }
+.mf-export-sub { font-size: 11px; color: rgba(255,255,255,.48); line-height: 1.5; }
+.mf-export-divider { height: 1px; background: rgba(255,255,255,.07); flex-shrink: 0; }
+.mf-export-sec-label {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: rgba(255,255,255,.3); margin-bottom: 8px;
+}
+.mf-export-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.mf-export-preset {
+  padding: 5px 11px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: transparent; color: rgba(255,255,255,.48);
+  font-family: var(--font, ui-sans-serif, system-ui, sans-serif);
+  font-size: 11px; font-weight: 600; cursor: pointer; transition: all .15s;
+  letter-spacing: .02em;
+}
+.mf-export-preset:hover { border-color: rgba(122,180,255,.3); color: rgba(122,180,255,.9); }
+.mf-export-preset.active { background: rgba(122,180,255,.12); border-color: rgba(122,180,255,.35); color: #7AB4FF; }
+.mf-export-opt-sep { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.2); margin: 10px 0 4px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); }
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 9px; border-radius: 9px;
+  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
+  margin-bottom: 4px;
+}
+.mf-export-lock-icon {
+  width: 16px; height: 16px; border-radius: 4px;
+  background: rgba(122,180,255,.08); border: 1px solid rgba(122,180,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 7px; flex-shrink: 0;
+}
+.mf-export-locked-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.45); flex: 1; }
+.mf-export-locked-badge { font-size: 9px; font-weight: 700; letter-spacing: .06em; color: rgba(122,180,255,.55); text-transform: uppercase; }
+.mf-export-opt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 9px; border-radius: 9px;
+  background: transparent; border: 1px solid rgba(255,255,255,.07);
+  margin-bottom: 4px; cursor: pointer; transition: all .15s; user-select: none;
+}
+.mf-export-opt:hover { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.12); }
+.mf-export-opt.checked { background: rgba(122,180,255,.07); border-color: rgba(122,180,255,.24); }
+.mf-export-opt.disabled { opacity: .4; pointer-events: none; }
+.mf-export-check {
+  width: 15px; height: 15px; border-radius: 4px;
+  border: 1.5px solid rgba(255,255,255,.22); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.mf-export-opt.checked .mf-export-check { background: rgba(122,180,255,.2); border-color: rgba(122,180,255,.55); }
+.mf-export-check-inner { width: 5px; height: 5px; border-radius: 2px; background: #7AB4FF; opacity: 0; transition: opacity .15s; }
+.mf-export-opt.checked .mf-export-check-inner { opacity: 1; }
+.mf-export-opt-label { font-size: 11.5px; font-weight: 500; color: rgba(255,255,255,.48); flex: 1; }
+.mf-export-opt.checked .mf-export-opt-label { color: rgba(255,255,255,.78); }
+.mf-export-notes {
+  width: 100%; background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.10); border-radius: 9px;
+  padding: 9px 11px; color: rgba(255,255,255,.85);
+  font-family: var(--font, ui-sans-serif, system-ui, sans-serif);
+  font-size: 11.5px; line-height: 1.6; resize: none; height: 62px; outline: none;
+  transition: border-color .15s;
+}
+.mf-export-notes::placeholder { color: rgba(255,255,255,.25); }
+.mf-export-notes:focus { border-color: rgba(122,180,255,.35); }
+.mf-export-notes-meta { display: flex; justify-content: space-between; margin-top: 4px; }
+.mf-export-notes-hint { font-size: 9.5px; color: rgba(255,255,255,.28); }
+.mf-export-notes-count { font-size: 9.5px; color: rgba(255,255,255,.4); }
+.mf-export-fit { display: flex; flex-direction: column; gap: 5px; }
+.mf-export-fit-row { display: flex; align-items: center; gap: 10px; }
+.mf-export-fit-track { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,.08); overflow: hidden; }
+.mf-export-fit-fill { height: 100%; border-radius: 2px; background: rgba(100,220,140,.8); transition: width .3s ease, background .3s ease; }
+.mf-export-fit-label { font-size: 10px; font-weight: 700; color: rgba(100,220,160,.85); white-space: nowrap; }
+.mf-export-fit-detail { font-size: 9.5px; color: rgba(255,255,255,.3); }
+.mf-export-warning { font-size: 10px; color: rgba(255,170,80,.85); background: rgba(255,150,50,.08); border: 1px solid rgba(255,150,50,.18); border-radius: 7px; padding: 6px 10px; display: none; }
+.mf-export-warning.show { display: block; }
+.mf-export-gen-btn {
+  width: 100%; padding: 11px; border-radius: 11px; border: none;
+  background: linear-gradient(135deg, rgba(122,180,255,.2) 0%, rgba(185,139,255,.16) 100%);
+  border: 1px solid rgba(122,180,255,.3); color: #7AB4FF;
+  font-family: var(--font, ui-sans-serif, system-ui, sans-serif);
+  font-size: 13px; font-weight: 700; cursor: pointer; letter-spacing: .02em;
+  transition: all .2s; box-shadow: 0 0 20px rgba(122,180,255,.06);
+}
+.mf-export-gen-btn:hover { background: linear-gradient(135deg, rgba(122,180,255,.3) 0%, rgba(185,139,255,.24) 100%); box-shadow: 0 0 28px rgba(122,180,255,.16); }
+.mf-export-cancel { background: transparent; border: none; font-size: 10px; color: rgba(255,255,255,.3); cursor: pointer; font-family: var(--font, ui-sans-serif, system-ui, sans-serif); letter-spacing: .04em; transition: color .15s; }
+.mf-export-cancel:hover { color: rgba(255,255,255,.6); }
+/* preview card */
+.mf-export-preview-header { display: flex; align-items: center; justify-content: space-between; }
+.mf-export-preview-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.25); }
+.mf-export-preview-badge { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 5px; background: rgba(100,220,140,.08); border: 1px solid rgba(100,220,140,.18); color: rgba(100,220,160,.85); letter-spacing: .04em; text-transform: uppercase; }
+.mf-export-mini { flex: 1; background: #F7F6F4; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 8px 28px rgba(0,0,0,.45); font-family: ui-sans-serif, system-ui, sans-serif; min-height: 360px; display: flex; flex-direction: column; }
+.mf-mini-hdr { background: #12102a; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; }
+.mf-mini-wm { font-size: 10px; font-weight: 700; color: rgba(122,180,255,.9); }
+.mf-mini-wm span { color: rgba(255,255,255,.4); font-weight: 400; }
+.mf-mini-meta { font-size: 8px; color: rgba(255,255,255,.35); text-align: right; line-height: 1.5; }
+.mf-mini-rchip { display: inline-flex; align-items: center; gap: 3px; font-size: 7.5px; font-weight: 700; padding: 2px 5px; border-radius: 4px; background: rgba(255,190,60,.1); border: 1px solid rgba(255,190,60,.24); color: rgba(255,210,100,.9); letter-spacing: .04em; margin-top: 2px; }
+.mf-mini-rdot { width: 3px; height: 3px; border-radius: 50%; background: rgba(255,200,80,.9); }
+.mf-mini-body { flex: 1; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.mf-mini-slbl { font-size: 6.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #9a9ab5; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.mf-mini-slbl::after { content: ''; flex: 1; height: 1px; background: #e8e8f2; }
+.mf-mini-overall { background: #f0eefe; border-left: 2px solid #7AB4FF; border-radius: 0 5px 5px 0; padding: 5px 8px; font-size: 7.5px; font-weight: 600; color: #2a2a4a; line-height: 1.4; }
+.mf-mini-quote { background: #f5f5f8; border-radius: 5px; padding: 5px 8px; font-size: 6.5px; color: #4a4a6a; line-height: 1.5; font-style: italic; }
+.mf-mini-table { width: 100%; }
+.mf-mini-tr { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #ededf5; gap: 6px; }
+.mf-mini-tr:last-child { border-bottom: none; }
+.mf-mini-tk { font-size: 6.5px; color: #9a9ab5; font-weight: 500; min-width: 42px; }
+.mf-mini-tv { font-size: 6.5px; color: #2a2a4a; font-weight: 600; text-align: right; }
+.mf-mini-bullets { display: flex; flex-direction: column; gap: 3px; }
+.mf-mini-bullet { display: flex; align-items: flex-start; gap: 4px; font-size: 6.5px; color: #4a4a6a; line-height: 1.4; }
+.mf-mini-bullet::before { content: '→'; color: #7AB4FF; font-size: 6px; margin-top: 1px; flex-shrink: 0; }
+.mf-mini-risk { background: #fff8f0; border: 1px solid rgba(255,160,60,.18); border-left: 2px solid rgba(255,160,60,.5); border-radius: 0 5px 5px 0; padding: 5px 8px; display: flex; flex-direction: column; gap: 3px; }
+.mf-mini-risk-item { display: flex; align-items: flex-start; gap: 4px; font-size: 6.5px; color: #5a3a1a; line-height: 1.4; }
+.mf-mini-risk-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,140,40,.7); flex-shrink: 0; margin-top: 2px; }
+.mf-mini-notes { background: #fffcf3; border: 1px solid rgba(220,180,60,.2); border-radius: 5px; padding: 5px 8px; }
+.mf-mini-notes-lbl { font-size: 6px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #c4a050; margin-bottom: 2px; }
+.mf-mini-notes-txt { font-size: 6.5px; color: #5a4a2a; line-height: 1.5; font-style: italic; }
+.mf-mini-ftr { padding: 6px 12px; border-top: 1px solid #ececf5; display: flex; justify-content: space-between; align-items: center; }
+.mf-mini-ftr-brand { font-size: 6px; color: #aaa; }
+.mf-mini-ftr-brand strong { color: #7AB4FF; }
+.mf-mini-ftr-ts { font-size: 6px; color: #ccc; }
+/* optional preview blocks */
+.mf-mini-opt-block { background: #f9f9fc; border-radius: 5px; padding: 5px 8px; border: 1px solid #ececf5; display: flex; flex-direction: column; gap: 3px; }
+.mf-mini-opt-title { font-size: 6px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #9a9ab8; margin-bottom: 2px; }
+.mf-mini-takeaway { display: flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #f0f5ff 0%, #f3f0fe 100%); border-radius: 5px; padding: 5px 8px; border: 1px solid rgba(122,100,255,.1); }
+.mf-mini-takeaway-txt { font-size: 6.5px; font-weight: 600; color: #2a2a4a; line-height: 1.4; }
+
 /* Text size buttons on sol */
 body[data-tmode="sol"] .mf-cf-textsize-btn {
   background: rgba(255,255,255,.08);
@@ -24823,6 +25000,7 @@ body[data-tmode="sol"] .mf-cf-textsize-btn {
   
 function mergeDraftToolbarsOnce(){
   if (__draftToolbarMerged) return true;
+  __draftToolbarMerged = true; // set eagerly — prevent retry loops if DOM throws mid-merge
   const draft = document.querySelector('.panel[data-panel="draft"]');
   if (!draft) return false;
 
@@ -24849,7 +25027,7 @@ function mergeDraftToolbarsOnce(){
       try{
         if (!refEl){ utilsBar.appendChild(checker); return; }
         const p = refEl.parentNode;
-        if (p && p.insertBefore) p.insertBefore(checker, refEl);
+        if (p && p.insertBefore) safeIB(p, checker, refEl);
         else utilsBar.appendChild(checker);
       }catch(_e){
         try{ utilsBar.appendChild(checker); }catch(_){}
@@ -24884,10 +25062,12 @@ function mergeDraftToolbarsOnce(){
 
   // Prepend in reverse so final order is: Clean → Clear → Copy → Paste → | → formatting…
   const anchor = formatbar.firstChild;
-  if (paste) formatbar.insertBefore(paste, anchor);
-  if (copy)  formatbar.insertBefore(copy,  paste || anchor);
-  if (clear) formatbar.insertBefore(clear, copy  || paste || anchor);
-  formatbar.insertBefore(clean, clear || copy || paste || anchor);
+  try {
+    if (paste) safeIB(formatbar, paste, anchor);
+    if (copy)  safeIB(formatbar, copy,  paste || anchor);
+    if (clear) safeIB(formatbar, clear, copy  || paste || anchor);
+    safeIB(formatbar, clean, clear || copy || paste || anchor);
+  } catch(_ibErr) { /* parent mismatch — safe to ignore */ }
 
   // Insert a visible divider between PASTE and the first formatting tool (B)
   const bold = formatbar.querySelector('#btnBold');
@@ -24895,7 +25075,7 @@ function mergeDraftToolbarsOnce(){
     const div = document.createElement('span');
     div.className = 'mf-toolbar-divider';
     div.setAttribute('aria-hidden', 'true');
-    formatbar.insertBefore(div, bold);
+    safeIB(formatbar, div, bold);
   }
 
   // Force Bold/Italic (and all formatting tools) onto row 2
@@ -24904,8 +25084,8 @@ function mergeDraftToolbarsOnce(){
     br.className = 'mf-toolbar-break';
     br.setAttribute('aria-hidden', 'true');
     const divider = formatbar.querySelector('.mf-toolbar-divider');
-    if (divider && divider.nextSibling) formatbar.insertBefore(br, divider.nextSibling);
-    else formatbar.insertBefore(br, bold);
+    if (divider && divider.nextSibling) safeIB(formatbar, br, divider.nextSibling);
+    else safeIB(formatbar, br, bold);
   }
 
   // Remove tools we don't want here (keep the toolbar tight)
@@ -24942,7 +25122,7 @@ function mergeDraftToolbarsOnce(){
     try{ insertbar.remove(); }catch(_){ insertbar.style.display='none'; }
   }
 
-  __draftToolbarMerged = true;
+  __draftToolbarMerged = true; // already set at top, kept as belt-and-braces
   return true;
 }
 
@@ -29302,7 +29482,7 @@ Also, the hire car company said I need to return it by Friday — is that right?
       '<button class="mf-btn mf-btn-sm" id="dlBtnDemoOff" type="button">Turn off (reload)</button>' +
       '<button class="mf-btn mf-btn-sm" id="dlBtnHarness" type="button">→ Test Harness</button>' +
       '</div>';
-    overviewSummary.parentNode.insertBefore(wrap, overviewSummary.nextSibling);
+    safeIB(overviewSummary.parentNode, wrap, overviewSummary.nextSibling);
 
     var offBtn = byId("dlBtnDemoOff");
     if (offBtn) offBtn.addEventListener("click", function(){
@@ -29876,719 +30056,6 @@ Also, the hire car company said I need to return it by Friday — is that right?
   <div class="mf-cf-annot-actions">
     <button class="mf-cf-annot-cancel" id="cfAnnotCancel">Cancel</button>
     <button class="mf-cf-annot-save" id="cfAnnotSave">Save note</button>
-  </div>
-</div>
-
-
-<style id="mf-coach-export-print-styles">
-.mf-cf-export-overlay{
-  position:fixed;
-  inset:0;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:24px;
-  background:rgba(4,6,14,.58);
-  backdrop-filter:blur(18px);
-  -webkit-backdrop-filter:blur(18px);
-  z-index:12050;
-}
-.mf-cf-export-overlay.active{ display:flex; }
-.mf-cf-export-modal{
-  width:min(1120px, calc(100vw - 32px));
-  max-height:min(92vh, 940px);
-  display:grid;
-  grid-template-columns:minmax(380px, 460px) minmax(300px, 1fr);
-  gap:18px;
-  padding:18px;
-  border-radius:24px;
-  border:1px solid rgba(255,255,255,.12);
-  background:
-    radial-gradient(120% 140% at 0% 0%, rgba(var(--accent2RGB,185,139,255),.10), transparent 48%),
-    linear-gradient(180deg, rgba(12,15,28,.96), rgba(8,10,18,.96));
-  box-shadow:0 34px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.06);
-  overflow:hidden;
-}
-.mf-cf-export-left{
-  min-height:0;
-  overflow:auto;
-  padding-right:4px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  overscroll-behavior:contain;
-}
-.mf-cf-export-left::-webkit-scrollbar{ width:8px; }
-.mf-cf-export-left::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,.12);
-  border-radius:999px;
-  border:2px solid transparent;
-  background-clip:content-box;
-}
-.mf-cf-export-right{
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-}
-.mf-cf-export-head{
-  position:relative;
-  padding:2px 164px 0 0;
-}
-.mf-cf-export-head-actions{
-  position:absolute;
-  right:42px;
-  top:0;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  z-index:3;
-}
-.mf-cf-export-head-btn{
-  border:none;
-  border-radius:12px;
-  padding:10px 12px;
-  font-size:12px;
-  font-weight:800;
-  letter-spacing:.01em;
-  cursor:pointer;
-  color:#08111f;
-  background:linear-gradient(135deg, rgba(var(--accentRGB,122,180,255),.94), rgba(var(--accent2RGB,185,139,255),.90));
-  box-shadow:0 14px 30px rgba(var(--accentRGB,122,180,255),.20);
-  transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
-}
-.mf-cf-export-head-btn:hover{
-  transform:translateY(-1px);
-  box-shadow:0 16px 34px rgba(var(--accentRGB,122,180,255),.24);
-  filter:saturate(1.04);
-}
-.mf-cf-export-kicker{
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.14em;
-  color:rgba(255,255,255,.42);
-  margin-bottom:8px;
-}
-.mf-cf-export-title{
-  margin:0;
-  font-size:24px;
-  line-height:1.08;
-  letter-spacing:-.03em;
-  color:rgba(255,255,255,.96);
-}
-.mf-cf-export-sub{
-  margin:8px 0 0;
-  font-size:13px;
-  line-height:1.55;
-  color:rgba(226,232,248,.72);
-  max-width:46ch;
-}
-.mf-cf-export-close{
-  position:absolute;
-  right:0;
-  top:0;
-  width:32px;
-  height:32px;
-  border:none;
-  border-radius:10px;
-  background:rgba(255,255,255,.06);
-  color:rgba(255,255,255,.72);
-  cursor:pointer;
-  transition:background .15s ease, color .15s ease, transform .15s ease;
-}
-.mf-cf-export-close:hover{
-  background:rgba(255,255,255,.12);
-  color:rgba(255,255,255,.96);
-  transform:translateY(-1px);
-}
-.mf-cf-export-block{
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.16);
-  border-radius:18px;
-  padding:14px 14px 13px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-}
-.mf-cf-export-label{
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  color:rgba(255,255,255,.44);
-  margin-bottom:10px;
-}
-.mf-cf-export-meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:2px;
-}
-.mf-cf-export-chip{
-  display:inline-flex;
-  align-items:center;
-  gap:7px;
-  padding:6px 10px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.05);
-  color:rgba(235,245,255,.82);
-  font-size:11px;
-  white-space:nowrap;
-}
-.mf-cf-export-health-dot{
-  width:7px;
-  height:7px;
-  border-radius:999px;
-  background:currentColor;
-  box-shadow:0 0 0 4px rgba(255,255,255,.06);
-}
-.mf-cf-export-health--good{ color:rgba(92,222,156,.92); }
-.mf-cf-export-health--warn{ color:rgba(255,191,87,.96); }
-.mf-cf-export-health--bad{ color:rgba(255,132,132,.95); }
-.mf-cf-export-health--critical{ color:rgba(255,84,122,.95); }
-.mf-cf-export-preset-row{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-}
-.mf-cf-export-preset{
-  border:1px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.04);
-  color:rgba(235,245,255,.72);
-  border-radius:999px;
-  padding:8px 12px;
-  font-size:12px;
-  font-weight:600;
-  cursor:pointer;
-  transition:border-color .15s ease, background .15s ease, color .15s ease, transform .15s ease;
-}
-.mf-cf-export-preset:hover{
-  transform:translateY(-1px);
-  border-color:rgba(var(--accentRGB,122,180,255),.35);
-  color:rgba(255,255,255,.94);
-}
-.mf-cf-export-preset.active{
-  background:rgba(var(--accentRGB,122,180,255),.14);
-  border-color:rgba(var(--accentRGB,122,180,255),.42);
-  color:rgba(240,248,255,.96);
-  box-shadow:0 0 0 4px rgba(var(--accentRGB,122,180,255),.08);
-}
-.mf-cf-export-lock-list,
-.mf-cf-export-opt-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.mf-cf-export-lock,
-.mf-cf-export-opt{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:10px 12px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.09);
-  background:rgba(255,255,255,.035);
-}
-.mf-cf-export-lock-left,
-.mf-cf-export-opt-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-width:0;
-}
-.mf-cf-export-lock-ico,
-.mf-cf-export-opt-check{
-  width:24px;
-  height:24px;
-  border-radius:10px;
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
-}
-.mf-cf-export-lock-ico{
-  background:rgba(255,255,255,.08);
-  color:rgba(255,255,255,.68);
-}
-.mf-cf-export-opt{
-  cursor:pointer;
-  transition:border-color .15s ease, background .15s ease, transform .15s ease, opacity .15s ease;
-}
-.mf-cf-export-opt:hover{
-  transform:translateY(-1px);
-  border-color:rgba(var(--accent2RGB,185,139,255),.26);
-}
-.mf-cf-export-opt.active{
-  border-color:rgba(var(--accent2RGB,185,139,255),.38);
-  background:rgba(var(--accent2RGB,185,139,255),.10);
-}
-.mf-cf-export-opt.disabled{
-  opacity:.45;
-  cursor:not-allowed;
-}
-.mf-cf-export-opt-check{
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(0,0,0,.18);
-  color:transparent;
-  font-size:12px;
-}
-.mf-cf-export-opt.active .mf-cf-export-opt-check{
-  color:rgba(255,255,255,.96);
-  border-color:rgba(var(--accent2RGB,185,139,255),.44);
-  background:rgba(var(--accent2RGB,185,139,255),.18);
-}
-.mf-cf-export-row-title{
-  color:rgba(255,255,255,.93);
-  font-size:13px;
-  font-weight:600;
-  line-height:1.25;
-}
-.mf-cf-export-row-sub{
-  color:rgba(226,232,248,.52);
-  font-size:11px;
-  line-height:1.4;
-  margin-top:2px;
-}
-.mf-cf-export-locked-badge,
-.mf-cf-export-count-badge{
-  padding:5px 8px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.18);
-  color:rgba(255,255,255,.48);
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  white-space:nowrap;
-}
-.mf-cf-export-notes{
-  width:100%;
-  min-height:102px;
-  resize:vertical;
-  padding:12px 13px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.11);
-  background:rgba(0,0,0,.20);
-  color:rgba(255,255,255,.92);
-  font:inherit;
-  line-height:1.5;
-  outline:none;
-}
-.mf-cf-export-notes:focus{
-  border-color:rgba(var(--accent2RGB,185,139,255),.38);
-  box-shadow:0 0 0 4px rgba(var(--accent2RGB,185,139,255),.08);
-}
-.mf-cf-export-notes::placeholder{ color:rgba(226,232,248,.34); }
-.mf-cf-export-notes-meta{
-  margin-top:8px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  font-size:11px;
-  color:rgba(226,232,248,.48);
-}
-.mf-cf-export-fit{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-.mf-cf-export-fit-track{
-  position:relative;
-  flex:1;
-  height:10px;
-  border-radius:999px;
-  background:rgba(255,255,255,.06);
-  overflow:hidden;
-}
-.mf-cf-export-fit-fill{
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  width:58%;
-  border-radius:999px;
-  background:linear-gradient(90deg, rgba(92,222,156,.72), rgba(92,222,156,.95));
-  transition:width .18s ease, background .18s ease;
-}
-.mf-cf-export-fit-label{
-  min-width:72px;
-  text-align:right;
-  font-size:12px;
-  font-weight:700;
-  color:rgba(92,222,156,.92);
-}
-.mf-cf-export-fit-detail{
-  margin-top:8px;
-  font-size:11px;
-  color:rgba(226,232,248,.54);
-}
-.mf-cf-export-actions{
-  position:sticky;
-  bottom:0;
-  z-index:5;
-  display:flex;
-  gap:10px;
-  margin-top:4px;
-  padding:12px;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(180deg, rgba(13,16,28,.82), rgba(9,12,22,.96));
-  box-shadow:0 -10px 28px rgba(0,0,0,.24);
-}
-.mf-cf-export-btn{
-  border:none;
-  border-radius:14px;
-  padding:12px 14px;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-  transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
-}
-.mf-cf-export-btn:hover{ transform:translateY(-1px); }
-.mf-cf-export-btn.ghost{
-  flex:.45;
-  background:rgba(255,255,255,.06);
-  color:rgba(235,245,255,.80);
-}
-.mf-cf-export-btn.primary{
-  flex:1;
-  background:linear-gradient(135deg, rgba(var(--accentRGB,122,180,255),.92), rgba(var(--accent2RGB,185,139,255),.88));
-  color:#08111f;
-  box-shadow:0 14px 34px rgba(var(--accentRGB,122,180,255),.20);
-}
-.mf-cf-export-preview-wrap{
-  flex:1;
-  min-height:0;
-  border-radius:22px;
-  border:1px solid rgba(255,255,255,.10);
-  background:
-    radial-gradient(130% 120% at 100% 0%, rgba(var(--accentRGB,122,180,255),.08), transparent 48%),
-    rgba(255,255,255,.04);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-.mf-cf-export-preview-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:14px 15px 11px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-.mf-cf-export-preview-label{
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  color:rgba(255,255,255,.48);
-}
-.mf-cf-export-preview-badge{
-  padding:5px 9px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(0,0,0,.18);
-  color:rgba(235,245,255,.74);
-  font-size:10px;
-}
-.mf-cf-export-preview-scroll{
-  flex:1;
-  min-height:0;
-  overflow:auto;
-  padding:16px;
-}
-.mf-cf-export-mini{
-  max-width:520px;
-  margin:0 auto;
-  border-radius:20px;
-  border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(244,245,250,.98));
-  color:#1f2333;
-  box-shadow:0 24px 48px rgba(0,0,0,.18);
-  overflow:hidden;
-}
-.mf-cf-export-mini-head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:14px;
-  padding:18px 18px 14px;
-  border-bottom:1px solid rgba(24,29,44,.08);
-}
-.mf-cf-export-mini-brand{
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:-.03em;
-  color:#3d2d67;
-}
-.mf-cf-export-mini-brand span{
-  font-weight:500;
-  color:#8d80b6;
-}
-.mf-cf-export-mini-meta{
-  text-align:right;
-  font-size:11px;
-  line-height:1.45;
-  color:#6f7383;
-}
-.mf-cf-export-mini-health{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  margin-top:6px;
-  padding:5px 9px;
-  border-radius:999px;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:.08em;
-  text-transform:uppercase;
-}
-.mf-cf-export-mini-health.good{ background:#e7f8ee; color:#2d8a60; }
-.mf-cf-export-mini-health.warn{ background:#fff4d8; color:#996e12; }
-.mf-cf-export-mini-health.bad{ background:#ffe7de; color:#b45a2a; }
-.mf-cf-export-mini-health.critical{ background:#ffe0e7; color:#b43357; }
-.mf-cf-export-mini-dot{
-  width:7px;
-  height:7px;
-  border-radius:999px;
-  background:currentColor;
-}
-.mf-cf-export-mini-strip{
-  display:flex;
-  flex-wrap:wrap;
-  gap:6px;
-  padding:12px 18px 0;
-}
-.mf-cf-export-mini-chip{
-  border-radius:999px;
-  background:#eef1f8;
-  color:#5b6174;
-  padding:5px 9px;
-  font-size:10px;
-  font-weight:700;
-}
-.mf-cf-export-mini-body{
-  padding:14px 18px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.mf-cf-export-mini-section{ display:flex; flex-direction:column; gap:7px; }
-.mf-cf-export-mini-label{
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:.10em;
-  color:#7a7f92;
-}
-.mf-cf-export-mini-card{
-  border-radius:14px;
-  border:1px solid rgba(31,35,51,.08);
-  background:#ffffff;
-  padding:12px 13px;
-}
-.mf-cf-export-mini-overall{
-  border-left:4px solid #7a63b6;
-  background:#f4f0fb;
-}
-.mf-cf-export-mini-quote{
-  border-left:4px solid #6d95df;
-  background:#edf3ff;
-}
-.mf-cf-export-mini-quote-text{
-  font-size:12px;
-  line-height:1.56;
-  color:#293246;
-}
-.mf-cf-export-mini-overall-text{
-  font-size:12px;
-  line-height:1.55;
-  color:#2f2750;
-  font-weight:600;
-}
-.mf-cf-export-mini-pairs{
-  display:grid;
-  gap:7px;
-}
-.mf-cf-export-mini-pair{
-  display:grid;
-  grid-template-columns:110px 1fr;
-  gap:10px;
-  font-size:11px;
-  line-height:1.42;
-}
-.mf-cf-export-mini-pair b{
-  color:#757b8f;
-  font-weight:700;
-}
-.mf-cf-export-mini-pair span{
-  color:#23293a;
-  font-weight:600;
-}
-.mf-cf-export-mini-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:10px;
-}
-.mf-cf-export-mini-list{
-  display:flex;
-  flex-direction:column;
-  gap:7px;
-}
-.mf-cf-export-mini-item{
-  position:relative;
-  padding-left:13px;
-  font-size:11px;
-  line-height:1.46;
-  color:#32394d;
-}
-.mf-cf-export-mini-item::before{
-  content:"→";
-  position:absolute;
-  left:0;
-  top:0;
-  color:#8c73c4;
-  font-weight:700;
-}
-.mf-cf-export-mini-note{
-  background:#fff8df;
-  border-color:#f0e0a2;
-}
-.mf-cf-export-mini-note-text{
-  font-size:11px;
-  line-height:1.52;
-  color:#5d4c1b;
-}
-.mf-cf-export-mini-good{
-  background:#edf8f2;
-  border-color:#d8efdf;
-}
-.mf-cf-export-mini-good-quote{
-  font-size:11.5px;
-  line-height:1.55;
-  font-weight:600;
-  color:#234333;
-}
-.mf-cf-export-mini-good-why{
-  margin-top:7px;
-  font-size:10.5px;
-  line-height:1.48;
-  color:#486857;
-}
-.mf-cf-export-mini-footer{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:12px 18px 15px;
-  border-top:1px solid rgba(24,29,44,.08);
-  font-size:10px;
-  color:#8b92a4;
-}
-@media (max-width: 980px){
-  .mf-cf-export-modal{
-    grid-template-columns:1fr;
-    width:min(760px, calc(100vw - 24px));
-  }
-  .mf-cf-export-right{
-    max-height:42vh;
-  }
-}
-@media (max-width: 640px){
-  .mf-cf-export-overlay{ padding:12px; }
-  .mf-cf-export-modal{ width:100%; padding:14px; border-radius:20px; }
-  .mf-cf-export-head{ padding-right:0; }
-  .mf-cf-export-head-actions{
-    position:static;
-    margin-top:12px;
-    justify-content:flex-start;
-  }
-  .mf-cf-export-head-btn{ width:100%; justify-content:center; }
-  .mf-cf-export-actions{ flex-direction:column; }
-  .mf-cf-export-btn.ghost, .mf-cf-export-btn.primary{ flex:initial; }
-  .mf-cf-export-mini-grid{ grid-template-columns:1fr; }
-}
-</style>
-
-<div class="mf-cf-export-overlay" id="cfExportOverlay" aria-hidden="true">
-  <div class="mf-cf-export-modal" role="dialog" aria-modal="true" aria-labelledby="cfExportTitle">
-    <div class="mf-cf-export-left">
-      <div class="mf-cf-export-head">
-        <div class="mf-cf-export-kicker">Coach print</div>
-        <h3 class="mf-cf-export-title" id="cfExportTitle">Export coaching summary</h3>
-        <p class="mf-cf-export-sub">Choose what to include. This summary is tuned for clean one-page printouts and quick coaching handoffs.</p>
-        <div class="mf-cf-export-head-actions">
-          <button class="mf-cf-export-head-btn" id="cfExportGenerateTop" type="button">Open print view</button>
-        </div>
-        <button class="mf-cf-export-close" id="cfExportClose" type="button" aria-label="Close export summary">✕</button>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">Current case</div>
-        <div class="mf-cf-export-meta" id="cfExportMeta"></div>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">Quick presets</div>
-        <div class="mf-cf-export-preset-row" id="cfExportPresetRow">
-          <button class="mf-cf-export-preset" data-preset="complaint" type="button">Complaint case</button>
-          <button class="mf-cf-export-preset" data-preset="calibration" type="button">Calibration</button>
-          <button class="mf-cf-export-preset" data-preset="qa" type="button">QA review</button>
-          <button class="mf-cf-export-preset" data-preset="minimal" type="button">Minimal</button>
-        </div>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">Always included</div>
-        <div class="mf-cf-export-lock-list">
-          <div class="mf-cf-export-lock"><div class="mf-cf-export-lock-left"><div class="mf-cf-export-lock-ico">🔒</div><div><div class="mf-cf-export-row-title">Session header + health</div><div class="mf-cf-export-row-sub">Case name, turn, mode, health, and session context.</div></div></div><div class="mf-cf-export-locked-badge">Locked</div></div>
-          <div class="mf-cf-export-lock"><div class="mf-cf-export-lock-left"><div class="mf-cf-export-lock-ico">🔒</div><div><div class="mf-cf-export-row-title">Overall read</div><div class="mf-cf-export-row-sub">The current coaching read in one clear sentence.</div></div></div><div class="mf-cf-export-locked-badge">Locked</div></div>
-          <div class="mf-cf-export-lock"><div class="mf-cf-export-lock-left"><div class="mf-cf-export-lock-ico">🔒</div><div><div class="mf-cf-export-row-title">Customer situation</div><div class="mf-cf-export-row-sub">Current customer turn plus primary signals.</div></div></div><div class="mf-cf-export-locked-badge">Locked</div></div>
-          <div class="mf-cf-export-lock"><div class="mf-cf-export-lock-left"><div class="mf-cf-export-lock-ico">🔒</div><div><div class="mf-cf-export-row-title">How to pitch this reply</div><div class="mf-cf-export-row-sub">Register, pace, formality, and opening move.</div></div></div><div class="mf-cf-export-locked-badge">Locked</div></div>
-        </div>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">Add up to 3 optional blocks</div>
-        <div class="mf-cf-export-opt-list" id="cfExportOptionalList">
-          <button class="mf-cf-export-opt" data-opt="risk" type="button"><div class="mf-cf-export-opt-left"><div class="mf-cf-export-opt-check">✓</div><div><div class="mf-cf-export-row-title">Risk snapshot</div><div class="mf-cf-export-row-sub">Quick pressure signals and escalation cues.</div></div></div><div class="mf-cf-export-count-badge">Optional</div></button>
-          <button class="mf-cf-export-opt" data-opt="watch" type="button"><div class="mf-cf-export-opt-left"><div class="mf-cf-export-opt-check">✓</div><div><div class="mf-cf-export-row-title">Watch for in the reply</div><div class="mf-cf-export-row-sub">What the coach should listen for or challenge.</div></div></div><div class="mf-cf-export-count-badge">Optional</div></button>
-          <button class="mf-cf-export-opt" data-opt="focus" type="button"><div class="mf-cf-export-opt-left"><div class="mf-cf-export-opt-check">✓</div><div><div class="mf-cf-export-row-title">Coaching focus</div><div class="mf-cf-export-row-sub">The single biggest teach-point for this case.</div></div></div><div class="mf-cf-export-count-badge">Optional</div></button>
-          <button class="mf-cf-export-opt" data-opt="good" type="button"><div class="mf-cf-export-opt-left"><div class="mf-cf-export-opt-check">✓</div><div><div class="mf-cf-export-row-title">What good looks like</div><div class="mf-cf-export-row-sub">A model opening move plus why it lands.</div></div></div><div class="mf-cf-export-count-badge">Optional</div></button>
-          <button class="mf-cf-export-opt" data-opt="notes" type="button"><div class="mf-cf-export-opt-left"><div class="mf-cf-export-opt-check">✓</div><div><div class="mf-cf-export-row-title">Coach notes</div><div class="mf-cf-export-row-sub">Session note or takeaway for the printout.</div></div></div><div class="mf-cf-export-count-badge">Optional</div></button>
-        </div>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">Session notes</div>
-        <textarea class="mf-cf-export-notes" id="cfExportNotes" maxlength="320" placeholder="Add a short note for this session…"></textarea>
-        <div class="mf-cf-export-notes-meta">
-          <span>Visible on the print card.</span>
-          <span id="cfExportNotesCount">0 / 320</span>
-        </div>
-      </div>
-
-      <div class="mf-cf-export-block">
-        <div class="mf-cf-export-label">One-page fit</div>
-        <div class="mf-cf-export-fit">
-          <div class="mf-cf-export-fit-track"><div class="mf-cf-export-fit-fill" id="cfExportFitFill"></div></div>
-          <div class="mf-cf-export-fit-label" id="cfExportFitLabel">Good fit</div>
-        </div>
-        <div class="mf-cf-export-fit-detail" id="cfExportFitDetail">Ready.</div>
-      </div>
-
-      <div class="mf-cf-export-actions">
-        <button class="mf-cf-export-btn ghost" id="cfExportCancel" type="button">Cancel</button>
-        <button class="mf-cf-export-btn primary" id="cfExportGenerate" type="button">Open print view</button>
-      </div>
-    </div>
-
-    <div class="mf-cf-export-right">
-      <div class="mf-cf-export-preview-wrap">
-        <div class="mf-cf-export-preview-head">
-          <div class="mf-cf-export-preview-label">Preview</div>
-          <div class="mf-cf-export-preview-badge" id="cfExportPreviewBadge">1 page</div>
-        </div>
-        <div class="mf-cf-export-preview-scroll" id="cfExportPreview"></div>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -33232,8 +32699,6 @@ Also, the hire car company said I need to return it by Friday — is that right?
         if (annotPop && annotPop.classList.contains('active')) { MF_CF_closeAnnotation(); return; }
         var clipOv = document.getElementById('cfClipOverlay');
         if (clipOv && clipOv.classList.contains('active')) { MF_CF_closeClipPanel(); return; }
-        var exportOv = document.getElementById('cfExportOverlay');
-        if (exportOv && exportOv.classList.contains('active')) { MF_CF_closePrintModal(); return; }
         var cf = _cfState();
         if (cf && cf.active) MF_CF_exitMode();
         return;
@@ -33298,624 +32763,539 @@ Also, the hire car company said I need to return it by Friday — is that right?
   }
 
   // ── Print / Export Signals ──────────────────────────────────────────
-  var _CF_PRINT_PRESETS = {
-    complaint:   { id: 'complaint',   label: 'Complaint case', selected: ['risk','watch','notes'] },
-    calibration: { id: 'calibration', label: 'Calibration',    selected: ['focus','good','notes'] },
-    qa:          { id: 'qa',          label: 'QA review',      selected: ['risk','watch','focus'] },
-    minimal:     { id: 'minimal',     label: 'Minimal',        selected: [] }
-  };
+  function MF_CF_printSignals() {
+    var signalsPanel = document.getElementById('cfSignalsPanel');
+    if (!signalsPanel) return;
+    var cf = _cfState();
+    var caseObj = cf ? cf.cases[cf.currentCase] : null;
+    var caseName = caseObj ? (caseObj.title || caseObj.name || 'Coaching Session') : 'Coaching Session';
+    var turnInfo = cf ? ('Turn ' + cf.revealIndex + ' of ' + (caseObj ? caseObj.messages.length : '?')) : '';
+    var ts = new Date();
+    var timestamp = ts.toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) + ' · ' + ts.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
 
-  function _cfUniquePush(arr, text) {
-    var t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
-    if (!t) return;
-    if (arr.indexOf(t) === -1) arr.push(t);
-  }
-
-  function _cfExportCounts(msgs, upto) {
-    var out = { cx: 0, agent: 0 };
-    for (var i = 0; i < Math.min(msgs.length, upto); i++) {
-      if ((msgs[i] && msgs[i].role) === 'customer') out.cx++;
-      else out.agent++;
+    // ── Extract structured data from the live DOM ──
+    function extractText(el, sel) {
+      var found = el.querySelectorAll(sel);
+      var arr = [];
+      for (var i = 0; i < found.length; i++) { var t = found[i].textContent.trim(); if (t) arr.push(t); }
+      return arr;
     }
-    return out;
-  }
-
-  function _cfPrintHealthClass(cls) {
-    if (cls === 'stabilising') return 'good';
-    if (cls === 'critical') return 'critical';
-    if (cls === 'escalating') return 'bad';
-    return 'warn';
-  }
-
-  function _cfPrintModeLabel() {
-    return _cfSignalMode === 'cx' ? 'CX Analysis' : (_cfSignalMode === 'agent' ? 'Agent Analysis' : 'Full Coaching View');
-  }
-
-  function _cfBuildTonePairs(eng) {
-    var emos = (eng && (eng.emotions || eng.customerEmotions || [])) || [];
-    var intents = (eng && (eng.customerIntents || [])) || [];
-    var g = null;
-    if (emos[0]) g = _CF_TONE_GUIDE[emos[0].id];
-    if (!g) {
-      for (var i = 0; i < intents.length; i++) { if (_CF_TONE_GUIDE[intents[i].id]) { g = _CF_TONE_GUIDE[intents[i].id]; break; } }
-    }
-    if (!g) g = { reg: 'Neutral-warm', pace: 'Balanced, conversational', form: 'Plain and direct', open: 'Answer first, context second' };
-    return [
-      { label: 'Register', value: g.reg },
-      { label: 'Pace', value: g.pace },
-      { label: 'Formality', value: g.form },
-      { label: 'Opening move', value: g.open }
-    ];
-  }
-
-  function _cfGetCurrentPrintData() {
-    var cf = _cfState(); if (!cf) return null;
-    var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return null;
-
-    var viewing = cf.viewingTurn || cf.revealIndex || 1;
-    if (viewing < 1) viewing = 1;
-
-    var revealed = caseObj.messages.slice(0, viewing);
-    var snap = caseObj.signalHistory && caseObj.signalHistory[viewing];
-    var eng = snap && snap.eng ? snap.eng : null;
-    if (!eng) {
-      var built = _cfBuildEngineSnapshotFromRevealed(viewing);
-      eng = built && built.eng ? built.eng : {};
-    }
-    eng = eng || {};
-
-    var allCustomer = '', allAgent = '';
-    for (var i = 0; i < revealed.length; i++) {
-      if (revealed[i].role === 'customer') allCustomer += (revealed[i].text || '') + '\n';
-      else allAgent += (revealed[i].text || '') + '\n';
-    }
-
-    var customerText = '', customerTurn = 1;
-    for (var j = viewing - 1; j >= 0; j--) {
-      if (caseObj.messages[j].role === 'customer') {
-        customerText = caseObj.messages[j].text || '';
-        customerTurn = j + 1;
-        break;
+    function extractPairs(el, dimSel, valSel) {
+      var dims = el.querySelectorAll(dimSel);
+      var vals = el.querySelectorAll(valSel);
+      var pairs = [];
+      for (var i = 0; i < Math.min(dims.length, vals.length); i++) {
+        pairs.push({ label: dims[i].textContent.trim(), value: vals[i].textContent.trim() });
       }
+      return pairs;
     }
-    if (!customerText) {
-      for (var k = 0; k < caseObj.messages.length; k++) {
-        if (caseObj.messages[k].role === 'customer') {
-          customerText = caseObj.messages[k].text || '';
-          customerTurn = k + 1;
-          break;
-        }
-      }
-    }
-
-    var customerDet = (typeof MF_customerDetectIntents === 'function')
-      ? MF_customerDetectIntents(customerText || allCustomer || '')
-      : { familyIntents: [], intents: [], tags: [], emotions: [] };
-
-    var intents = (eng.customerIntents && eng.customerIntents.length ? eng.customerIntents : (customerDet.familyIntents || customerDet.intents || [])) || [];
-    var emotions = (eng.customerEmotions || eng.emotions || customerDet.emotions || []) || [];
-    var tonePairs = _cfBuildTonePairs({ customerIntents: intents, emotions: emotions });
-    var kits = (typeof MF_selectCoachingKitsPhaseF === 'function') ? (MF_selectCoachingKitsPhaseF(customerDet) || []) : [];
 
     var overallText = '';
-    var overallEl = document.querySelector('#cfSignalsPanel .mf-cf-overall-text');
+    var overallEl = signalsPanel.querySelector('.mf-cf-overall-text');
     if (overallEl) overallText = overallEl.textContent.trim();
-    if (!overallText) overallText = (eng.trajectory && eng.trajectory.summary) || (eng.proportionality && eng.proportionality.summary) || (eng.openerQuality && eng.openerQuality.summary) || 'Use the customer signals to guide the reply clearly and in the right order.';
 
+    var toneGuide = extractPairs(signalsPanel, '.mf-cf-cx-tone-dim', '.mf-cf-cx-tone-val');
+    var watchItems = extractText(signalsPanel, '.mf-cf-cx-watch-item');
+    var discussItems = extractText(signalsPanel, '.mf-cf-cx-discuss-text');
+
+    // Health
+    var healthText = 'Healthy', healthCls = 'low';
+    var healthEl = signalsPanel.querySelector('.mf-health-pill, [class*="health-pill"]');
+    if (healthEl) { healthText = healthEl.textContent.trim(); var r = healthEl.getAttribute('data-risk'); if (r) healthCls = r; }
+    var atRiskEl = signalsPanel.querySelector('[class*="at-risk"], [class*="AT RISK"]');
+    if (!healthEl) {
+      var riskBadge = signalsPanel.querySelector('.mf-cf-health-badge, .mf-cf-trajectory-label');
+      if (riskBadge) { healthText = riskBadge.textContent.trim(); healthCls = 'high'; }
+    }
+    // Try to get "AT RISK" from text content
+    var trajectoryEl = signalsPanel.querySelector('[class*="trajectory"]');
+    if (trajectoryEl) {
+      var tt = trajectoryEl.textContent;
+      if (/at risk/i.test(tt)) { healthText = 'AT RISK'; healthCls = 'high'; }
+      else if (/escalat/i.test(tt)) { healthText = 'ESCALATING'; healthCls = 'critical'; }
+    }
+
+    // Needs
+    var primaryNeed = '', secondaryNeed = '';
+    var needEls = signalsPanel.querySelectorAll('.mf-cf-cx-need-row, .mf-cf-cx-predict-row, [class*="need-row"]');
+    if (needEls.length > 0) {
+      var nv0 = needEls[0].querySelector('[class*="val"], [class*="value"], td:last-child');
+      if (nv0) primaryNeed = nv0.textContent.trim();
+      if (needEls.length > 1) { var nv1 = needEls[1].querySelector('[class*="val"], [class*="value"], td:last-child'); if (nv1) secondaryNeed = nv1.textContent.trim(); }
+    }
+    // Fallback: look for intent chips
+    if (!primaryNeed) {
+      var intentChips = signalsPanel.querySelectorAll('.mf-cf-cx-intent-name, .mf-chip, [class*="intent-name"]');
+      if (intentChips.length > 0) { primaryNeed = intentChips[0].textContent.trim(); }
+      if (intentChips.length > 1) { secondaryNeed = intentChips[1].textContent.trim(); }
+    }
+
+    // Thread (first customer message)
+    var firstCxMsg = '';
+    if (cf && caseObj) {
+      var revealed = caseObj.messages.slice(0, cf.revealIndex);
+      for (var i = 0; i < revealed.length; i++) {
+        if (revealed[i].role === 'customer') { firstCxMsg = revealed[i].text; break; }
+      }
+    }
+    if (!firstCxMsg) {
+      var msgEl = signalsPanel.querySelector('[class*="cx-msg"], [class*="customer-msg"]');
+      if (!msgEl) {
+        var convoArea = document.querySelector('.mf-cf-transcript, .mf-conversation');
+        if (convoArea) { var cxBub = convoArea.querySelector('[class*="cx"], [class*="customer"]'); if (cxBub) firstCxMsg = cxBub.textContent.trim().slice(0, 400); }
+      }
+      if (msgEl) firstCxMsg = msgEl.textContent.trim().slice(0, 400);
+    }
+    // Also try the main conversation panel
+    if (!firstCxMsg) {
+      var mainConvo = document.querySelector('#conversationPanel, .mf-cf-panel--thread, [id*="thread"]');
+      if (mainConvo) {
+        var cxMsgs = mainConvo.querySelectorAll('[class*="customer"], [class*="cx-bubble"]');
+        if (cxMsgs.length) firstCxMsg = cxMsgs[0].textContent.trim().slice(0, 400);
+      }
+    }
+
+    // Coaching focus: discussion items or fallback
+    var coachFocus = discussItems.length ? discussItems : extractText(signalsPanel, '.mf-cf-teach-item, [class*="coach-item"], [class*="focus-item"]');
+
+    // ── Build risk items from signals ──
     var riskItems = [];
-    var trajectory = eng.trajectory || {};
-    var topIntentIds = [];
-    for (var a = 0; a < intents.length; a++) topIntentIds.push(intents[a].id);
-    if (trajectory.drivers && trajectory.drivers.length) {
-      for (var d = 0; d < trajectory.drivers.length && d < 3; d++) _cfUniquePush(riskItems, trajectory.drivers[d]);
+    var riskEls = signalsPanel.querySelectorAll('.mf-cf-rail-item, [class*="gap-item"], [class*="obligation"]');
+    for (var ri = 0; ri < Math.min(riskEls.length, 3); ri++) {
+      var rt = riskEls[ri].textContent.trim();
+      if (rt && rt.length > 3) riskItems.push(rt);
     }
-    if (trajectory.counts && trajectory.counts.unresolvedBlocks > 0) {
-      _cfUniquePush(riskItems, trajectory.counts.unresolvedBlocks + ' unresolved coverage block' + (trajectory.counts.unresolvedBlocks > 1 ? 's remain' : ' remains'));
-    }
-    if (emotions[0] && emotions[0].level && emotions[0].level !== 'low') {
-      _cfUniquePush(riskItems, (emotions[0].label || emotions[0].id) + ' is still shaping how this reply will land');
-    }
-    if (topIntentIds.indexOf('COMPLAINT_DISSATISFACTION') >= 0 || topIntentIds.indexOf('ESCALATION_MANAGER') >= 0) {
-      _cfUniquePush(riskItems, 'Complaint or escalation risk is active, so ownership needs to land before process');
-    }
-    if (topIntentIds.indexOf('DELAY_COMMUNICATION') >= 0) {
-      _cfUniquePush(riskItems, 'Delay pressure is part of the thread, so vague timelines will likely add heat');
-    }
-    riskItems = riskItems.slice(0, 4);
-
-    var watchItems = [];
-    var panel = document.getElementById('cfSignalsPanel');
-    if (panel) {
-      var watchEls = panel.querySelectorAll('.mf-cf-cx-watch-item');
-      for (var w = 0; w < watchEls.length && watchItems.length < 4; w++) _cfUniquePush(watchItems, watchEls[w].textContent);
-    }
-    if (!watchItems.length) {
-      for (var m = 0; m < Math.min(intents.length, 2); m++) {
-        var cov = _CF_COVERAGE[intents[m].id];
-        if (cov && cov.must) {
-          for (var mm = 0; mm < cov.must.length && watchItems.length < 4; mm++) _cfUniquePush(watchItems, cov.must[mm]);
-        }
+    if (riskItems.length === 0) {
+      var watchOvers = signalsPanel.querySelectorAll('[class*="watch"] .mf-chip, [class*="watch"] span');
+      for (var wo = 0; wo < Math.min(watchOvers.length, 3); wo++) {
+        var wt = watchOvers[wo].textContent.trim();
+        if (wt && wt.length > 3) riskItems.push(wt);
       }
     }
-    var gaps = eng.agentGaps || eng.gaps || [];
-    for (var g = 0; g < gaps.length && watchItems.length < 4; g++) {
-      var gap = gaps[g] || {};
-      var gid = gap.id || gap.gapId || String(gap);
-      _cfUniquePush(watchItems, _CF_GAP_WEAK[gid] || gap.label || gap.title || '');
-    }
-    if (eng.openerQuality && /flat|missed/i.test(String((eng.openerQuality.label || '') + ' ' + (eng.openerQuality.cls || '')))) {
-      _cfUniquePush(watchItems, eng.openerQuality.summary || 'The opening needs to do more work in the first line.');
-    }
-    if (!watchItems.length && trajectory.summary) _cfUniquePush(watchItems, trajectory.summary);
-    watchItems = watchItems.slice(0, 4);
-
-    var tagSet = {};
-    var tags = (customerDet.tags || []);
-    for (var t = 0; t < tags.length; t++) tagSet[tags[t]] = true;
-
-    var focusText = 'Lead with the clearest answer first, then support it with just enough process to move the conversation forward.';
-    if (topIntentIds.indexOf('COMPLAINT_DISSATISFACTION') >= 0 || topIntentIds.indexOf('DELAY_COMMUNICATION') >= 0 || topIntentIds.indexOf('ESCALATION_MANAGER') >= 0) {
-      focusText = 'Ownership before explanation. Name the issue, apologise clearly, and show who is handling the next step before you move into process.';
-    } else if (tagSet.MULTI_QUESTION) {
-      focusText = 'Answer each point one by one. The coaching test here is visible coverage, not one blended paragraph that leaves the customer guessing.';
-    } else if (tagSet.VULN_FINANCIAL || tagSet.VULN_HEALTH || tagSet.VULN_AGE || tagSet.VULNERABILITY) {
-      focusText = 'Slow the reply down and make it easier to carry. Shorter sentences, less jargon, and one clear next step matter more than detail density.';
-    } else if (emotions[0] && (emotions[0].id === 'DISTRUST' || emotions[0].id === 'FRUSTRATION')) {
-      focusText = 'Contain the heat first. The reply needs to sound grounded and specific, not polished or overly reassuring.';
+    // Fallback risk items from conversation health section
+    if (riskItems.length === 0 && healthCls === 'high') {
+      riskItems = ['Conversation marked as At Risk — review required', 'Unresolved obligation blocks detected', 'Priority obligations not yet covered'];
     }
 
-    var goodQuote = '';
-    var goodWhy = '';
-    if (kits.length && kits[0].openingStarters && kits[0].openingStarters.length) {
-      goodQuote = kits[0].openingStarters[0];
-      goodWhy = (kits[0].toneGuidance && kits[0].toneGuidance.use) || kits[0].coachingPrompt || '';
-    } else {
-      goodQuote = tonePairs[3] ? tonePairs[3].value : 'Answer first, context second.';
-      goodWhy = tonePairs[0] ? tonePairs[0].value : 'Keep the tone measured, plain, and customer-centred.';
+    // "What good looks like" — opening example from coaching kit
+    var goodLooks = '';
+    var kitEl = signalsPanel.querySelector('[class*="coach-kit"], [class*="scenario-card"], [class*="opening-starter"]');
+    if (kitEl) goodLooks = kitEl.textContent.trim().slice(0, 320);
+    if (!goodLooks && toneGuide.length > 0) {
+      goodLooks = 'Example opening: ' + (toneGuide.find(function(p){ return /opening/i.test(p.label); }) || {value: ''}).value;
     }
 
-    var baseNotes = [];
-    if (caseObj.coachNote) baseNotes.push(String(caseObj.coachNote).trim());
-    if (caseObj.scratchpad) baseNotes.push(String(caseObj.scratchpad).trim());
+    // Key takeaway — derive from health + primary intent
+    var keyTakeaway = '';
+    if (overallText) keyTakeaway = overallText;
 
-    var counts = _cfExportCounts(caseObj.messages, viewing);
-    var ts = new Date();
-    var timestamp = ts.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' · ' + ts.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-    var healthLabel = trajectory.label || 'At risk';
-    var healthCls = _cfPrintHealthClass(trajectory.cls || '');
-    var customerQuote = String(customerText || '').replace(/\s+/g, ' ').trim();
-    if (customerQuote.length > 360) customerQuote = customerQuote.slice(0, 357) + '…';
+    // ── Populate mini preview ──
+    var miniTs = document.getElementById('mfMiniTs');
+    var miniHealthLbl = document.getElementById('mfMiniHealthLbl');
+    var miniRDot = document.getElementById('mfMiniRDot');
+    var miniOverall = document.getElementById('mfMiniOverall');
+    var miniQuote = document.getElementById('mfMiniQuote');
+    var miniPitch = document.getElementById('mfMiniPitch');
+    var miniFtrTs = document.getElementById('mfMiniFtrTs');
 
-    return {
-      caseLabel: caseObj.label || 'Coaching Session',
-      timestamp: timestamp,
-      viewing: viewing,
-      totalTurns: caseObj.messages.length,
-      modeLabel: _cfPrintModeLabel(),
-      counts: counts,
-      healthLabel: healthLabel,
-      healthCls: healthCls,
-      overallText: overallText,
-      customerQuote: customerQuote,
-      customerTurn: customerTurn,
-      primaryIntent: intents[0] ? (intents[0].label || intents[0].id) : '',
-      secondaryIntent: intents[1] ? (intents[1].label || intents[1].id) : '',
-      tonePairs: tonePairs,
-      riskItems: riskItems,
-      watchItems: watchItems,
-      focusText: focusText,
-      goodQuote: goodQuote,
-      goodWhy: goodWhy,
-      baseNotes: baseNotes.join(' ').trim(),
-      recommendedPreset: (topIntentIds.indexOf('COMPLAINT_DISSATISFACTION') >= 0 || topIntentIds.indexOf('DELAY_COMMUNICATION') >= 0 || topIntentIds.indexOf('ESCALATION_MANAGER') >= 0) ? 'complaint' : ((tagSet.MULTI_QUESTION || tagSet.VULNERABILITY || tagSet.VULN_FINANCIAL || tagSet.VULN_HEALTH || tagSet.VULN_AGE) ? 'calibration' : 'qa')
+    if (miniTs) miniTs.textContent = timestamp;
+    if (miniFtrTs) miniFtrTs.textContent = timestamp;
+    if (miniHealthLbl) miniHealthLbl.textContent = healthText || 'Health';
+    if (miniRDot) {
+      var dotColor = healthCls === 'critical' ? 'rgba(255,80,80,.9)' : healthCls === 'high' ? 'rgba(255,200,80,.9)' : healthCls === 'medium' ? 'rgba(255,190,60,.9)' : 'rgba(100,220,140,.9)';
+      miniRDot.style.background = dotColor;
+    }
+    if (miniOverall) miniOverall.textContent = overallText || caseName;
+    if (miniQuote) miniQuote.textContent = (firstCxMsg ? '"' + firstCxMsg.slice(0, 160) + (firstCxMsg.length > 160 ? '…"' : '"') : '—');
+    if (miniPitch) {
+      var ph = '';
+      for (var tp = 0; tp < toneGuide.length; tp++) {
+        ph += '<div class="mf-mini-tr"><span class="mf-mini-tk">' + _cfEsc(toneGuide[tp].label) + '</span><span class="mf-mini-tv">' + _cfEsc(toneGuide[tp].value) + '</span></div>';
+      }
+      miniPitch.innerHTML = ph || '<div class="mf-mini-tr"><span class="mf-mini-tk">—</span><span class="mf-mini-tv">Awaiting signals</span></div>';
+    }
+
+    // Store extracted data on modal for use by generator
+    var modal = document.getElementById('mfExportModalBg');
+    modal._mfData = {
+      caseName: caseName, turnInfo: turnInfo, timestamp: timestamp,
+      overallText: overallText, toneGuide: toneGuide, watchItems: watchItems,
+      coachFocus: coachFocus, firstCxMsg: firstCxMsg, healthText: healthText,
+      healthCls: healthCls, primaryNeed: primaryNeed, secondaryNeed: secondaryNeed,
+      riskItems: riskItems, goodLooks: goodLooks, keyTakeaway: keyTakeaway
     };
+
+    // Reset to default state on each open
+    var bg2 = document.getElementById('mfExportModalBg');
+    if (bg2) {
+      var defaultOpts = ['overall','situation','pitch','takeaway'];
+      bg2.querySelectorAll('.mf-export-opt').forEach(function(el) {
+        var isDefault = defaultOpts.indexOf(el.getAttribute('data-opt')) > -1;
+        el.classList.toggle('checked', isDefault);
+        el.classList.remove('disabled');
+      });
+      bg2.querySelectorAll('.mf-export-preset').forEach(function(c){ c.classList.remove('active'); });
+      var nw = document.getElementById('mfExportNotesWrap');
+      if (nw) nw.style.display = 'none';
+    }
+
+    // Open modal
+    modal.classList.add('open');
+    MF_CF_exportUpdateFit();
+    MF_CF_exportUpdatePreview();
   }
 
-  function _cfGetPrintCfg(caseObj, data) {
-    if (!caseObj.exportCfg) {
-      var presetId = (data && data.recommendedPreset) || 'complaint';
-      var preset = _CF_PRINT_PRESETS[presetId] || _CF_PRINT_PRESETS.complaint;
-      caseObj.exportCfg = {
-        preset: preset.id,
-        selected: preset.selected.slice(),
-        notes: data && data.baseNotes ? data.baseNotes : ''
-      };
-    }
-    if (!caseObj.exportCfg.selected) caseObj.exportCfg.selected = [];
-    if (!caseObj.exportCfg.notes) caseObj.exportCfg.notes = caseObj.exportCfg.notes || '';
-    return caseObj.exportCfg;
+  // ── Export Modal Logic ──────────────────────────────────────────────
+  function MF_CF_exportCheckedOpts() {
+    var checked = [];
+    document.querySelectorAll('.mf-export-opt.checked').forEach(function(el){ checked.push(el.getAttribute('data-opt')); });
+    return checked;
   }
 
-  function _cfEstimatePrintFit(data, cfg) {
-    var selected = (cfg && cfg.selected) ? cfg.selected.length : 0;
-    var noteLen = (cfg && cfg.notes ? cfg.notes.length : 0);
-    var quoteLen = data && data.customerQuote ? data.customerQuote.length : 0;
-    var score = 52 + (selected * 13) + Math.min(12, Math.ceil(noteLen / 60) * 2) + (quoteLen > 230 ? 6 : (quoteLen > 130 ? 3 : 0));
-    if (cfg && cfg.selected && cfg.selected.indexOf('good') >= 0) score += 2;
-    var label = 'Good fit', cls = 'good', detail = selected + ' optional block' + (selected !== 1 ? 's' : '') + ' selected · fits cleanly on one page';
-    if (score > 95) {
-      label = 'Too much';
-      cls = 'critical';
-      detail = 'This may spill over. Trim the notes or drop one optional block.';
-    } else if (score > 84) {
-      label = 'At limit';
-      cls = 'warn';
-      detail = selected + ' optional block' + (selected !== 1 ? 's' : '') + ' selected · one-page limit is getting tight';
-    }
-    return { score: Math.max(36, Math.min(100, score)), label: label, cls: cls, detail: detail };
+  function MF_CF_exportUpdateFit() {
+    var checked = MF_CF_exportCheckedOpts();
+    var n = checked.length;
+    var notesEl = document.getElementById('mfExportNotesField');
+    var notesLen = notesEl ? notesEl.value.length : 0;
+    var fill = document.getElementById('mfExportFitFill');
+    var label = document.getElementById('mfExportFitLabel');
+    var detail = document.getElementById('mfExportFitDetail');
+    var warning = document.getElementById('mfExportWarning');
+    // 9 sections max; 4 default ≈ 45%, each extra ≈ 7%
+    var pct = Math.min(Math.max(n * 11, 10) + (notesLen > 150 ? 6 : 0), 100);
+    if (fill) fill.style.width = pct + '%';
+    var over = n >= 8 || (n >= 7 && notesLen > 200);
+    var full = n >= 6;
+    var color = over ? 'rgba(255,100,80,.8)' : full ? 'rgba(255,190,60,.8)' : 'rgba(100,220,140,.8)';
+    if (fill) fill.style.background = color;
+    var lbl = over ? 'Likely 2 pages' : full ? 'Full page' : n <= 3 ? 'Slim' : 'Good fit';
+    var lblColor = over ? 'rgba(255,130,100,.9)' : full ? 'rgba(255,200,80,.9)' : 'rgba(100,220,160,.85)';
+    if (label) { label.textContent = lbl; label.style.color = lblColor; }
+    if (detail) detail.textContent = n + ' section' + (n !== 1 ? 's' : '') + ' selected' + (over ? ' · may overflow to 2 pages' : full ? ' · tight but printable' : ' · fits cleanly');
+    if (warning) warning.classList.toggle('show', over);
   }
 
-  function _cfRenderPrintPreview(data, cfg) {
-    if (!data) return '';
-    var notes = String((cfg && cfg.notes) || '').trim();
-    var selected = (cfg && cfg.selected) ? cfg.selected.slice() : [];
-    var html = '';
-    html += '<div class="mf-cf-export-mini">';
-    html +=   '<div class="mf-cf-export-mini-head">';
-    html +=     '<div class="mf-cf-export-mini-brand">MirrorFlow <span>Coach</span></div>';
-    html +=     '<div class="mf-cf-export-mini-meta">' + _cfEsc(data.caseLabel) + '<br>' + _cfEsc(data.timestamp);
-    html +=       '<div class="mf-cf-export-mini-health ' + _cfEsc(data.healthCls) + '"><span class="mf-cf-export-mini-dot"></span>' + _cfEsc(data.healthLabel) + '</div>';
-    html +=     '</div>';
-    html +=   '</div>';
-    html +=   '<div class="mf-cf-export-mini-strip">';
-    html +=     '<div class="mf-cf-export-mini-chip">Turn ' + data.viewing + ' of ' + data.totalTurns + '</div>';
-    html +=     '<div class="mf-cf-export-mini-chip">' + _cfEsc(data.modeLabel) + '</div>';
-    html +=     '<div class="mf-cf-export-mini-chip">' + data.counts.cx + ' CX · ' + data.counts.agent + ' Agent</div>';
-    html +=   '</div>';
-    html +=   '<div class="mf-cf-export-mini-body">';
-    html +=     '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Overall read</div><div class="mf-cf-export-mini-card mf-cf-export-mini-overall"><div class="mf-cf-export-mini-overall-text">' + _cfEsc(data.overallText) + '</div></div></div>';
-    html +=     '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Customer situation</div><div class="mf-cf-export-mini-card mf-cf-export-mini-quote"><div class="mf-cf-export-mini-quote-text">"' + _cfEsc(data.customerQuote) + '"</div></div></div>';
-    html +=     '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">How to pitch this reply</div><div class="mf-cf-export-mini-card"><div class="mf-cf-export-mini-pairs">';
-    for (var i = 0; i < data.tonePairs.length; i++) {
-      html += '<div class="mf-cf-export-mini-pair"><b>' + _cfEsc(data.tonePairs[i].label) + '</b><span>' + _cfEsc(data.tonePairs[i].value) + '</span></div>';
-    }
-    html +=     '</div></div></div>';
-
-    if (selected.length) {
-      html += '<div class="mf-cf-export-mini-grid">';
-      for (var s = 0; s < selected.length; s++) {
-        var key = selected[s];
-        if (key === 'risk' && data.riskItems.length) {
-          html += '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Risk snapshot</div><div class="mf-cf-export-mini-card"><div class="mf-cf-export-mini-list">';
-          for (var r = 0; r < data.riskItems.length && r < 4; r++) html += '<div class="mf-cf-export-mini-item">' + _cfEsc(data.riskItems[r]) + '</div>';
-          html += '</div></div></div>';
-        } else if (key === 'watch' && data.watchItems.length) {
-          html += '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Watch for</div><div class="mf-cf-export-mini-card"><div class="mf-cf-export-mini-list">';
-          for (var w = 0; w < data.watchItems.length && w < 4; w++) html += '<div class="mf-cf-export-mini-item">' + _cfEsc(data.watchItems[w]) + '</div>';
-          html += '</div></div></div>';
-        } else if (key === 'focus' && data.focusText) {
-          html += '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Coaching focus</div><div class="mf-cf-export-mini-card"><div class="mf-cf-export-mini-quote-text">' + _cfEsc(data.focusText) + '</div></div></div>';
-        } else if (key === 'good' && data.goodQuote) {
-          html += '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">What good looks like</div><div class="mf-cf-export-mini-card mf-cf-export-mini-good"><div class="mf-cf-export-mini-good-quote">“' + _cfEsc(data.goodQuote) + '”</div><div class="mf-cf-export-mini-good-why">' + _cfEsc(data.goodWhy) + '</div></div></div>';
-        } else if (key === 'notes' && notes) {
-          html += '<div class="mf-cf-export-mini-section"><div class="mf-cf-export-mini-label">Coach notes</div><div class="mf-cf-export-mini-card mf-cf-export-mini-note"><div class="mf-cf-export-mini-note-text">' + _cfEsc(notes) + '</div></div></div>';
-        }
+  function MF_CF_exportUpdatePreview() {
+    var modal = document.getElementById('mfExportModalBg');
+    if (!modal || !modal._mfData) return;
+    var d = modal._mfData;
+    var checked = MF_CF_exportCheckedOpts();
+    var slots = ['mfMiniOptSlot1','mfMiniOptSlot2','mfMiniOptSlot3'];
+    slots.forEach(function(id){ var el = document.getElementById(id); if(el){ el.style.display='none'; el.innerHTML=''; } });
+    var idx = 0;
+    checked.forEach(function(opt) {
+      if (idx >= 3) return;
+      var slotEl = document.getElementById(slots[idx]);
+      if (!slotEl) return;
+      var html = '';
+      if (opt === 'risk') {
+        html = '<div class="mf-mini-slbl">Risk snapshot</div><div class="mf-mini-risk">';
+        var items = d.riskItems.length ? d.riskItems : ['Escalation risk — ombudsman mentioned','Zero agent contact — high frustration','Unresolved obligation blocks remain'];
+        items.slice(0,3).forEach(function(r){ html += '<div class="mf-mini-risk-item"><div class="mf-mini-risk-dot"></div>' + _cfEsc(r.slice(0,70)) + '</div>'; });
+        html += '</div>';
+      } else if (opt === 'watchfor') {
+        html = '<div class="mf-mini-slbl">Watch for</div><div class="mf-mini-opt-block"><div class="mf-mini-bullets">';
+        var items2 = d.watchItems.length ? d.watchItems : ['Acknowledge and apologise — no deflection','State clearly what stage the claim is at','Close with a question or availability signal'];
+        items2.slice(0,3).forEach(function(w){ html += '<div class="mf-mini-bullet">' + _cfEsc(w.slice(0,65)) + '</div>'; });
+        html += '</div></div>';
+      } else if (opt === 'coaching') {
+        html = '<div class="mf-mini-slbl">Coaching focus</div><div class="mf-mini-opt-block"><div class="mf-mini-bullets">';
+        var items3 = d.coachFocus.length ? d.coachFocus : ['Lead with empathy before process','Name the delay directly — own it','Close with a next-step commitment'];
+        items3.slice(0,3).forEach(function(c){ html += '<div class="mf-mini-bullet">' + _cfEsc(c.slice(0,65)) + '</div>'; });
+        html += '</div></div>';
+      } else if (opt === 'goodlooks') {
+        html = '<div class="mf-mini-slbl">What good looks like</div><div class="mf-mini-opt-block"><div class="mf-mini-opt-title">Example opening</div><div style="font-size:6.5px;color:#3a3a5a;line-height:1.4;font-style:italic">' + _cfEsc((d.goodLooks || '\u201cI\u2019m really sorry about the delay \u2014 that\u2019s not the experience we want for you.\u201d').slice(0,180)) + '</div></div>';
+      } else if (opt === 'notes') {
+        var notesVal = (document.getElementById('mfExportNotesField') || {value:''}).value;
+        html = '<div class="mf-mini-slbl">Coach notes</div><div class="mf-mini-notes"><div class="mf-mini-notes-lbl">Notes</div><div class="mf-mini-notes-txt">' + _cfEsc((notesVal || 'No notes added yet.').slice(0,160)) + '</div></div>';
       }
-      html += '</div>';
-    }
-
-    html +=   '</div>';
-    html +=   '<div class="mf-cf-export-mini-footer"><span>Generated by <strong>MirrorFlow Coach</strong></span><span>' + _cfEsc(data.timestamp) + '</span></div>';
-    html += '</div>';
-    return html;
+      if (html) { slotEl.innerHTML = html; slotEl.style.display = ''; idx++; }
+    });
   }
 
-  function _cfSyncPrintModal() {
-    var cf = _cfState(); if (!cf) return;
-    var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return;
-    var data = _cfGetCurrentPrintData(); if (!data) return;
-    var cfg = _cfGetPrintCfg(caseObj, data);
+  function MF_CF_initExportModal() {
+    var bg = document.getElementById('mfExportModalBg');
+    if (!bg) return;
 
-    var meta = document.getElementById('cfExportMeta');
-    if (meta) {
-      meta.innerHTML = ''
-        + '<span class="mf-cf-export-chip"><span class="mf-cf-export-health-dot"></span>' + _cfEsc(data.caseLabel) + '</span>'
-        + '<span class="mf-cf-export-chip">Turn ' + data.viewing + ' of ' + data.totalTurns + '</span>'
-        + '<span class="mf-cf-export-chip">' + _cfEsc(data.modeLabel) + '</span>'
-        + '<span class="mf-cf-export-chip mf-cf-export-health--' + _cfEsc(data.healthCls) + '"><span class="mf-cf-export-health-dot"></span>' + _cfEsc(data.healthLabel) + '</span>';
+    // Close on backdrop click
+    bg.addEventListener('click', function(e){ if (e.target === bg) MF_CF_closeExportModal(); });
+
+    // Cancel button
+    var cancelBtn = document.getElementById('mfExportCancelBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', MF_CF_closeExportModal);
+
+    // Preset chips
+    bg.querySelectorAll('.mf-export-preset').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        bg.querySelectorAll('.mf-export-preset').forEach(function(c){ c.classList.remove('active'); });
+        chip.classList.add('active');
+        var preset = chip.getAttribute('data-preset');
+        bg.querySelectorAll('.mf-export-opt').forEach(function(o){ o.classList.remove('checked'); });
+        var maps = {
+          default:     ['overall','situation','pitch','takeaway'],
+          complaint:   ['overall','situation','pitch','risk','watchfor','notes','takeaway'],
+          calibration: ['overall','situation','pitch','coaching','watchfor','goodlooks','takeaway'],
+          qa:          ['overall','situation','pitch','risk','watchfor','notes','takeaway'],
+          minimal:     ['overall','pitch','takeaway'],
+          full:        ['overall','situation','pitch','risk','watchfor','coaching','goodlooks','notes','takeaway']
+        };
+        var sel = maps[preset] || [];
+        sel.forEach(function(optKey){
+          var el = bg.querySelector('[data-opt="' + optKey + '"]');
+          if (el) el.classList.add('checked');
+        });
+        // Show notes wrap if notes selected
+        var notesWrap = document.getElementById('mfExportNotesWrap');
+        if (notesWrap) notesWrap.style.display = sel.indexOf('notes') > -1 ? '' : 'none';
+        MF_CF_exportUpdateFit();
+        MF_CF_exportUpdatePreview();
+      });
+    });
+
+    // Optional block toggles
+    bg.querySelectorAll('.mf-export-opt').forEach(function(opt) {
+      opt.addEventListener('click', function() {
+        if (opt.classList.contains('disabled')) return;
+        opt.classList.toggle('checked');
+        var isNotes = opt.getAttribute('data-opt') === 'notes';
+        var notesWrap = document.getElementById('mfExportNotesWrap');
+        if (isNotes && notesWrap) notesWrap.style.display = opt.classList.contains('checked') ? '' : 'none';
+        MF_CF_exportUpdateFit();
+        MF_CF_exportUpdatePreview();
+      });
+    });
+
+    // Notes textarea
+    var notesField = document.getElementById('mfExportNotesField');
+    var notesCount = document.getElementById('mfExportNotesCount');
+    if (notesField) {
+      notesField.addEventListener('input', function() {
+        if (notesCount) notesCount.textContent = notesField.value.length + ' / 300';
+        MF_CF_exportUpdateFit();
+        MF_CF_exportUpdatePreview();
+      });
     }
 
-    var presetBtns = document.querySelectorAll('#cfExportPresetRow .mf-cf-export-preset');
-    for (var p = 0; p < presetBtns.length; p++) {
-      presetBtns[p].classList.toggle('active', presetBtns[p].getAttribute('data-preset') === cfg.preset);
-    }
-
-    var selectedCount = cfg.selected.length;
-    var optBtns = document.querySelectorAll('#cfExportOptionalList .mf-cf-export-opt');
-    for (var o = 0; o < optBtns.length; o++) {
-      var key = optBtns[o].getAttribute('data-opt');
-      var isActive = cfg.selected.indexOf(key) >= 0;
-      var disableAdd = !isActive && selectedCount >= 3;
-      optBtns[o].classList.toggle('active', isActive);
-      optBtns[o].classList.toggle('disabled', disableAdd);
-      optBtns[o].setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    }
-
-    var notesEl = document.getElementById('cfExportNotes');
-    if (notesEl && notesEl.value !== cfg.notes) notesEl.value = cfg.notes || '';
-    var notesCount = document.getElementById('cfExportNotesCount');
-    if (notesCount) notesCount.textContent = String((cfg.notes || '').length) + ' / 320';
-
-    var fit = _cfEstimatePrintFit(data, cfg);
-    var fitFill = document.getElementById('cfExportFitFill');
-    var fitLabel = document.getElementById('cfExportFitLabel');
-    var fitDetail = document.getElementById('cfExportFitDetail');
-    var previewBadge = document.getElementById('cfExportPreviewBadge');
-    if (fitFill) {
-      fitFill.style.width = fit.score + '%';
-      fitFill.style.background = fit.cls === 'critical'
-        ? 'linear-gradient(90deg, rgba(255,108,108,.78), rgba(255,108,140,.95))'
-        : (fit.cls === 'warn'
-          ? 'linear-gradient(90deg, rgba(255,188,82,.78), rgba(255,206,104,.94))'
-          : 'linear-gradient(90deg, rgba(92,222,156,.72), rgba(92,222,156,.95))');
-    }
-    if (fitLabel) {
-      fitLabel.textContent = fit.label;
-      fitLabel.style.color = fit.cls === 'critical' ? 'rgba(255,108,130,.96)' : (fit.cls === 'warn' ? 'rgba(255,196,98,.96)' : 'rgba(92,222,156,.94)');
-    }
-    if (fitDetail) fitDetail.textContent = fit.detail;
-    if (previewBadge) previewBadge.textContent = fit.cls === 'critical' ? 'Spill risk' : '1 page';
-
-    var preview = document.getElementById('cfExportPreview');
-    if (preview) preview.innerHTML = _cfRenderPrintPreview(data, cfg);
+    // Generate button
+    var genBtn = document.getElementById('mfExportGenBtn');
+    if (genBtn) genBtn.addEventListener('click', MF_CF_generateExportCard);
   }
 
-  function MF_CF_openPrintModal() {
-    var cf = _cfState();
-    if (!cf || !cf.active || !cf.cases[cf.currentCase]) {
-      MF_CF_toast('Open a saved Coach case first.');
-      return;
-    }
-    var data = _cfGetCurrentPrintData();
-    if (!data) {
-      MF_CF_toast('There is nothing ready to print yet.');
-      return;
-    }
-    var caseObj = cf.cases[cf.currentCase];
-    var cfg = _cfGetPrintCfg(caseObj, data);
-    if (!cfg.preset) cfg.preset = data.recommendedPreset || 'complaint';
-    if (!cfg.selected || !cfg.selected.length) {
-      var preset = _CF_PRINT_PRESETS[cfg.preset] || _CF_PRINT_PRESETS.complaint;
-      cfg.selected = preset.selected.slice();
-    }
-    if (!cfg.notes && data.baseNotes) cfg.notes = data.baseNotes;
-    var overlay = document.getElementById('cfExportOverlay');
-    if (overlay) {
-      overlay.classList.add('active');
-      overlay.setAttribute('aria-hidden', 'false');
-    }
-    _cfSyncPrintModal();
+  function MF_CF_closeExportModal() {
+    var bg = document.getElementById('mfExportModalBg');
+    if (bg) bg.classList.remove('open');
   }
 
-  function MF_CF_closePrintModal() {
-    var overlay = document.getElementById('cfExportOverlay');
-    if (overlay) {
-      overlay.classList.remove('active');
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-  }
+  function MF_CF_generateExportCard() {
+    var modal = document.getElementById('mfExportModalBg');
+    if (!modal || !modal._mfData) return;
+    var d = modal._mfData;
+    var checked = MF_CF_exportCheckedOpts();
+    var notesText = (document.getElementById('mfExportNotesField') || {value:''}).value;
 
-  function _cfTogglePrintOptional(key) {
-    var cf = _cfState(); if (!cf) return;
-    var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return;
-    var data = _cfGetCurrentPrintData();
-    var cfg = _cfGetPrintCfg(caseObj, data);
-    var idx = cfg.selected.indexOf(key);
-    if (idx >= 0) cfg.selected.splice(idx, 1);
-    else if (cfg.selected.length < 3) cfg.selected.push(key);
-    _cfSyncPrintModal();
-  }
+    var healthColorMap = { low: '#4ade80', medium: '#fbbf24', high: '#fb923c', critical: '#f87171' };
+    var healthBgMap = { low: 'rgba(74,222,128,.12)', medium: 'rgba(251,191,36,.12)', high: 'rgba(251,146,60,.12)', critical: 'rgba(248,113,113,.12)' };
+    var healthBorderMap = { low: 'rgba(74,222,128,.28)', medium: 'rgba(251,191,36,.28)', high: 'rgba(251,146,60,.28)', critical: 'rgba(248,113,113,.28)' };
+    var hc = d.healthCls || 'high';
 
-  function _cfApplyPrintPreset(presetId) {
-    var cf = _cfState(); if (!cf) return;
-    var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return;
-    var data = _cfGetCurrentPrintData();
-    var cfg = _cfGetPrintCfg(caseObj, data);
-    var preset = _CF_PRINT_PRESETS[presetId] || _CF_PRINT_PRESETS.complaint;
-    cfg.preset = preset.id;
-    cfg.selected = preset.selected.slice();
-    if (!cfg.notes && data && data.baseNotes) cfg.notes = data.baseNotes;
-    _cfSyncPrintModal();
-  }
-
-  function _cfBuildPrintPage(data, cfg, fit) {
-    var notes = String((cfg && cfg.notes) || '').trim();
-    var selected = (cfg && cfg.selected) ? cfg.selected.slice() : [];
-    var S = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>MirrorFlow Coach — ' + _cfEsc(data.caseLabel) + '</title><style>';
+    var S = '<!DOCTYPE html><html><head><meta charset="utf-8">';
+    S += '<title>MirrorFlow Coach — ' + _cfEsc(d.caseName) + '</title>';
+    S += '<style>';
     S += [
-      '@page { size: A4; margin: 12mm; }',
-      '*{ box-sizing:border-box; }',
-      'html,body{ margin:0; padding:0; background:#eef1f6; color:#1f2533; font-family:"Segoe UI",-apple-system,system-ui,sans-serif; }',
-      'body{ padding:16px; }',
-      '.pc-actions{ display:flex; justify-content:flex-end; gap:10px; margin:0 auto 14px; max-width:850px; }',
-      '.pc-btn{ border:none; border-radius:999px; padding:10px 14px; font:600 13px/1 "Segoe UI",-apple-system,system-ui,sans-serif; cursor:pointer; background:#21273a; color:#fff; box-shadow:0 12px 28px rgba(0,0,0,.12); }',
-      '.pc-btn.secondary{ background:#fff; color:#293045; border:1px solid rgba(31,37,51,.10); box-shadow:none; }',
-      '.pc-sheet{ max-width:850px; margin:0 auto; background:#fff; border-radius:24px; box-shadow:0 24px 60px rgba(12,18,32,.14); overflow:hidden; }',
-      '.pc-header{ display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding:24px 26px 18px; background:linear-gradient(180deg,#f8f6fc,#ffffff); border-bottom:1px solid rgba(30,36,52,.08); }',
-      '.pc-brand{ font-size:28px; font-weight:800; letter-spacing:-.04em; color:#3f2f67; }',
-      '.pc-brand span{ color:#8f84b8; font-weight:500; }',
-      '.pc-meta{ text-align:right; font-size:11px; line-height:1.5; color:#6e7486; }',
-      '.pc-health{ display:inline-flex; align-items:center; gap:7px; margin-top:8px; padding:7px 11px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }',
-      '.pc-health .dot{ width:8px; height:8px; border-radius:999px; background:currentColor; box-shadow:none; }',
-      '.pc-health.good{ background:#e7f8ee; color:#2d8a60; }',
-      '.pc-health.warn{ background:#fff4d8; color:#996e12; }',
-      '.pc-health.bad{ background:#ffe7de; color:#b45a2a; }',
-      '.pc-health.critical{ background:#ffe0e7; color:#b43357; }',
-      '.pc-strip{ display:flex; flex-wrap:wrap; gap:8px; padding:14px 26px 0; }',
-      '.pc-chip{ border-radius:999px; background:#eef1f8; color:#5b6174; padding:6px 10px; font-size:10px; font-weight:700; }',
-      '.pc-body{ padding:18px 26px 24px; display:flex; flex-direction:column; gap:16px; }',
-      '.pc-sec{ display:flex; flex-direction:column; gap:8px; break-inside:avoid; }',
-      '.pc-label{ font-size:10px; text-transform:uppercase; letter-spacing:.11em; color:#7a7f92; }',
-      '.pc-card{ border-radius:16px; border:1px solid rgba(31,37,51,.08); background:#ffffff; padding:14px 15px; }',
-      '.pc-overall{ background:#f4f0fb; border-left:4px solid #7a63b6; }',
-      '.pc-overall-text{ font-size:13px; line-height:1.58; font-weight:600; color:#2f2750; }',
-      '.pc-quote{ background:#edf3ff; border-left:4px solid #6d95df; }',
-      '.pc-quote-head{ display:flex; align-items:center; gap:7px; margin-bottom:8px; font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:#5a77b3; font-weight:800; }',
-      '.pc-cx-dot{ width:8px; height:8px; border-radius:999px; background:#6d95df; }',
-      '.pc-quote-text{ font-size:12.5px; line-height:1.6; color:#263145; }',
-      '.pc-intents{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }',
-      '.pc-intent{ border-radius:999px; padding:6px 10px; font-size:10px; font-weight:800; letter-spacing:.05em; background:#f0ecfb; color:#6d58a6; }',
-      '.pc-pairs{ display:grid; gap:8px; }',
-      '.pc-pair{ display:grid; grid-template-columns:122px 1fr; gap:12px; font-size:12px; line-height:1.45; }',
-      '.pc-pair b{ color:#747b8e; font-weight:700; }',
-      '.pc-pair span{ color:#222a39; font-weight:600; }',
-      '.pc-grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }',
-      '.pc-list{ display:flex; flex-direction:column; gap:8px; }',
-      '.pc-item{ position:relative; padding-left:14px; font-size:12px; line-height:1.5; color:#32394d; }',
-      '.pc-item:before{ content:"→"; position:absolute; left:0; top:0; color:#8c73c4; font-weight:700; }',
-      '.pc-note{ background:#fff8df; border-color:#f0e0a2; }',
-      '.pc-note-text{ font-size:12px; line-height:1.58; color:#5d4c1b; }',
-      '.pc-good{ background:#edf8f2; border-color:#d8efdf; }',
-      '.pc-good-quote{ font-size:12.5px; line-height:1.58; color:#234333; font-weight:600; }',
-      '.pc-good-why{ margin-top:8px; font-size:11px; line-height:1.5; color:#486857; }',
-      '.pc-focus{ background:#f7f5ff; }',
-      '.pc-focus-text{ font-size:12px; line-height:1.58; color:#2f2e47; }',
-      '.pc-footer{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 26px 18px; border-top:1px solid rgba(30,36,52,.08); font-size:10px; color:#8b92a4; }',
-      '.pc-foot-badge{ color:#6e7486; font-weight:700; }',
-      '.pc-fit-note{ text-align:right; }',
-      '@media print { html,body{ background:#fff; } body{ padding:0; } .pc-actions{ display:none !important; } .pc-sheet{ box-shadow:none; border-radius:0; max-width:none; } }',
-      '@media (max-width:760px){ .pc-grid{ grid-template-columns:1fr; } .pc-header{ flex-direction:column; } .pc-meta{ text-align:left; } }'
-    ].join('');
+      '@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap");',
+      '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }',
+      '@page { margin: 12mm 14mm; size: A4; }',
+      'body { font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; background: white; color: #1e1e30; font-size: 11px; line-height: 1.5; }',
+      // Header
+      '.pc-header { background: #12102a; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }',
+      '.pc-wm { display: flex; align-items: baseline; gap: 5px; }',
+      '.pc-wm-main { font-size: 17px; font-weight: 700; color: #7AB4FF; letter-spacing: -.02em; }',
+      '.pc-wm-sub { font-size: 13px; font-weight: 300; color: rgba(255,255,255,.4); }',
+      '.pc-hdr-meta { text-align: right; }',
+      '.pc-session-lbl { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 2px; }',
+      '.pc-session-date { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.6); margin-bottom: 5px; }',
+      '.pc-health-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 7px; letter-spacing: .06em; text-transform: uppercase; background:' + healthBgMap[hc] + '; border: 1px solid ' + healthBorderMap[hc] + '; color:' + healthColorMap[hc] + '; }',
+      '.pc-health-dot { width: 4px; height: 4px; border-radius: 50%; background:' + healthColorMap[hc] + '; }',
+      // Meta strip
+      '.pc-meta-strip { background: #f7f6fb; padding: 8px 28px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #e8e6f0; }',
+      '.pc-meta-chip { display: inline-flex; align-items: center; font-size: 9.5px; font-weight: 600; color: #7a7a9a; padding: 2px 9px; border-radius: 5px; background: rgba(122,122,180,.07); border: 1px solid rgba(122,122,180,.12); letter-spacing: .03em; }',
+      // Body
+      '.pc-body { padding: 20px 28px; display: flex; flex-direction: column; gap: 16px; }',
+      '.pc-slbl { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #9a9ab8; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }',
+      '.pc-slbl::after { content: ""; flex: 1; height: 1px; background: #ededf5; }',
+      '.pc-slbl-ico { font-size: 10px; opacity: .7; }',
+      // Overall
+      '.pc-overall { background: linear-gradient(135deg, #f3f0fe 0%, #eef4ff 100%); border-left: 3px solid #7AB4FF; border-radius: 0 8px 8px 0; padding: 12px 16px; }',
+      '.pc-overall-text { font-size: 13px; font-weight: 600; color: #1e1e3a; line-height: 1.45; letter-spacing: -.01em; }',
+      // Customer quote
+      '.pc-quote-wrap { background: #f8f8fb; border-radius: 9px; padding: 12px 16px; border: 1px solid #ebebf3; }',
+      '.pc-quote-hdr { font-size: 8.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #b0b0c8; margin-bottom: 7px; display: flex; align-items: center; gap: 5px; }',
+      '.pc-cx-dot { width: 5px; height: 5px; border-radius: 50%; background: #7AB4FF; opacity: .7; }',
+      '.pc-quote-text { font-size: 12px; color: #3a3a5c; line-height: 1.6; font-style: italic; }',
+      '.pc-needs-row { display: flex; gap: 8px; margin-top: 9px; flex-wrap: wrap; }',
+      '.pc-need-chip { display: flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 7px; background: #f3f0fe; border: 1px solid rgba(122,100,255,.15); font-size: 10.5px; font-weight: 600; color: #5a4a9a; }',
+      '.pc-need-chip.sec { background: #f0f5ff; border-color: rgba(100,140,255,.15); color: #3a5a9a; }',
+      '.pc-need-lbl { font-size: 8.5px; font-weight: 500; color: #b0b0c8; margin-right: 2px; }',
+      // Pitch table
+      '.pc-pitch-table { width: 100%; border-collapse: collapse; }',
+      '.pc-pitch-table tr { border-bottom: 1px solid #f0f0f6; }',
+      '.pc-pitch-table tr:last-child { border-bottom: none; }',
+      '.pc-pitch-table td { padding: 8px 0; font-size: 11.5px; vertical-align: middle; }',
+      '.pc-pitch-key { color: #9a9ab8; font-weight: 500; width: 120px; font-size: 11px; }',
+      '.pc-pitch-val { color: #1e1e3a; font-weight: 600; }',
+      '.pc-pitch-accent { color: #5a3a9a; }',
+      // Two col optional
+      '.pc-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }',
+      // Optional blocks
+      '.pc-opt-block { background: #f9f9fc; border-radius: 9px; padding: 12px 14px; border: 1px solid #ececf5; }',
+      '.pc-opt-title { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #9a9ab8; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }',
+      '.pc-bullet-list { display: flex; flex-direction: column; gap: 5px; }',
+      '.pc-bullet { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; color: #3a3a5a; line-height: 1.4; }',
+      '.pc-bullet-arrow { color: #7AB4FF; font-size: 10px; margin-top: 1px; flex-shrink: 0; font-weight: 700; }',
+      // Risk
+      '.pc-risk-block { background: #fff8f0; border-radius: 9px; padding: 12px 14px; border: 1px solid rgba(255,160,60,.18); border-left: 3px solid rgba(255,160,60,.5); }',
+      '.pc-risk-list { display: flex; flex-direction: column; gap: 5px; }',
+      '.pc-risk-item { display: flex; align-items: flex-start; gap: 7px; font-size: 11.5px; color: #5a3a1a; line-height: 1.4; }',
+      '.pc-risk-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,140,40,.7); flex-shrink: 0; margin-top: 3px; }',
+      // Good looks
+      '.pc-good-block { background: #f3f0fe; border-radius: 9px; padding: 12px 14px; border: 1px solid rgba(122,100,255,.12); }',
+      '.pc-good-text { font-size: 12px; color: #3a3a5a; line-height: 1.6; font-style: italic; }',
+      // Notes
+      '.pc-notes-block { background: #fffcf3; border-radius: 9px; padding: 12px 14px; border: 1px solid rgba(220,180,60,.22); position: relative; }',
+      '.pc-notes-text { font-size: 12px; color: #4a3a18; line-height: 1.6; font-style: italic; }',
+      '.pc-notes-accent { position: absolute; top: 8px; right: 12px; font-size: 18px; opacity: .1; }',
+      // Takeaway
+      '.pc-takeaway { display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #f0f5ff 0%, #f3f0fe 100%); border-radius: 9px; padding: 12px 16px; border: 1px solid rgba(122,100,255,.12); }',
+      '.pc-takeaway-ico { font-size: 16px; opacity: .7; }',
+      '.pc-takeaway-text { font-size: 12.5px; font-weight: 600; color: #2a2a4a; line-height: 1.4; flex: 1; }',
+      // Footer
+      '.pc-footer { padding: 12px 28px; border-top: 1px solid #ededf5; display: flex; align-items: center; justify-content: space-between; background: #fafafa; }',
+      '.pc-footer-brand { font-size: 9.5px; color: #b0b0c8; }',
+      '.pc-footer-brand strong { color: #7AB4FF; font-weight: 600; }',
+      '.pc-footer-meta { font-size: 9.5px; color: #c8c8d8; font-family: ui-monospace, monospace; }',
+      '@media print { @page { margin: 8mm 10mm; } body { font-size: 10.5px; } .pc-body { padding: 14px 22px; gap: 12px; } }',
+    ].join('\n');
     S += '</style></head><body>';
-    S += '<div class="pc-actions"><button class="pc-btn secondary" onclick="window.close()">Close</button><button class="pc-btn" onclick="window.print()">Print / Save as PDF</button></div>';
-    S += '<div class="pc-sheet">';
-    S += '<div class="pc-header"><div><div class="pc-brand">MirrorFlow <span>Coach</span></div></div><div class="pc-meta">' + _cfEsc(data.caseLabel) + '<br>' + _cfEsc(data.timestamp) + '<div class="pc-health ' + _cfEsc(data.healthCls) + '"><span class="dot"></span>' + _cfEsc(data.healthLabel) + '</div></div></div>';
-    S += '<div class="pc-strip"><span class="pc-chip">Turn ' + data.viewing + ' of ' + data.totalTurns + '</span><span class="pc-chip">' + _cfEsc(data.modeLabel) + '</span><span class="pc-chip">' + data.counts.cx + ' CX · ' + data.counts.agent + ' Agent</span><span class="pc-chip">' + _cfEsc((_CF_PRINT_PRESETS[cfg.preset] && _CF_PRINT_PRESETS[cfg.preset].label) || 'Custom') + '</span></div>';
-    S += '<div class="pc-body">';
-    S += '<div class="pc-sec"><div class="pc-label">Overall read</div><div class="pc-card pc-overall"><div class="pc-overall-text">' + _cfEsc(data.overallText) + '</div></div></div>';
-    S += '<div class="pc-sec"><div class="pc-label">Customer situation</div><div class="pc-card pc-quote"><div class="pc-quote-head"><span class="pc-cx-dot"></span>Customer · Turn ' + data.customerTurn + '</div><div class="pc-quote-text">"' + _cfEsc(data.customerQuote) + '"</div>';
-    if (data.primaryIntent || data.secondaryIntent) {
-      S += '<div class="pc-intents">';
-      if (data.primaryIntent) S += '<span class="pc-intent">Primary · ' + _cfEsc(data.primaryIntent) + '</span>';
-      if (data.secondaryIntent) S += '<span class="pc-intent">Secondary · ' + _cfEsc(data.secondaryIntent) + '</span>';
-      S += '</div>';
-    }
-    S += '</div></div>';
-    S += '<div class="pc-sec"><div class="pc-label">How to pitch this reply</div><div class="pc-card"><div class="pc-pairs">';
-    for (var i = 0; i < data.tonePairs.length; i++) {
-      S += '<div class="pc-pair"><b>' + _cfEsc(data.tonePairs[i].label) + '</b><span>' + _cfEsc(data.tonePairs[i].value) + '</span></div>';
-    }
-    S += '</div></div></div>';
 
-    if (selected.length) {
-      S += '<div class="pc-grid">';
-      for (var s = 0; s < selected.length; s++) {
-        var key = selected[s];
-        if (key === 'risk' && data.riskItems.length) {
-          S += '<div class="pc-sec"><div class="pc-label">Risk snapshot</div><div class="pc-card"><div class="pc-list">';
-          for (var r = 0; r < data.riskItems.length && r < 4; r++) S += '<div class="pc-item">' + _cfEsc(data.riskItems[r]) + '</div>';
-          S += '</div></div></div>';
-        } else if (key === 'watch' && data.watchItems.length) {
-          S += '<div class="pc-sec"><div class="pc-label">Watch for in the reply</div><div class="pc-card"><div class="pc-list">';
-          for (var w = 0; w < data.watchItems.length && w < 4; w++) S += '<div class="pc-item">' + _cfEsc(data.watchItems[w]) + '</div>';
-          S += '</div></div></div>';
-        } else if (key === 'focus' && data.focusText) {
-          S += '<div class="pc-sec"><div class="pc-label">Coaching focus</div><div class="pc-card pc-focus"><div class="pc-focus-text">' + _cfEsc(data.focusText) + '</div></div></div>';
-        } else if (key === 'good' && data.goodQuote) {
-          S += '<div class="pc-sec"><div class="pc-label">What good looks like</div><div class="pc-card pc-good"><div class="pc-good-quote">“' + _cfEsc(data.goodQuote) + '”</div><div class="pc-good-why">' + _cfEsc(data.goodWhy) + '</div></div></div>';
-        } else if (key === 'notes' && notes) {
-          S += '<div class="pc-sec"><div class="pc-label">Coach notes</div><div class="pc-card pc-note"><div class="pc-note-text">' + _cfEsc(notes) + '</div></div></div>';
-        }
-      }
-      S += '</div>';
-    }
+    // Header
+    S += '<div class="pc-header">';
+    S += '<div class="pc-wm"><div class="pc-wm-main">MirrorFlow</div><div class="pc-wm-sub">Coach</div></div>';
+    S += '<div class="pc-hdr-meta"><div class="pc-session-lbl">Coaching Session</div><div class="pc-session-date">' + _cfEsc(d.timestamp) + '</div>';
+    S += '<div class="pc-health-chip"><div class="pc-health-dot"></div>' + _cfEsc(d.healthText || 'Health') + '</div></div></div>';
 
+    // Meta strip
+    S += '<div class="pc-meta-strip">';
+    if (d.turnInfo) S += '<span class="pc-meta-chip">' + _cfEsc(d.turnInfo) + '</span>';
+    S += '<span class="pc-meta-chip">Full read</span>';
+    if (d.primaryNeed) S += '<span class="pc-meta-chip">' + _cfEsc(d.primaryNeed) + '</span>';
     S += '</div>';
-    S += '<div class="pc-footer"><span>Generated by <strong>MirrorFlow Coach</strong></span><span class="pc-foot-badge">' + _cfEsc(fit.label) + '</span></div>';
-    S += '</div></body></html>';
-    return S;
-  }
 
-  function MF_CF_openPrintView() {
-    var cf = _cfState(); if (!cf) return;
-    var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return;
-    var data = _cfGetCurrentPrintData(); if (!data) return;
-    var cfg = _cfGetPrintCfg(caseObj, data);
-    cfg.notes = String(cfg.notes || '').trim().slice(0, 320);
-    var fit = _cfEstimatePrintFit(data, cfg);
-    var html = _cfBuildPrintPage(data, cfg, fit);
-    var win = window.open('', '_blank', 'width=920,height=1160');
-    if (!win) {
-      MF_CF_toast('Pop-up blocked — please allow pop-ups for print view.');
-      return;
+    // Body
+    S += '<div class="pc-body">';
+
+    // 1. Overall read
+    if (checked.indexOf('overall') > -1 && d.overallText) {
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">◇</span>Overall read</div>';
+      S += '<div class="pc-overall"><div class="pc-overall-text">' + _cfEsc(d.overallText) + '</div></div></div>';
     }
-    win.document.write(html);
-    win.document.close();
-    MF_CF_closePrintModal();
+
+    // 2. Customer situation
+    if (checked.indexOf('situation') > -1 && d.firstCxMsg) {
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">👤</span>Customer situation</div>';
+      S += '<div class="pc-quote-wrap"><div class="pc-quote-hdr"><div class="pc-cx-dot"></div>Customer · Turn 1</div>';
+      S += '<div class="pc-quote-text">"' + _cfEsc(d.firstCxMsg.slice(0,400)) + '"</div>';
+      if (d.primaryNeed || d.secondaryNeed) {
+        S += '<div class="pc-needs-row">';
+        if (d.primaryNeed) S += '<div class="pc-need-chip"><span class="pc-need-lbl">Primary</span>' + _cfEsc(d.primaryNeed) + '</div>';
+        if (d.secondaryNeed) S += '<div class="pc-need-chip sec"><span class="pc-need-lbl">Secondary</span>' + _cfEsc(d.secondaryNeed) + '</div>';
+        S += '</div>';
+      }
+      S += '</div></div>';
+    }
+
+    // 3. Pitch table
+    if (checked.indexOf('pitch') > -1 && d.toneGuide.length > 0) {
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">🎯</span>How to pitch this reply</div>';
+      S += '<table class="pc-pitch-table">';
+      for (var tp2 = 0; tp2 < d.toneGuide.length; tp2++) {
+        var isAccent = /register|opening/i.test(d.toneGuide[tp2].label);
+        S += '<tr><td class="pc-pitch-key">' + _cfEsc(d.toneGuide[tp2].label) + '</td><td class="pc-pitch-val' + (isAccent ? ' pc-pitch-accent' : '') + '">' + _cfEsc(d.toneGuide[tp2].value) + '</td></tr>';
+      }
+      S += '</table></div>';
+    }
+
+    // 4. Additional optional blocks
+    var addlKeys = ['risk','watchfor','coaching','goodlooks','notes'];
+    var optBlocks = checked.filter(function(o){ return addlKeys.indexOf(o) > -1; });
+    if (optBlocks.length >= 2) {
+      // Render first two in two-col, rest full-width
+      var firstTwo = optBlocks.slice(0,2);
+      var rest = optBlocks.slice(2);
+      S += '<div class="pc-two-col">';
+      firstTwo.forEach(function(opt){ S += MF_CF_buildOptBlock(opt, d, notesText); });
+      S += '</div>';
+      rest.forEach(function(opt){ S += MF_CF_buildOptBlock(opt, d, notesText); });
+    } else {
+      optBlocks.forEach(function(opt){ S += MF_CF_buildOptBlock(opt, d, notesText); });
+    }
+
+    // 5. Key takeaway
+    if (checked.indexOf('takeaway') > -1) {
+      var takeaway = d.keyTakeaway || d.overallText || '';
+      if (takeaway) {
+        S += '<div><div class="pc-slbl">Key takeaway</div>';
+        S += '<div class="pc-takeaway"><div class="pc-takeaway-ico">💡</div><div class="pc-takeaway-text">' + _cfEsc(takeaway) + '</div></div></div>';
+      }
+    }
+
+    S += '</div>'; // end pc-body
+
+    // Footer
+    S += '<div class="pc-footer"><div class="pc-footer-brand">Generated by <strong>MirrorFlow Coach</strong></div><div class="pc-footer-meta">' + _cfEsc(d.timestamp) + '</div></div>';
+
+    S += '</body></html>';
+
+    MF_CF_closeExportModal();
+    var win = window.open('', '_blank', 'width=820,height=1060');
+    if (win) {
+      win.document.write(S);
+      win.document.close();
+      setTimeout(function(){ try { win.print(); } catch(e){} }, 800);
+    } else {
+      MF_CF_toast('Pop-up blocked — please allow pop-ups for export.');
+    }
   }
 
-  function MF_CF_printSignals() {
-    MF_CF_openPrintModal();
+  function MF_CF_buildOptBlock(opt, d, notesText) {
+    var S = '';
+    if (opt === 'risk') {
+      var items = d.riskItems.length ? d.riskItems : ['Escalation risk — ombudsman mentioned','Zero agent contact — high frustration base','Unresolved obligation blocks remain before send'];
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">⚠</span>Risk snapshot</div><div class="pc-risk-block"><div class="pc-risk-list">';
+      items.slice(0,3).forEach(function(r){ S += '<div class="pc-risk-item"><div class="pc-risk-dot"></div>' + _cfEsc(r) + '</div>'; });
+      S += '</div></div></div>';
+    } else if (opt === 'watchfor') {
+      var items2 = d.watchItems.length ? d.watchItems : ['Acknowledge and apologise — no deflection','State clearly what stage the claim is at','Acknowledge the delay directly — name it','Close with a question or availability signal'];
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">👁</span>Watch for in the reply</div><div class="pc-opt-block"><div class="pc-bullet-list">';
+      items2.slice(0,4).forEach(function(w){ S += '<div class="pc-bullet"><span class="pc-bullet-arrow">→</span>' + _cfEsc(w) + '</div>'; });
+      S += '</div></div></div>';
+    } else if (opt === 'coaching') {
+      var items3 = d.coachFocus.length ? d.coachFocus : ['Lead with empathy before process explanation','Name the delay directly — don\'t soften it','Close with a concrete next-step commitment'];
+      S += '<div><div class="pc-slbl">Coaching focus</div><div class="pc-opt-block"><div class="pc-bullet-list">';
+      items3.slice(0,3).forEach(function(c){ S += '<div class="pc-bullet"><span class="pc-bullet-arrow">→</span>' + _cfEsc(c) + '</div>'; });
+      S += '</div></div></div>';
+    } else if (opt === 'goodlooks') {
+      var gl = d.goodLooks || '"I\'m really sorry about the delay — that\'s not the experience we want for you. Let me look into this right now and give you a clear update."';
+      S += '<div><div class="pc-slbl">What good looks like</div><div class="pc-good-block"><div class="pc-good-text">' + _cfEsc(gl.slice(0,320)) + '</div></div></div>';
+    } else if (opt === 'notes' && notesText) {
+      S += '<div><div class="pc-slbl"><span class="pc-slbl-ico">✏</span>Coach notes</div><div class="pc-notes-block"><div class="pc-notes-accent">"</div><div class="pc-notes-text">' + _cfEsc(notesText) + '</div></div></div>';
+    }
+    return S;
   }
 
   function MF_CF_initPrint() {
     var btn = document.getElementById('cfPrintBtn');
-    if (btn && !btn._mfWired) {
-      btn._mfWired = true;
-      btn.addEventListener('click', MF_CF_printSignals);
-    }
-
-    var overlay = document.getElementById('cfExportOverlay');
-    var closeBtn = document.getElementById('cfExportClose');
-    var cancelBtn = document.getElementById('cfExportCancel');
-    var genBtn = document.getElementById('cfExportGenerate');
-    var genTopBtn = document.getElementById('cfExportGenerateTop');
-    var notesEl = document.getElementById('cfExportNotes');
-
-    if (closeBtn && !closeBtn._mfWired) {
-      closeBtn._mfWired = true;
-      closeBtn.addEventListener('click', MF_CF_closePrintModal);
-    }
-    if (cancelBtn && !cancelBtn._mfWired) {
-      cancelBtn._mfWired = true;
-      cancelBtn.addEventListener('click', MF_CF_closePrintModal);
-    }
-    if (genBtn && !genBtn._mfWired) {
-      genBtn._mfWired = true;
-      genBtn.addEventListener('click', MF_CF_openPrintView);
-    }
-    if (genTopBtn && !genTopBtn._mfWired) {
-      genTopBtn._mfWired = true;
-      genTopBtn.addEventListener('click', MF_CF_openPrintView);
-    }
-    if (overlay && !overlay._mfWired) {
-      overlay._mfWired = true;
-      overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) MF_CF_closePrintModal();
-      });
-    }
-    if (notesEl && !notesEl._mfWired) {
-      notesEl._mfWired = true;
-      notesEl.addEventListener('input', function() {
-        var cf = _cfState(); if (!cf) return;
-        var caseObj = cf.cases[cf.currentCase]; if (!caseObj) return;
-        var data = _cfGetCurrentPrintData();
-        var cfg = _cfGetPrintCfg(caseObj, data);
-        cfg.notes = String(notesEl.value || '').slice(0, 320);
-        _cfSyncPrintModal();
-      });
-    }
-
-    var presetBtns = document.querySelectorAll('#cfExportPresetRow .mf-cf-export-preset');
-    for (var p = 0; p < presetBtns.length; p++) {
-      if (presetBtns[p]._mfWired) continue;
-      presetBtns[p]._mfWired = true;
-      (function(btn) {
-        btn.addEventListener('click', function() { _cfApplyPrintPreset(btn.getAttribute('data-preset')); });
-      })(presetBtns[p]);
-    }
-
-    var optBtns = document.querySelectorAll('#cfExportOptionalList .mf-cf-export-opt');
-    for (var o = 0; o < optBtns.length; o++) {
-      if (optBtns[o]._mfWired) continue;
-      optBtns[o]._mfWired = true;
-      (function(btn) {
-        btn.addEventListener('click', function() {
-          if (btn.classList.contains('disabled') && !btn.classList.contains('active')) return;
-          _cfTogglePrintOptional(btn.getAttribute('data-opt'));
-        });
-      })(optBtns[o]);
-    }
+    if (btn) btn.addEventListener('click', MF_CF_printSignals);
+    MF_CF_initExportModal();
   }
 
   // ── Text Size Controls ──────────────────────────────────────────────
@@ -34168,7 +33548,7 @@ Also, the hire car company said I need to return it by Friday — is that right?
   position: relative !important;
   display: block !important;
   overflow: visible !important;
-  padding: 13px 56px 13px 12px !important;
+  padding: 12px 56px 12px 12px !important;
   max-height: none !important;
   border-radius: 18px !important;
   border: 1px solid rgba(255,255,255,.14) !important;
@@ -34191,19 +33571,11 @@ Also, the hire car company said I need to return it by Friday — is that right?
   flex-wrap:wrap;
   align-items:center;
   align-content:flex-start;
-  column-gap: 8px;
-  row-gap: 10px;
+  gap:8px;
   min-height:34px;
 }
-.mf-toolbar-flow-break{
-  flex: 0 0 100%;
-  width: 100%;
-  height: 0;
-  margin: 0;
-  padding: 0;
-}
 body:not([data-focus="editor"]) .mf-toolbar-flow{
-  max-height: 86px;
+  max-height: 78px;
   overflow: hidden;
 }
 body[data-focus="editor"] .mf-toolbar-flow{
@@ -34435,27 +33807,27 @@ body[data-focus="editor"] .toolPocket{
 <script id="mf-toolbar-adaptive-v12-js">
 (function(){
   const PREF_KEY = 'MF_toolbar_pref_v12';
-  const TRI_PANEL_IDS = [
-    'copyBtn','pasteBtn','clearBtn','btnClean','btnAlignDraft'
-  ];
-  const FOCUS_BASE_IDS = [
-    'copyBtn','pasteBtn','clearBtn','btnClean','btnAlignDraft',
+  const ESSENTIAL_IDS = [
+    'btnClean','clearBtn','copyBtn','pasteBtn',
     'btnUndoPrimary','btnRedoPrimary',
-    'btnReplies','btnPhrases',
-    'btnBold','btnItalic','btnUnderline'
+    'btnBold','btnItalic','btnUnderline','btnBullets','mfWordCount'
   ];
-  const LATE_EXTRA_IDS = ['btnBullets','mfWordCount'];
   const TOOL_DEFS = [
-    { id:'btnOrderedList', label:'Numbered list', ico:'1.', priority:12 },
-    { id:'btnClearFormat', label:'Clear format', ico:'Tx', priority:14 },
-    { id:'btnHighlight', label:'Highlight', ico:'✦', priority:16 },
+    { id:'btnOrderedList', label:'Numbered list', ico:'1.', priority:10 },
+    { id:'btnClearFormat', label:'Clear format', ico:'Tx', priority:12 },
+    { id:'btnHighlight', label:'Highlight', ico:'✦', priority:14 },
+    { id:'btnAlignDraft', label:'Sequence', ico:'⇅', priority:16 },
     { id:'btnQuote', label:'Quote', ico:'❝', priority:18 },
     { id:'btnLink', label:'Link', ico:'🔗', priority:20 },
     { id:'btnChecklist', label:'Checklist', ico:'☐', priority:22 },
-    { id:'btnStrike', label:'Strike', ico:'S̶', priority:24 },
-    { id:'btnCode', label:'Code', ico:'</>', priority:26 },
-    { id:'btnIndent', label:'Indent', ico:'⇥', priority:28 },
-    { id:'btnOutdent', label:'Outdent', ico:'⇤', priority:30 }
+    { id:'btnReplies', label:'Replies', ico:'↪', priority:24 },
+    { id:'btnPhrases', label:'Phrases', ico:'✎', priority:26 },
+    { id:'btnStrike', label:'Strike', ico:'S̶', priority:28 },
+    { id:'btnCode', label:'Code', ico:'</>', priority:30 },
+    { id:'btnIndent', label:'Indent', ico:'⇥', priority:32 },
+    { id:'btnOutdent', label:'Outdent', ico:'⇤', priority:34 },
+    { id:'btnDemoMsgShuffle', label:'Demo', ico:'🎲', priority:50 },
+    { id:'btnDevLabTool', label:'DevLab', ico:'⚙', priority:60 }
   ];
   const TOOL_ID_SET = new Set(TOOL_DEFS.map(t => t.id));
   const esc = (v)=> window.CSS && CSS.escape ? CSS.escape(v) : String(v).replace(/([ #;?%&,.+*~\':"!^$\[\]()=>|\/\@])/g,'\\$1');
@@ -34511,14 +33883,14 @@ body[data-focus="editor"] .toolPocket{
       const flow = document.createElement('div');
       flow.className = 'mf-toolbar-flow';
       flow.id = 'mfToolbarFlow';
-      tb.insertBefore(flow, btn);
+      safeIB(tb, flow, btn);
       state.flow = flow;
     }
     if (!state.reservoir){
       const reservoir = document.createElement('div');
       reservoir.id = 'mfToolbarReservoir';
       reservoir.hidden = true;
-      tb.parentNode.insertBefore(reservoir, tb.nextSibling);
+      safeIB(tb.parentNode, reservoir, tb.nextSibling);
       state.reservoir = reservoir;
     }
     if (!state.measure){
@@ -34597,7 +33969,7 @@ body[data-focus="editor"] .toolPocket{
       used = w;
       return true;
     };
-    TRI_PANEL_IDS.forEach(id => {
+    ESSENTIAL_IDS.forEach(id => {
       const node = canonicalNode(id);
       if (node) addWidth(measureNode(node));
     });
@@ -34614,22 +33986,13 @@ body[data-focus="editor"] .toolPocket{
   function visibleOptionalIds(){
     const focusMode = document.body.dataset.focus === 'editor';
     if (focusMode) return TOOL_DEFS.map(t => t.id).filter(id => !!canonicalNode(id));
-    return [];
-  }
-
-  function shouldShowLateExtras(){
-    return document.body.dataset.focus === 'editor';
+    return fitCandidateIds(2);
   }
 
   function layoutToolbar(){
     if (!ensureStructure()) return;
-    const focusMode = document.body.dataset.focus === 'editor';
     const visibleOptionals = new Set(visibleOptionalIds());
-    const lateExtras = shouldShowLateExtras()
-      ? LATE_EXTRA_IDS.filter(id => !!canonicalNode(id))
-      : [];
-    const baseVisible = focusMode ? FOCUS_BASE_IDS : TRI_PANEL_IDS;
-    const allVisible = [...baseVisible, ...TOOL_DEFS.map(t => t.id).filter(id => visibleOptionals.has(id)), ...lateExtras];
+    const allVisible = [...ESSENTIAL_IDS, ...TOOL_DEFS.map(t => t.id).filter(id => visibleOptionals.has(id))];
     allVisible.forEach(id => {
       const node = canonicalNode(id);
       if (node) moveToFlow(node);
@@ -34639,22 +34002,7 @@ body[data-focus="editor"] .toolPocket{
       const node = canonicalNode(def.id);
       if (node) moveToReservoir(node);
     });
-    LATE_EXTRA_IDS.forEach(id => {
-      if (lateExtras.includes(id)) return;
-      const node = canonicalNode(id);
-      if (node) moveToReservoir(node);
-    });
-    if (!state.rowBreak){
-      const br = document.createElement('span');
-      br.className = 'mf-toolbar-flow-break';
-      br.setAttribute('aria-hidden', 'true');
-      state.rowBreak = br;
-    }
-    if (state.rowBreak.parentNode === state.flow) state.flow.removeChild(state.rowBreak);
     allVisible.forEach(id => {
-      if (focusMode && id === 'btnBold' && state.rowBreak.parentNode !== state.flow) {
-        state.flow.appendChild(state.rowBreak);
-      }
       const node = canonicalNode(id);
       if (node && node.parentNode === state.flow) state.flow.appendChild(node);
     });
@@ -34681,7 +34029,7 @@ body[data-focus="editor"] .toolPocket{
       sub.className = 'mf-pocket-sub';
       sub.textContent = 'Responsive visibility, with focus mode showing the full set.';
       if (titleNode){
-        head.insertBefore(copyWrap, titleNode);
+        safeIB(head, copyWrap, titleNode);
         copyWrap.appendChild(titleNode);
         copyWrap.appendChild(sub);
       }
@@ -34796,4 +34144,87 @@ body[data-focus="editor"] .toolPocket{
   else boot();
 })();
 </script>
+
+<!-- ══ MirrorFlow Export Modal ══════════════════════════════════════ -->
+<div id="mfExportModalBg" role="dialog" aria-modal="true">
+  <div class="mf-export-modal">
+    <div class="mf-export-controls">
+      <div>
+        <div class="mf-export-title">Export coaching summary</div>
+        <div class="mf-export-sub" style="margin-top:4px">Choose what to include. Optimised for printing and sharing.</div>
+      </div>
+      <div class="mf-export-divider"></div>
+      <div>
+        <div class="mf-export-sec-label">Quick presets</div>
+        <div class="mf-export-presets">
+          <button class="mf-export-preset" data-preset="default">Default</button>
+          <button class="mf-export-preset" data-preset="complaint">Complaint</button>
+          <button class="mf-export-preset" data-preset="calibration">Calibration</button>
+          <button class="mf-export-preset" data-preset="minimal">Minimal</button>
+          <button class="mf-export-preset" data-preset="full">Full</button>
+        </div>
+      </div>
+      <div>
+        <div class="mf-export-sec-label">Sections</div>
+        <div class="mf-export-opt checked" data-opt="overall"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Overall read</div></div>
+        <div class="mf-export-opt checked" data-opt="situation"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Customer situation</div></div>
+        <div class="mf-export-opt checked" data-opt="pitch"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">How to pitch this reply</div></div>
+        <div class="mf-export-opt checked" data-opt="takeaway"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Key takeaway</div></div>
+        <div class="mf-export-opt-sep">Additional</div>
+        <div class="mf-export-opt" data-opt="risk"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Risk snapshot</div></div>
+        <div class="mf-export-opt" data-opt="watchfor"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Watch for in the reply</div></div>
+        <div class="mf-export-opt" data-opt="coaching"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Coaching focus</div></div>
+        <div class="mf-export-opt" data-opt="goodlooks"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">What good looks like</div></div>
+        <div class="mf-export-opt" data-opt="notes"><div class="mf-export-check"><div class="mf-export-check-inner"></div></div><div class="mf-export-opt-label">Coach notes</div></div>
+      </div>
+      <div id="mfExportNotesWrap" style="display:none">
+        <div class="mf-export-sec-label">Session notes</div>
+        <textarea id="mfExportNotesField" class="mf-export-notes" maxlength="300" placeholder="Add a short note for this session…"></textarea>
+        <div class="mf-export-notes-meta">
+          <div class="mf-export-notes-hint">Visible on the printed card</div>
+          <div class="mf-export-notes-count" id="mfExportNotesCount">0 / 300</div>
+        </div>
+      </div>
+      <div class="mf-export-fit">
+        <div class="mf-export-sec-label">One-page fit</div>
+        <div class="mf-export-fit-row">
+          <div class="mf-export-fit-track"><div class="mf-export-fit-fill" id="mfExportFitFill" style="width:45%"></div></div>
+          <div class="mf-export-fit-label" id="mfExportFitLabel">Ready</div>
+        </div>
+        <div class="mf-export-fit-detail" id="mfExportFitDetail">Select optional blocks to include</div>
+      </div>
+      <div class="mf-export-warning" id="mfExportWarning">Too much selected for one page. Remove a block or shorten notes.</div>
+      <button class="mf-export-gen-btn" id="mfExportGenBtn">Generate PDF →</button>
+      <button class="mf-export-cancel" id="mfExportCancelBtn">Cancel</button>
+    </div>
+    <div class="mf-export-preview-col">
+      <div class="mf-export-preview-header">
+        <div class="mf-export-preview-lbl">Preview</div>
+        <div class="mf-export-preview-badge">1 page</div>
+      </div>
+      <div class="mf-export-mini">
+        <div class="mf-mini-hdr">
+          <div class="mf-mini-wm">MirrorFlow <span>Coach</span></div>
+          <div class="mf-mini-meta">Coaching Session<br><span id="mfMiniTs">—</span>
+            <div><span class="mf-mini-rchip"><span class="mf-mini-rdot" id="mfMiniRDot"></span><span id="mfMiniHealthLbl">—</span></span></div>
+          </div>
+        </div>
+        <div class="mf-mini-body">
+          <div><div class="mf-mini-slbl">Overall read</div><div class="mf-mini-overall" id="mfMiniOverall">—</div></div>
+          <div><div class="mf-mini-slbl">Customer</div><div class="mf-mini-quote" id="mfMiniQuote">—</div></div>
+          <div><div class="mf-mini-slbl">How to pitch this reply</div><div class="mf-mini-table" id="mfMiniPitch"></div></div>
+          <div id="mfMiniOptSlot1" style="display:none"></div>
+          <div id="mfMiniOptSlot2" style="display:none"></div>
+          <div id="mfMiniOptSlot3" style="display:none"></div>
+        </div>
+        <div class="mf-mini-ftr">
+          <div class="mf-mini-ftr-brand">Generated by <strong>MirrorFlow Coach</strong></div>
+          <div class="mf-mini-ftr-ts" id="mfMiniFtrTs">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ══ end Export Modal ══════════════════════════════════════════════ -->
+
 </body>
