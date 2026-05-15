@@ -4,7 +4,8 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MirrorFlow Ping — Shell v6</title>
-<link rel="stylesheet" href="mirrorflow.tokens.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23000000'/%3E%3Cpath d='M6 16c4-5 7-5 10 0 3 5 6 5 10 0' fill='none' stroke='%23bf00ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="../mirrorflow.tokens.css" />
 <style>
 /* =========================================================
    Ping Shell v6 — Pulse rebuild + rail fixes + deeper accent
@@ -221,7 +222,9 @@ body {
 }
 .mf-shell[data-insights="collapsed"] { --mf-rail-insights-w: 0px !important; }
 .mf-shell[data-phone="collapsed"]    { --mf-rail-phone-w: 0px !important; }
+.mf-shell[data-right-panel="phone"][data-phone="open"] { --mf-rail-phone-w: 390px; }
 .mf-shell[data-right-panel="notes"][data-phone="open"] { --mf-rail-phone-w: 340px; }
+.mf-shell[data-right-panel="assist"][data-phone="open"] { --mf-rail-phone-w: 380px; }
 
 /* ================ SIDE DOCKS ================ */
 .mf-side-dock {
@@ -431,11 +434,12 @@ body {
 /* rail open/collapse now lives in the side docks */
 
 .mf-resize-handle {
-  position: absolute; top: 0; right: -3px; width: 6px; height: 100%;
+  position: absolute; top: 0; right: -6px; width: 12px; height: 100%;
   cursor: ew-resize; z-index: 5;
+  touch-action: none;
 }
 .mf-resize-handle::after {
-  content: ""; position: absolute; top: 50%; right: 2px; width: 2px; height: 32px;
+  content: ""; position: absolute; top: 50%; right: 5px; width: 2px; height: 32px;
   background: var(--mf-border-strong); border-radius: 1px;
   transform: translateY(-50%);
   opacity: 0; transition: opacity var(--mf-dur-fast) var(--mf-ease);
@@ -626,6 +630,7 @@ body {
 }
 .mf-rail-phone .mf-phone-stage,
 .mf-rail-phone .mf-notes-stage,
+.mf-rail-phone .mf-assist-stage,
 .mf-rail-phone .mf-rail-phone-head { overflow: hidden; }
 .mf-rail-phone-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -640,10 +645,11 @@ body {
 }
 .mf-shell[data-phone="collapsed"] .mf-phone-stage,
 .mf-shell[data-phone="collapsed"] .mf-notes-stage,
+.mf-shell[data-phone="collapsed"] .mf-assist-stage,
 .mf-shell[data-phone="collapsed"] .mf-rail-phone-title {
   opacity: 0; pointer-events: none;
 }
-.mf-phone-stage, .mf-notes-stage, .mf-rail-phone-title {
+.mf-phone-stage, .mf-notes-stage, .mf-assist-stage, .mf-rail-phone-title {
   transition: opacity var(--mf-dur-base) var(--mf-ease);
 }
 
@@ -989,6 +995,17 @@ body {
   opacity: .70;
   border-style: dashed;
 }
+.bubble.idle {
+  opacity: .88;
+  pointer-events: none;
+  box-shadow: 0 10px 26px rgba(0,0,0,.14);
+}
+.bubble.idle[data-role="idle-agent"] {
+  align-self: flex-end;
+  border-color: var(--phone-agent-stroke, var(--bub-agent-stroke));
+  background: var(--phone-agent-bg, var(--bub-agent));
+  color: var(--phone-agent-text, rgba(255,255,255,0.95));
+}
 .bubble.preview::before {
   content: 'DRAFT';
   display: block;
@@ -1156,11 +1173,15 @@ html[data-theme="linen"] .phone-wrap {
   --phone-chrome-text: rgba(255,248,235,0.92);
   --phone-chrome-muted: rgba(255,248,235,0.64);
   --phone-chat-haze: color-mix(in srgb, var(--mf-accent) 13%, rgba(255,255,255,0.14));
-  --phone-cust-bg: linear-gradient(135deg, var(--mf-accent), var(--mf-accent-2));
-  --phone-cust-stroke: color-mix(in srgb, var(--mf-accent) 74%, #fff8eb);
+  --phone-cust-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--mf-accent) 78%, #5a2f14),
+    color-mix(in srgb, var(--mf-accent-2) 64%, #2f1c0d));
+  --phone-cust-stroke: color-mix(in srgb, var(--mf-accent) 78%, #3a2818);
   --phone-cust-text: #fffaf1;
-  --phone-agent-bg: linear-gradient(135deg, #422b18, #20130a);
-  --phone-agent-stroke: color-mix(in srgb, var(--mf-accent) 46%, #fff0d4);
+  --phone-agent-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--mf-accent) 30%, #3a2412),
+    #1d1209);
+  --phone-agent-stroke: color-mix(in srgb, var(--mf-accent) 64%, #3a2818);
   --phone-agent-text: #fff7ed;
   --phone-time-text: rgba(42,29,16,0.56);
   --phone-field-bg: rgba(255,250,240,0.92);
@@ -1188,12 +1209,14 @@ html[data-theme="paper"] .phone-wrap {
   --phone-chrome-muted: rgba(255,255,250,0.62);
   --phone-chat-haze: color-mix(in srgb, var(--mf-accent) 10%, rgba(255,255,255,0.18));
   --phone-cust-bg: linear-gradient(135deg,
-    color-mix(in srgb, var(--mf-accent) 86%, #ffffff),
-    color-mix(in srgb, var(--mf-accent-2) 74%, #f6f3e4));
-  --phone-cust-stroke: color-mix(in srgb, var(--mf-accent) 58%, #ffffff);
+    color-mix(in srgb, var(--mf-accent) 76%, #1f3144),
+    color-mix(in srgb, var(--mf-accent-2) 62%, #101923));
+  --phone-cust-stroke: color-mix(in srgb, var(--mf-accent) 68%, #273241);
   --phone-cust-text: #ffffff;
-  --phone-agent-bg: linear-gradient(135deg, #1b2430, #0c1118);
-  --phone-agent-stroke: color-mix(in srgb, var(--mf-accent) 42%, #eaf2fb);
+  --phone-agent-bg: linear-gradient(135deg,
+    color-mix(in srgb, var(--mf-accent) 22%, #1b2430),
+    #0a1017);
+  --phone-agent-stroke: color-mix(in srgb, var(--mf-accent) 58%, #273241);
   --phone-agent-text: #f8fafc;
   --phone-time-text: rgba(20,24,31,0.54);
   --phone-field-bg: rgba(255,255,250,0.94);
@@ -1287,6 +1310,271 @@ html[data-theme="paper"] .phone-wrap {
 .send-dot:hover {
   color: #fff;
   filter: brightness(1.08);
+}
+
+/* =========================================================
+   MF PING: MirrorGlass Phone v2
+   Premium phone preview shell
+   ========================================================= */
+.phone-wrap {
+  --mf-phone-base-w: 372;
+  --mf-phone-base-h: 724;
+  --mf-phone-accent: var(--mf-accent);
+  --mf-phone-accent-2: var(--mf-accent-2);
+  --mf-phone-bg:
+    radial-gradient(420px 280px at 18% 0%, color-mix(in srgb, var(--mf-phone-accent) 30%, transparent), transparent 64%),
+    radial-gradient(360px 260px at 96% 104%, color-mix(in srgb, var(--mf-phone-accent-2) 22%, transparent), transparent 68%),
+    linear-gradient(160deg, var(--phone-screen-a) 0%, var(--phone-screen-b) 47%, var(--phone-screen-c) 100%);
+  --mf-phone-glow: color-mix(in srgb, var(--mf-phone-accent) 34%, transparent);
+  --mf-phone-frame: #05070b;
+  --mf-phone-glass: rgba(255,255,255,0.075);
+  --mf-phone-border: var(--phone-shell-stroke);
+  --mf-phone-bubble-customer: var(--phone-cust-bg);
+  --mf-phone-bubble-agent: var(--phone-agent-bg);
+  --mf-phone-rail-bg:
+    radial-gradient(circle at 84% 0%, color-mix(in srgb, var(--mf-phone-accent) 32%, transparent), transparent 54%),
+    linear-gradient(180deg, color-mix(in srgb, var(--phone-chrome-a) 92%, transparent), color-mix(in srgb, var(--phone-chrome-b) 96%, transparent));
+  --mf-phone-aura-opacity: .64;
+  --mf-phone-underglow-opacity: .56;
+  width: calc(var(--mf-phone-base-w) * 1px * var(--phone-scale));
+  height: calc(var(--mf-phone-base-h) * 1px * var(--phone-scale));
+  filter: none;
+  isolation: isolate;
+  overflow: visible;
+  z-index: 1;
+}
+.mf-rail-phone .mf-phone-stage {
+  overflow: visible;
+}
+html[data-theme="linen"] .phone-wrap,
+html[data-theme="paper"] .phone-wrap {
+  --mf-phone-aura-opacity: .46;
+  --mf-phone-underglow-opacity: .42;
+}
+.phone-wrap::before,
+.phone-wrap::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  pointer-events: none;
+}
+.phone-wrap::before {
+  top: 49%;
+  z-index: -2;
+  width: 126%;
+  height: 104%;
+  transform: translate(-50%, -50%);
+  border-radius: 52% / 48%;
+  background:
+    radial-gradient(ellipse at 50% 52%,
+      color-mix(in srgb, var(--mf-phone-accent) 25%, transparent) 0%,
+      color-mix(in srgb, var(--mf-phone-accent-2) 13%, transparent) 36%,
+      transparent 72%);
+  filter: blur(34px);
+  opacity: var(--mf-phone-aura-opacity);
+}
+.phone-wrap::after {
+  bottom: -74px;
+  z-index: -1;
+  width: 112%;
+  height: 30%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center,
+      color-mix(in srgb, var(--mf-phone-accent) 30%, transparent) 0%,
+      color-mix(in srgb, var(--mf-phone-accent-2) 14%, transparent) 38%,
+      transparent 74%);
+  filter: blur(30px);
+  opacity: var(--mf-phone-underglow-opacity);
+}
+.phone-inner {
+  width: calc(var(--mf-phone-base-w) * 1px);
+  height: calc(var(--mf-phone-base-h) * 1px);
+  grid-template-rows: 40px 62px minmax(0, 1fr) 78px;
+  border-radius: 44px;
+  background: var(--mf-phone-bg);
+  box-shadow:
+    0 0 0 8px var(--mf-phone-frame),
+    0 0 0 9px var(--mf-phone-border),
+    inset 0 0 0 1px rgba(255,255,255,.12),
+    inset 0 0 28px rgba(255,255,255,.045),
+    0 22px 38px var(--phone-shell-shadow),
+    0 0 30px color-mix(in srgb, var(--mf-phone-accent) 20%, transparent);
+}
+.phone-inner::before {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.16), transparent 30%),
+    linear-gradient(112deg, rgba(255,255,255,.18) 0%, transparent 16%, transparent 68%, rgba(255,255,255,.08) 100%),
+    radial-gradient(circle at 1px 1px, var(--phone-mesh-a) 1px, transparent 1.4px),
+    linear-gradient(120deg, var(--phone-mesh-b) 1px, transparent 1px);
+  background-size: auto, auto, 18px 18px, 34px 34px;
+  mix-blend-mode: screen;
+  opacity: calc(var(--phone-mesh-opacity) + .08);
+}
+.phone-inner::after {
+  border-radius: 44px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    inset 0 -22px 38px rgba(0,0,0,.28);
+}
+.phone-notch {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 72px;
+  height: 5px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(0,0,0,.58), rgba(255,255,255,.05));
+  box-shadow: inset 0 1px 1px rgba(255,255,255,.08), 0 1px 5px rgba(0,0,0,.5);
+  z-index: 6;
+  pointer-events: none;
+}
+.statusbar {
+  padding: 13px 25px 6px;
+  border-bottom: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.72), rgba(0,0,0,.18));
+}
+.status-left { gap: 8px; }
+.phone-time {
+  color: var(--phone-chrome-text);
+  font-weight: 800;
+}
+.status-online {
+  padding: 1px 7px 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--phone-chrome-text) 16%, transparent);
+  border-radius: 999px;
+  background: rgba(0,0,0,.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.chathead {
+  min-height: 62px;
+  padding: 10px 15px;
+  border-top: 1px solid rgba(255,255,255,.035);
+  border-bottom: 1px solid var(--phone-chrome-stroke);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--mf-phone-accent) 18%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--phone-chrome-a) 96%, transparent), color-mix(in srgb, var(--phone-chrome-b) 94%, transparent));
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+}
+.chathead-left { gap: 9px; }
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-color: color-mix(in srgb, var(--mf-phone-accent) 42%, rgba(255,255,255,.16));
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.32), transparent 26%),
+    linear-gradient(135deg, color-mix(in srgb, var(--mf-phone-accent) 92%, #0b1118), color-mix(in srgb, var(--mf-phone-accent-2) 70%, #05070b));
+  color: #fff;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--mf-phone-accent) 32%, transparent);
+}
+.chatmeta .title {
+  color: var(--phone-chrome-text);
+  font-size: calc(13.2px * var(--phone-font-scale));
+  letter-spacing: .01em;
+}
+.chatmeta .sub {
+  color: var(--phone-chrome-muted);
+  font-size: calc(10.6px * var(--phone-font-scale));
+}
+.chathead-right {
+  color: var(--phone-chrome-muted);
+  font: 700 calc(10.5px * var(--phone-font-scale)) var(--mf-font-ui);
+}
+.chat {
+  padding: 14px 14px 12px;
+  gap: 10px;
+  background:
+    linear-gradient(92deg, rgba(255,255,255,.055), transparent 23%, transparent 72%, rgba(255,255,255,.035)),
+    radial-gradient(360px 260px at 72% 4%, var(--phone-chat-haze), transparent 70%),
+    radial-gradient(280px 220px at 4% 98%, color-mix(in srgb, var(--phone-orb-b) 70%, transparent), transparent 74%);
+}
+.bubble {
+  max-width: min(86%, 44ch);
+  padding: 11px 13px;
+  border-radius: 18px 18px 18px 9px;
+  background: var(--mf-phone-bubble-customer);
+  box-shadow:
+    0 12px 22px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+.bubble[data-role="agent"],
+.bubble[data-role="idle-agent"] {
+  border-color: var(--phone-agent-stroke);
+  background: var(--mf-phone-bubble-agent);
+  color: var(--phone-agent-text);
+  border-radius: 18px 18px 9px 18px;
+  padding: 12px 14px;
+  line-height: 1.42;
+  box-shadow:
+    0 14px 26px rgba(0,0,0,.30),
+    0 0 22px color-mix(in srgb, var(--mf-phone-accent) 18%, transparent),
+    inset 0 1px 0 rgba(255,255,255,.13);
+}
+.bubble.preview {
+  opacity: .88;
+  border-style: solid;
+}
+.bubble.preview::before {
+  color: color-mix(in srgb, var(--mf-phone-accent) 78%, #fff);
+}
+.bubble.idle {
+  opacity: .92;
+}
+.phone-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 42px;
+  align-items: end;
+  gap: 9px;
+  padding: 9px 10px 11px;
+  background: var(--mf-phone-rail-bg);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.mf-phone-input-stack {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+.mf-phone-coach-tip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 3px;
+  color: var(--phone-chrome-muted);
+  font: 700 9.5px var(--mf-font-ui);
+}
+.phone-input-field {
+  min-height: 36px;
+  max-height: 86px;
+  border-radius: 18px;
+  padding: 8px 13px;
+  background: color-mix(in srgb, var(--phone-field-bg) 92%, rgba(0,0,0,.18));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 8px 18px rgba(0,0,0,.18);
+}
+.send-dot {
+  width: 42px;
+  height: 42px;
+  align-self: end;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 0 18px color-mix(in srgb, var(--mf-phone-accent) 28%, transparent);
+}
+.send-dot:hover,
+.send-dot:focus-visible {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.16),
+    0 0 22px color-mix(in srgb, var(--mf-phone-accent) 46%, transparent),
+    0 0 44px color-mix(in srgb, var(--mf-phone-accent-2) 24%, transparent);
+}
+@media (max-width: 1500px) {
+  .mf-shell[data-right-panel="phone"][data-phone="open"] { --mf-rail-phone-w: 360px; }
+}
+@media (max-width: 1280px) {
+  .mf-shell[data-right-panel="phone"][data-phone="open"] { --mf-rail-phone-w: 320px; }
 }
 
 /* ================ RESPONSIVE BREAKPOINTS ================ */
@@ -1951,17 +2239,50 @@ html[data-theme="paper"] .phone-wrap {
 /* right rail assist stage */
 .mf-assist-stage {
   flex: 1; min-height: 0; display: none;
-  flex-direction: column; gap: 0;
-  overflow-y: auto; padding: 8px 0 2px;
+  flex-direction: column; gap: 10px;
+  overflow-y: auto; padding: 10px 16px 16px;
 }
 .mf-shell[data-right-panel="assist"] .mf-phone-stage,
 .mf-shell[data-right-panel="assist"] .mf-notes-stage { display: none; }
 .mf-shell[data-right-panel="assist"] .mf-assist-stage { display: flex; }
 
+/* recommendation strip (left rail summary) */
+.mf-assist-rec {
+  margin-top: 12px; padding: 8px 10px;
+  border-left: 2px solid var(--mf-accent-soft);
+  background: var(--mf-bg-surface); border-radius: 0 var(--mf-r-sm) var(--mf-r-sm) 0;
+  font: 500 11px/1.5 var(--mf-font-ui); color: var(--mf-ink-3);
+  flex: 0 0 auto;
+}
+.mf-assist-rec:empty { display: none; }
+
+/* clear-ignored button (right rail suggestions header) */
+.mf-assist-clear-btn {
+  height: 22px; padding: 0 8px;
+  border: 1px solid var(--mf-border); border-radius: var(--mf-r-pill);
+  background: transparent; color: var(--mf-ink-3);
+  font: 700 9px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: border-color var(--mf-dur-fast) var(--mf-ease), color var(--mf-dur-fast) var(--mf-ease);
+}
+.mf-assist-clear-btn:hover { border-color: var(--mf-accent); color: var(--mf-accent); }
+
+/* issue count dot on dock button */
+.mf-assist-count {
+  display: none; position: absolute; top: 6px; right: 6px;
+  min-width: 14px; height: 14px; padding: 0 3px;
+  background: var(--mf-accent); color: var(--mf-bg-canvas);
+  border-radius: var(--mf-r-pill); font: 800 8px var(--mf-font-mono);
+  line-height: 14px; text-align: center;
+}
+.mf-assist-count.visible { display: block; }
+#tabAssist { position: relative; }
+
 /* assist summary (right rail) */
 .mf-assist-sum-head {
-  display: flex; align-items: baseline; justify-content: space-between;
-  padding: 0 2px 10px; flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px;
+  padding: 0 0 4px; flex: 0 0 auto;
 }
 .mf-assist-sum-eyebrow {
   display: block; color: var(--mf-ink-3);
@@ -2014,10 +2335,10 @@ html[data-theme="paper"] .phone-wrap {
 
 /* assist suggestions (left rail mode panel) */
 .mf-assist-filter-bar {
-  display: flex; gap: 5px; flex-wrap: wrap; padding-bottom: 12px;
+  display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 4px;
 }
 .mf-assist-filter-btn {
-  height: 26px; padding: 0 10px;
+  height: 28px; padding: 0 10px;
   border: 1px solid var(--mf-border); border-radius: var(--mf-r-pill);
   background: var(--mf-bg-input); color: var(--mf-ink-3);
   font: 700 10px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase;
@@ -2036,7 +2357,7 @@ html[data-theme="paper"] .phone-wrap {
 }
 .mf-assist-card {
   border: 1px solid var(--mf-border); border-radius: var(--mf-r-md);
-  background: var(--mf-bg-surface); padding: 10px; margin-bottom: 8px;
+  background: var(--mf-bg-surface); padding: 12px; margin-bottom: 10px;
   position: relative;
   transition: border-color var(--mf-dur-fast) var(--mf-ease),
               box-shadow var(--mf-dur-fast) var(--mf-ease),
@@ -2057,7 +2378,11 @@ html[data-theme="paper"] .phone-wrap {
 }
 .mf-assist-card:hover::before { opacity: .9; }
 .mf-assist-card-head {
-  display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 .mf-assist-badge {
   padding: 2px 7px; border-radius: var(--mf-r-pill);
@@ -2081,13 +2406,19 @@ html[data-theme="paper"] .phone-wrap {
   overflow: hidden; margin-bottom: 8px;
 }
 .mf-assist-before {
-  padding: 5px 8px; font: 600 12px/1.35 var(--mf-font-mono);
+  padding: 7px 9px; font: 600 12px/1.4 var(--mf-font-mono);
   background: rgba(255,92,122,.08); color: #ff5c7a;
   border-bottom: 1px solid var(--mf-border);
+  overflow-wrap: anywhere;
 }
 .mf-assist-after {
-  padding: 5px 8px; font: 600 12px/1.35 var(--mf-font-mono);
+  padding: 7px 9px; font: 600 12px/1.4 var(--mf-font-mono);
   background: var(--mf-accent-soft); color: var(--mf-accent);
+  overflow-wrap: anywhere;
+}
+.mf-assist-before:empty,
+.mf-assist-after:empty {
+  display: none;
 }
 .mf-assist-after.review-only {
   color: var(--mf-ink-3); background: var(--mf-bg-input); font-style: italic;
@@ -2111,13 +2442,267 @@ html[data-theme="paper"] .phone-wrap {
 }
 .mf-assist-act-btn:not(.apply):hover { border-color: var(--mf-accent-soft); color: var(--mf-ink); }
 
+/* === ASSIST SUMMARY ROWS === */
+.mf-assist-rows { margin-top: 14px; flex: 0 0 auto; }
+.mf-assist-row {
+  padding: 6px 0; border-bottom: 1px solid var(--mf-border);
+}
+.mf-assist-row:last-child { border-bottom: none; }
+.mf-assist-row-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 3px;
+}
+.mf-assist-row-title { font: 700 11px var(--mf-font-ui); color: var(--mf-ink-2); }
+.mf-assist-row-note  { font: 400 10px/1.4 var(--mf-font-ui); color: var(--mf-ink-3); }
+.mf-assist-row-meter {
+  height: 3px; background: var(--mf-bg-input); border-radius: var(--mf-r-pill);
+  overflow: hidden; margin-top: 4px;
+}
+.mf-assist-row-fill {
+  display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--mf-accent), var(--mf-accent-2));
+  transition: width .3s var(--mf-ease);
+}
+
+/* === ASSIST COLLAPSIBLE SECTIONS === */
+.mf-assist-section { margin-top: 12px; flex: 0 0 auto; }
+.mf-assist-section-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  padding: 6px 0; border: none; background: transparent; cursor: pointer;
+  font: 700 10px var(--mf-font-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mf-ink-3); border-top: 1px solid var(--mf-border);
+}
+.mf-assist-section-toggle:hover { color: var(--mf-ink-2); }
+.mf-assist-section-toggle svg { transition: transform .2s var(--mf-ease); }
+.mf-assist-section[data-open="true"] .mf-assist-section-toggle svg { transform: rotate(180deg); }
+.mf-assist-section-body { display: none; padding-bottom: 4px; }
+.mf-assist-section[data-open="true"] .mf-assist-section-body { display: block; }
+
+/* === ASSIST DIAGNOSTICS DRAWER === */
+.mf-assist-diagnostics {
+  flex: 0 0 auto;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-r-md);
+  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+  overflow: hidden;
+  margin: 2px 0 10px;
+}
+.mf-assist-diagnostics-toggle {
+  width: 100%;
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  background: transparent;
+  color: var(--mf-ink-2);
+  cursor: pointer;
+  text-align: left;
+}
+.mf-assist-diag-eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  font: 800 8px var(--mf-font-mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--mf-ink-3);
+}
+.mf-assist-diagnostics-toggle strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 800 12px var(--mf-font-ui);
+}
+.mf-assist-diagnostics-toggle svg {
+  width: 14px;
+  height: 14px;
+  color: var(--mf-ink-3);
+  transition: transform .2s var(--mf-ease), color .2s var(--mf-ease);
+}
+.mf-assist-diagnostics-toggle:hover svg { color: var(--mf-accent); }
+.mf-assist-diagnostics[data-open="true"] .mf-assist-diagnostics-toggle svg { transform: rotate(180deg); }
+.mf-assist-diag-pill {
+  min-width: 46px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: var(--mf-r-pill);
+  border: 1px solid var(--mf-border);
+  background: var(--mf-bg-input);
+  color: var(--mf-ink-3);
+  font: 800 9px var(--mf-font-mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.mf-assist-diag-pill[data-state="pass"] {
+  border-color: rgba(71, 255, 184, .45);
+  color: #65ffc6;
+  background: rgba(28, 151, 104, .12);
+}
+.mf-assist-diag-pill[data-state="fail"] {
+  border-color: rgba(255, 95, 130, .55);
+  color: #ff8aa4;
+  background: rgba(255, 61, 110, .12);
+}
+.mf-assist-diag-pill[data-state="warn"] {
+  border-color: rgba(255, 205, 89, .55);
+  color: #ffd57a;
+  background: rgba(255, 190, 76, .12);
+}
+.mf-assist-diagnostics-body {
+  display: none;
+  padding: 0 10px 10px;
+  border-top: 1px solid var(--mf-border);
+}
+.mf-assist-diagnostics[data-open="true"] .mf-assist-diagnostics-body { display: block; }
+.mf-assist-diag-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding-top: 10px;
+}
+.mf-assist-diag-stat {
+  min-width: 0;
+  border: 1px solid var(--mf-border);
+  border-radius: var(--mf-r-sm);
+  background: var(--mf-bg-input);
+  padding: 7px 8px;
+}
+.mf-assist-diag-stat span {
+  display: block;
+  margin-bottom: 3px;
+  font: 800 8px var(--mf-font-mono);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--mf-ink-3);
+}
+.mf-assist-diag-stat strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 800 12px var(--mf-font-ui);
+  color: var(--mf-ink-2);
+}
+.mf-assist-diag-note {
+  margin-top: 8px;
+  color: var(--mf-ink-3);
+  font: 500 10px/1.45 var(--mf-font-ui);
+}
+.mf-assist-diag-failures {
+  display: none;
+  margin-top: 8px;
+  max-height: 94px;
+  overflow: auto;
+  border-top: 1px solid var(--mf-border);
+  padding-top: 6px;
+}
+.mf-assist-diag-failures[data-show="true"] { display: block; }
+.mf-assist-diag-failure {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--mf-border);
+}
+.mf-assist-diag-failure:last-child { border-bottom: 0; }
+.mf-assist-diag-failure strong {
+  display: block;
+  font: 800 10px var(--mf-font-ui);
+  color: var(--mf-ink-2);
+}
+.mf-assist-diag-failure span {
+  display: block;
+  margin-top: 2px;
+  font: 500 9px/1.35 var(--mf-font-mono);
+  color: var(--mf-ink-3);
+}
+.mf-assist-diag-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+/* === RULE CONTROLS === */
+.mf-assist-rule-card {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--mf-border);
+}
+.mf-assist-rule-card:last-child { border-bottom: none; }
+.mf-assist-rule-card[data-disabled="true"] { opacity: .45; }
+.mf-assist-rule-info { flex: 1; min-width: 0; }
+.mf-assist-rule-label { font: 700 11px var(--mf-font-ui); color: var(--mf-ink-2); }
+.mf-assist-rule-meta  { font: 500 9px var(--mf-font-mono); color: var(--mf-ink-3); margin-top: 2px; letter-spacing: .05em; }
+.mf-assist-rule-switch {
+  flex-shrink: 0; width: 28px; height: 16px; border-radius: 8px;
+  background: var(--mf-bg-input); border: 1px solid var(--mf-border);
+  cursor: pointer; position: relative; transition: background .2s, border-color .2s;
+}
+.mf-assist-rule-switch::after {
+  content: ""; position: absolute; top: 2px; left: 2px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--mf-ink-3); transition: left .2s, background .2s;
+}
+.mf-assist-rule-switch[aria-pressed="true"] {
+  background: var(--mf-accent); border-color: var(--mf-accent);
+}
+.mf-assist-rule-switch[aria-pressed="true"]::after {
+  left: 14px; background: #fff;
+}
+
+/* === PROTECTED SPANS LIST === */
+.mf-assist-span-row {
+  display: flex; gap: 8px; align-items: baseline;
+  padding: 4px 0; border-bottom: 1px solid var(--mf-border);
+  font: 400 11px var(--mf-font-ui);
+}
+.mf-assist-span-row:last-child { border-bottom: none; }
+.mf-assist-span-type {
+  font: 700 8px var(--mf-font-mono); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--mf-accent); flex-shrink: 0;
+}
+.mf-assist-span-text { color: var(--mf-ink-3); font-family: var(--mf-font-mono); font-size: 10px; word-break: break-all; }
+
+/* === ASSIST ACTIONS === */
+.mf-assist-actions {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; flex: 0 0 auto;
+  padding-top: 12px; border-top: 1px solid var(--mf-border);
+}
+.mf-assist-action-btn {
+  height: 26px; padding: 0 10px;
+  border: 1px solid var(--mf-border); border-radius: var(--mf-r-pill);
+  background: var(--mf-bg-input); color: var(--mf-ink-3);
+  font: 700 9px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--mf-dur-fast) var(--mf-ease), color var(--mf-dur-fast) var(--mf-ease);
+}
+.mf-assist-action-btn:hover { border-color: var(--mf-accent); color: var(--mf-accent); }
+
+/* === CARD GROUP LABELS (right rail) === */
+.mf-assist-group-label {
+  font: 800 9px var(--mf-font-mono); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--mf-ink-3); padding: 6px 0 5px; border-bottom: 1px solid var(--mf-border);
+  margin: 4px 0 8px;
+}
+.mf-assist-group-label:first-child { padding-top: 0; }
+
+/* card focus state (clicked/active) */
+.mf-assist-card[data-active="true"] {
+  border-color: var(--mf-accent); box-shadow: 0 0 0 1px var(--mf-accent), 0 0 18px var(--mf-glow-1);
+}
+.mf-assist-card[data-active="true"]::before { opacity: .9; }
+
 /* === PHONE RAIL DRAG-RESIZE === */
 .mf-phone-resize {
-  position: absolute; top: 0; left: -3px; width: 6px; height: 100%;
+  position: absolute; top: 0; left: -6px; width: 12px; height: 100%;
   cursor: ew-resize; z-index: 5;
+  touch-action: none;
 }
 .mf-phone-resize::after {
-  content: ""; position: absolute; top: 50%; left: 2px; width: 2px; height: 32px;
+  content: ""; position: absolute; top: 50%; left: 5px; width: 2px; height: 32px;
   background: var(--mf-border-strong); border-radius: 1px;
   transform: translateY(-50%);
   opacity: 0; transition: opacity var(--mf-dur-fast) var(--mf-ease);
@@ -2464,16 +3049,88 @@ html[data-theme="paper"] .phone-wrap {
           <span class="mf-detect-meta" id="mfAssistMetaLabel">Local · offline</span>
         </div>
 
-        <div class="mf-assist-filter-bar" id="mfAssistFilterBar">
-          <button class="mf-assist-filter-btn is-active" data-filter="all">All</button>
-          <button class="mf-assist-filter-btn" data-filter="grammar">Grammar</button>
-          <button class="mf-assist-filter-btn" data-filter="clarity">Clarity</button>
-          <button class="mf-assist-filter-btn" data-filter="tone">Tone</button>
-          <button class="mf-assist-filter-btn" data-filter="policy">Rules</button>
+        <span class="mf-assist-tone-chip" id="mfAssistToneChip" data-risk="Low">—</span>
+
+        <div class="mf-assist-kpis">
+          <div class="mf-assist-kpi">
+            <div class="mf-assist-kpi-label">Issues</div>
+            <div class="mf-assist-kpi-value" id="mfAssistIssues">--</div>
+          </div>
+          <div class="mf-assist-kpi">
+            <div class="mf-assist-kpi-label">Protected</div>
+            <div class="mf-assist-kpi-value" id="mfAssistProtected">--</div>
+          </div>
+          <div class="mf-assist-kpi">
+            <div class="mf-assist-kpi-label">Words</div>
+            <div class="mf-assist-kpi-value" id="mfAssistWords">--</div>
+          </div>
+          <div class="mf-assist-kpi">
+            <div class="mf-assist-kpi-label">Grade</div>
+            <div class="mf-assist-kpi-value" id="mfAssistGrade">--</div>
+          </div>
         </div>
 
-        <div id="mfAssistCardList">
-          <div class="mf-assist-empty">Type a draft to run the writing check.</div>
+        <div id="mfAssistBars">
+          <div class="mf-assist-bar-row">
+            <div class="mf-assist-bar-label">
+              <span class="mf-assist-bar-name">Grammar</span>
+              <span class="mf-assist-bar-val" id="mfBarValGrammar">—</span>
+            </div>
+            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarGrammar" style="width:0%"></span></div>
+          </div>
+          <div class="mf-assist-bar-row">
+            <div class="mf-assist-bar-label">
+              <span class="mf-assist-bar-name">Clarity</span>
+              <span class="mf-assist-bar-val" id="mfBarValClarity">—</span>
+            </div>
+            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarClarity" style="width:0%"></span></div>
+          </div>
+          <div class="mf-assist-bar-row">
+            <div class="mf-assist-bar-label">
+              <span class="mf-assist-bar-name">Tone</span>
+              <span class="mf-assist-bar-val" id="mfBarValTone">—</span>
+            </div>
+            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarTone" style="width:0%"></span></div>
+          </div>
+          <div class="mf-assist-bar-row">
+            <div class="mf-assist-bar-label">
+              <span class="mf-assist-bar-name">Policy</span>
+              <span class="mf-assist-bar-val" id="mfBarValPolicy">—</span>
+            </div>
+            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarPolicy" style="width:0%"></span></div>
+          </div>
+        </div>
+
+        <div class="mf-assist-rec" id="mfAssistRec" aria-live="polite"></div>
+
+        <!-- Summary detail rows -->
+        <div class="mf-assist-rows" id="mfAssistRows"></div>
+
+        <!-- Protected tokens -->
+        <div class="mf-assist-section" id="mfAssistSpansSection" data-open="false">
+          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistSpansSection" type="button">
+            <span id="mfAssistSpansLabel">Protected tokens</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="mf-assist-section-body" id="mfAssistSpansList"></div>
+        </div>
+
+        <!-- Rule controls -->
+        <div class="mf-assist-section" id="mfAssistRulesSection" data-open="false">
+          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistRulesSection" type="button">
+            <span>Rule controls</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="mf-assist-section-body" id="mfAssistRuleList"></div>
+        </div>
+
+        <!-- Actions -->
+        <div class="mf-assist-actions">
+          <button class="mf-assist-action-btn" id="mfAssistExportJson" type="button">Export JSON</button>
+          <button class="mf-assist-action-btn" id="mfAssistExportProfile" type="button">Export profile</button>
+          <button class="mf-assist-action-btn" id="mfAssistImportProfile" type="button">Import profile</button>
+          <button class="mf-assist-action-btn" id="mfAssistResetProfile" type="button">Reset profile</button>
+          <input type="file" id="mfAssistProfileInput" accept=".json" style="display:none">
         </div>
       </div>
     </div>
@@ -2548,6 +3205,7 @@ html[data-theme="paper"] .phone-wrap {
     <div class="mf-phone-stage">
       <div class="phone-wrap" data-shell="clean" id="phoneWrap">
         <div class="phone-inner">
+          <span class="phone-notch" aria-hidden="true"></span>
 
           <div class="statusbar">
             <div class="status-left">
@@ -2563,11 +3221,28 @@ html[data-theme="paper"] .phone-wrap {
             </div>
           </div>
 
+          <div class="chathead" aria-label="Customer support status">
+            <div class="chathead-left">
+              <div class="avatar" aria-hidden="true">CS</div>
+              <div class="chatmeta">
+                <div class="title">Customer Support</div>
+                <div class="sub">Typically replies within an hour</div>
+              </div>
+            </div>
+            <div class="chathead-right">
+              <span class="dotlive" aria-hidden="true"></span>
+              <span id="phoneInteractionCount">Chats: 0</span>
+            </div>
+          </div>
+
           <div class="chat" id="phoneBody"></div>
 
           <div class="phone-input">
-            <textarea id="customerInput" class="phone-input-field" rows="1"
-              placeholder="Type customer message here…"></textarea>
+            <div class="mf-phone-input-stack">
+              <span class="mf-phone-coach-tip">Use the customer's name once - it helps it feel personal.</span>
+              <textarea id="customerInput" class="phone-input-field" rows="1"
+                placeholder="Type customer message here…"></textarea>
+            </div>
             <button class="send-dot" id="phoneSendBtn" type="button" aria-label="Send customer message">
               <svg fill="none" height="16" viewBox="0 0 24 24" width="16">
                 <path d="M3 11.5L21 3l-8.5 18-1.8-7.1L3 11.5z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/>
@@ -2590,61 +3265,62 @@ html[data-theme="paper"] .phone-wrap {
       <div class="mf-notes-list" id="sideNotesList"></div>
     </section>
 
-    <section class="mf-assist-stage" id="assistSummaryPanel" aria-label="Assist summary">
+    <section class="mf-assist-stage" id="assistSummaryPanel" aria-label="Assist suggestions">
       <div class="mf-assist-sum-head">
         <div>
           <span class="mf-assist-sum-eyebrow">Writing check</span>
-          <strong class="mf-assist-sum-title">Assist summary</strong>
+          <strong class="mf-assist-sum-title">Suggestions</strong>
+        </div>
+        <button class="mf-assist-clear-btn" id="mfAssistClearIgnored" type="button" style="display:none" title="Restore ignored issues">Clear ignored</button>
+      </div>
+      <div class="mf-assist-filter-bar" id="mfAssistFilterBar">
+        <button class="mf-assist-filter-btn is-active" data-filter="all">All</button>
+        <button class="mf-assist-filter-btn" data-filter="grammar">Grammar</button>
+        <button class="mf-assist-filter-btn" data-filter="clarity">Clarity</button>
+        <button class="mf-assist-filter-btn" data-filter="tone">Tone</button>
+        <button class="mf-assist-filter-btn" data-filter="policy">Rules</button>
+      </div>
+      <div class="mf-assist-diagnostics" id="mfAssistDiagnostics" data-open="false">
+        <button class="mf-assist-diagnostics-toggle" id="mfAssistDiagnosticsToggle" type="button" aria-expanded="false">
+          <span>
+            <span class="mf-assist-diag-eyebrow">Diagnostics</span>
+            <strong id="mfAssistDiagStatus">Tests pending</strong>
+          </span>
+          <span class="mf-assist-diag-pill" id="mfAssistDiagPill" data-state="warn">--</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="m6 9 6 6 6-6"></path>
+          </svg>
+        </button>
+        <div class="mf-assist-diagnostics-body">
+          <div class="mf-assist-diag-grid">
+            <div class="mf-assist-diag-stat">
+              <span>Tests</span>
+              <strong id="mfAssistDiagTests">--</strong>
+            </div>
+            <div class="mf-assist-diag-stat">
+              <span>Rules</span>
+              <strong id="mfAssistDiagRules">--</strong>
+            </div>
+            <div class="mf-assist-diag-stat">
+              <span>Disabled</span>
+              <strong id="mfAssistDiagDisabled">--</strong>
+            </div>
+            <div class="mf-assist-diag-stat">
+              <span>Profile</span>
+              <strong id="mfAssistDiagProfile">--</strong>
+            </div>
+          </div>
+          <div class="mf-assist-diag-note" id="mfAssistDiagNote">Run tests to verify Assist rule health.</div>
+          <div class="mf-assist-diag-failures" id="mfAssistDiagFailures"></div>
+          <div class="mf-assist-diag-actions">
+            <button class="mf-assist-action-btn" id="mfAssistRunTests" type="button">Run tests</button>
+            <button class="mf-assist-action-btn" id="mfAssistCopyReport" type="button">Copy report</button>
+            <button class="mf-assist-action-btn" id="mfAssistDownloadReport" type="button">Download report</button>
+          </div>
         </div>
       </div>
-      <span class="mf-assist-tone-chip" id="mfAssistToneChip" data-risk="Low">—</span>
-      <div class="mf-assist-kpis">
-        <div class="mf-assist-kpi">
-          <div class="mf-assist-kpi-label">Issues</div>
-          <div class="mf-assist-kpi-value" id="mfAssistIssues">--</div>
-        </div>
-        <div class="mf-assist-kpi">
-          <div class="mf-assist-kpi-label">Protected</div>
-          <div class="mf-assist-kpi-value" id="mfAssistProtected">--</div>
-        </div>
-        <div class="mf-assist-kpi">
-          <div class="mf-assist-kpi-label">Grade</div>
-          <div class="mf-assist-kpi-value" id="mfAssistGrade">--</div>
-        </div>
-        <div class="mf-assist-kpi">
-          <div class="mf-assist-kpi-label">Clarity</div>
-          <div class="mf-assist-kpi-value" id="mfAssistClarity">--</div>
-        </div>
-      </div>
-      <div id="mfAssistBars">
-        <div class="mf-assist-bar-row">
-          <div class="mf-assist-bar-label">
-            <span class="mf-assist-bar-name">Grammar</span>
-            <span class="mf-assist-bar-val" id="mfBarValGrammar">—</span>
-          </div>
-          <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarGrammar" style="width:0%"></span></div>
-        </div>
-        <div class="mf-assist-bar-row">
-          <div class="mf-assist-bar-label">
-            <span class="mf-assist-bar-name">Clarity</span>
-            <span class="mf-assist-bar-val" id="mfBarValClarity">—</span>
-          </div>
-          <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarClarity" style="width:0%"></span></div>
-        </div>
-        <div class="mf-assist-bar-row">
-          <div class="mf-assist-bar-label">
-            <span class="mf-assist-bar-name">Tone</span>
-            <span class="mf-assist-bar-val" id="mfBarValTone">—</span>
-          </div>
-          <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarTone" style="width:0%"></span></div>
-        </div>
-        <div class="mf-assist-bar-row">
-          <div class="mf-assist-bar-label">
-            <span class="mf-assist-bar-name">Policy</span>
-            <span class="mf-assist-bar-val" id="mfBarValPolicy">—</span>
-          </div>
-          <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarPolicy" style="width:0%"></span></div>
-        </div>
+      <div id="mfAssistCardList">
+        <div class="mf-assist-empty">Type a draft to run the writing check.</div>
       </div>
     </section>
 
@@ -2671,11 +3347,12 @@ html[data-theme="paper"] .phone-wrap {
         <span class="mf-dock-state" aria-hidden="true"></span>
         <span class="mf-dock-label">Side Notes</span>
       </button>
-      <button class="mf-dock-btn" id="tabAssist" type="button" data-panel-toggle="assist" aria-pressed="false" title="Open Assist summary">
+      <button class="mf-dock-btn" id="tabAssist" type="button" data-panel-toggle="assist" aria-pressed="false" title="Open Assist suggestions">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 20h9"></path>
           <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
         </svg>
+        <span class="mf-assist-count" id="mfAssistDot" aria-hidden="true"></span>
         <span class="mf-dock-state" aria-hidden="true"></span>
         <span class="mf-dock-label">Assist</span>
       </button>
@@ -2848,7 +3525,7 @@ document.getElementById('tabAssist').addEventListener('click', (e) => {
   if (shell.dataset.rightPanel !== 'assist') {
     shell.dataset.rightPanel = 'assist';
     shell.dataset.phone = 'open';
-    renderPingAssistSummary(mfLastAssist);
+    renderPingAssist();
   } else {
     shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
   }
@@ -2863,7 +3540,7 @@ document.querySelectorAll('[data-mode-toggle]').forEach(btn => {
     syncModeControls();
     syncRailControls();
     renderPingInsights();
-    renderPingAssist();
+    if (btn.dataset.modeToggle === 'assist') renderPingAssist();
     save();
     toast(`${btn.title.replace(' mode', '')} mode`);
   });
@@ -2895,6 +3572,7 @@ document.addEventListener('mouseup', () => {
   if (!dragging) return;
   dragging = false;
   document.body.style.cursor = ''; document.body.style.userSelect = '';
+  save();
 });
 
 /* =========================================================
@@ -2918,6 +3596,11 @@ draftOut.dataset.role = 'agent';
 const draftIn  = document.createElement('div');
 draftIn.className  = 'bubble preview';
 draftIn.dataset.role = 'cust';
+
+const PHONE_IDLE_MSGS = [
+  { role: 'idle-cust',  text: 'Hi, I need help with my claim.' },
+  { role: 'idle-agent', text: 'Hi,\nThanks for reaching out, how can I help?' }
+];
 
 let sideNotes = [
   {
@@ -3009,7 +3692,13 @@ function getDraftPlain() {
   html = html.replace(/<[^>]+>/g, '');
   const tmp = document.createElement('div');
   tmp.innerHTML = html;
-  return tmp.textContent.replace(/\n{3,}/g, '\n\n').trim();
+  return tmp.textContent
+    .replace(/\u00a0/g, ' ')
+    .split('\n')
+    .map(line => line.trim())
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
 /* collapsed text (used for counter/tone calcs) */
@@ -3018,6 +3707,7 @@ function getDraftText() {
 }
 
 function updatePhoneDraft() {
+  clearPhoneIdle();
   const t = getDraftPlain();
   if (t) {
     draftOut.textContent = t.length > 600 ? t.slice(0, 600) + '…' : t;
@@ -3025,10 +3715,12 @@ function updatePhoneDraft() {
     phoneBody.scrollTop = phoneBody.scrollHeight;
   } else {
     draftOut.remove();
+    syncPhoneIdle();
   }
 }
 
 function updateCustomerDraft() {
+  clearPhoneIdle();
   const t = customerEl.value;
   if (t.trim()) {
     draftIn.textContent = t.length > 600 ? t.slice(0, 600) + '…' : t;
@@ -3039,7 +3731,57 @@ function updateCustomerDraft() {
     phoneBody.scrollTop = phoneBody.scrollHeight;
   } else {
     draftIn.remove();
+    syncPhoneIdle();
   }
+}
+
+function clearPhoneIdle() {
+  phoneBody.querySelectorAll('[data-idle="true"]').forEach(el => el.remove());
+}
+
+function hasRealPhoneContent() {
+  return Boolean(phoneBody.querySelector('.bubble:not([data-idle="true"]), .bubble-time:not([data-idle="true"])'));
+}
+
+function shouldShowPhoneIdle() {
+  return !getDraftPlain() && !customerEl.value.trim() && !hasRealPhoneContent();
+}
+
+function renderPhoneIdle() {
+  clearPhoneIdle();
+  PHONE_IDLE_MSGS.forEach(msg => {
+    const el = document.createElement('div');
+    el.className = 'bubble idle';
+    el.dataset.role = msg.role;
+    el.dataset.idle = 'true';
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = msg.text;
+    phoneBody.appendChild(el);
+  });
+  updatePhoneInteractionCount();
+}
+
+function syncPhoneIdle() {
+  if (shouldShowPhoneIdle()) renderPhoneIdle();
+  else clearPhoneIdle();
+  updatePhoneInteractionCount();
+}
+
+function getPersistablePhoneHTML() {
+  const clone = phoneBody.cloneNode(true);
+  clone.querySelectorAll('[data-idle="true"]').forEach(el => el.remove());
+  return clone.innerHTML;
+}
+
+/* =========================================================
+   MF PING: MirrorGlass Phone v2
+   Phone preview metadata
+   ========================================================= */
+function updatePhoneInteractionCount() {
+  const el = document.getElementById('phoneInteractionCount');
+  if (!el) return;
+  const count = phoneBody.querySelectorAll('.bubble:not(.preview):not([data-idle="true"])').length;
+  el.textContent = `Chats: ${count}`;
 }
 
 /* phone-input textarea auto-grow */
@@ -3909,7 +4651,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     { id:"tone.blame.you_failed_to", category:"tone", subtype:"blame", label:"Blame wording", severity:"high", confidence:0.86, pattern:/\byou failed to\b/gi, replacement:"we do not have", message:"Avoid direct blame wording." },
     { id:"tone.escalation.calm_down", category:"tone", subtype:"escalation", label:"Escalating phrase", severity:"high", confidence:0.92, pattern:/\bcalm down\b/gi, replacement:null, message:"This phrase is likely to escalate the conversation." },
     { id:"tone.passive_aggressive.obviously", category:"tone", subtype:"passive_aggressive", label:"Passive-aggressive wording", severity:"medium", confidence:0.76, pattern:/\bobviously\b/gi, replacement:"", message:"This word can read as dismissive." },
-    { id:"tone.command.you_need_to", category:"tone", subtype:"imperative", label:"Hard instruction", severity:"medium", confidence:0.74, pattern:/\byou need to\b/gi, replacement:"please", message:"This can sound like an order. Soften the instruction." },
+    { id:"tone.command.you_need_to", category:"tone", subtype:"imperative", label:"Hard instruction", severity:"medium", confidence:0.74, pattern:/(^|[.!?]\s+)you need to\b/gi, replacement:"$1please", message:"This can sound like an order. Soften the instruction." },
     { id:"tone.dismissive.not_my_problem", category:"tone", subtype:"dismissive", label:"Dismissive wording", severity:"high", confidence:0.94, pattern:/\b(that'?s not my problem|not my problem)\b/gi, replacement:null, message:"This dismisses the customer's issue. Rewrite manually." },
     { id:"tone.accusatory.you_are_wrong", category:"tone", subtype:"accusatory", label:"Accusatory wording", severity:"high", confidence:0.90, pattern:/\byou are wrong\b/gi, replacement:"I can clarify this", message:"Avoid telling the customer they are wrong." },
     { id:"tone.robotic.kindly", category:"tone", subtype:"robotic", label:"Over-formal wording", severity:"low", confidence:0.64, pattern:/\bkindly\b/gi, replacement:"please", message:"This can sound stiff in chat." },
@@ -3953,6 +4695,47 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
 
   const RULE_REGISTRY = REGEX_RULES.concat(STRUCTURAL_RULES);
   const RULE_ID_SET   = new Set(RULE_REGISTRY.map(r => r.id));
+  const RULE_TESTS = [
+    { id: "G-001", ruleId: "grammar.agreement.we_has", input: "We has checked the booking.", expectedReplacement: "we have" },
+    { id: "G-002", ruleId: "grammar.article.an_update", input: "There is a update on your account.", expectedReplacement: "there is an update" },
+    { id: "G-003", ruleId: "grammar.agreement.team_responds", input: "The team respond today.", expectedReplacement: "team responds" },
+    { id: "G-004", ruleId: "grammar.capitalization.first_person_i", input: "i can check this now.", expectedReplacement: "I" },
+    { id: "G-005", ruleId: "grammar.duplicate.repeated_word", input: "I am sorry sorry for the delay.", expectedReplacement: "sorry" },
+    { id: "G-006", ruleId: "grammar.spacing.double_space", input: "I can  check this.", expectedReplacement: " " },
+    { id: "G-007", ruleId: "grammar.verb_modal.of_have", input: "You should of received the update.", expectedReplacement: "should have" },
+    { id: "G-008", ruleId: "grammar.confusion.your_welcome", input: "Your welcome.", expectedReplacement: "you're welcome" },
+    { id: "G-009", ruleId: "grammar.confusion.bare_with_me", input: "Please bare with me.", expectedReplacement: "please bear with me" },
+    { id: "G-010", ruleId: "grammar.verb.be_advised", input: "Please be advise that the slot changed.", expectedReplacement: "please be advised" },
+    { id: "G-011", ruleId: "grammar.number.any_questions", input: "Let me know if you have any question.", expectedReplacement: "any questions" },
+    { id: "G-012", ruleId: "grammar.comparative.more_better", input: "This is more better for the customer.", expectedReplacement: "better" },
+    { id: "G-013", ruleId: "grammar.confusion.less_than", input: "This takes less then five minutes.", expectedReplacement: "less than" },
+    { id: "C-001", ruleId: "clarity.specificity.very_soon", input: "This should be resolved very soon.", expectedReplacement: "as soon as I have the update" },
+    { id: "C-002", ruleId: "clarity.wordiness.in_order_to", input: "I need this in order to help.", expectedReplacement: "to" },
+    { id: "C-003", ruleId: "clarity.wordiness.due_to_fact", input: "This changed due to the fact that the slot moved.", expectedReplacement: "because" },
+    { id: "C-004", ruleId: "clarity.wordiness.moment_in_time", input: "At this moment in time, I do not have the file.", expectedReplacement: "now" },
+    { id: "C-005", ruleId: "clarity.wordiness.please_note_that", input: "Please note that the booking is confirmed.", expectedReplacement: "" },
+    { id: "C-006", ruleId: "clarity.phrase.provide_me_with", input: "Please provide me with the reference.", expectedReplacement: "send me" },
+    { id: "C-007", ruleId: "clarity.hedging.just", input: "I just need the reference number.", expectedReplacement: "" },
+    { id: "C-008", ruleId: "clarity.length.long_sentence", input: "I can check the booking now and confirm the slot because the previous appointment was changed by the team and the new time needs to be verified before I send it to you.", expectedReplacement: null },
+    { id: "C-009", ruleId: "clarity.wordiness.in_the_event_that", input: "In the event that this changes, I will update you.", expectedReplacement: "if" },
+    { id: "C-010", ruleId: "clarity.wordiness.with_regards_to", input: "With regards to your booking, I can help.", expectedReplacement: "about" },
+    { id: "C-011", ruleId: "clarity.wordiness.prior_to", input: "Please send this prior to the appointment.", expectedReplacement: "before" },
+    { id: "C-012", ruleId: "clarity.wordiness.at_later_date", input: "We can check this at a later date.", expectedReplacement: "later" },
+    { id: "C-013", ruleId: "clarity.jargon.backend", input: "The backend is still updating.", expectedReplacement: "internal system" },
+    { id: "T-001", ruleId: "tone.robotic.as_per", input: "As per our process, I will update you.", expectedReplacement: "following" },
+    { id: "T-002", ruleId: "tone.defensive.as_you_know", input: "As you know, this was already sent.", expectedReplacement: "to confirm" },
+    { id: "T-003", ruleId: "tone.blame.you_should_have", input: "You should have sent this earlier.", expectedReplacement: "the usual next step is to" },
+    { id: "T-004", ruleId: "tone.blame.you_failed_to", input: "You failed to send the document.", expectedReplacement: "we do not have" },
+    { id: "T-005", ruleId: "tone.escalation.calm_down", input: "Please calm down.", expectedReplacement: null },
+    { id: "T-006", ruleId: "tone.passive_aggressive.obviously", input: "Obviously, this was already handled.", expectedReplacement: "" },
+    { id: "T-007", ruleId: "tone.apology.repeated", input: "Sorry, I am sorry this happened.", expectedReplacement: null },
+    { id: "T-008", ruleId: "tone.command.you_need_to", input: "You need to send the reference.", expectedReplacement: "please" },
+    { id: "T-009", ruleId: "tone.dismissive.not_my_problem", input: "That is not my problem.", expectedReplacement: null },
+    { id: "T-010", ruleId: "tone.accusatory.you_are_wrong", input: "You are wrong about this.", expectedReplacement: "I can clarify this" },
+    { id: "T-011", ruleId: "tone.robotic.kindly", input: "Kindly send the reference.", expectedReplacement: "please" },
+    { id: "T-012", ruleId: "tone.absolute.no_way", input: "No way, that is impossible.", expectedReplacement: null },
+    { id: "P-001", ruleId: "policy.promise.guaranteed_today", input: "The refund is guaranteed today.", expectedReplacement: "will be confirmed once verified" }
+  ];
 
   function isPlainObject(v) { return Boolean(v) && typeof v==="object" && !Array.isArray(v); }
   function safeProfileText(v, fb) { const t=typeof v==="string"?v.trim():""; return t?t.slice(0,120):fb; }
@@ -4125,14 +4908,87 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
       clarity:{ model:clarityScore.model, score:clarityScore.score, quality:clarityScore.quality, level:clarityScore.level, risk:clarityScore.risk, grade, words:wordCount, sentences:sentences.length, avgSentenceLength, longSentences, readability:grade<=9?"Good":grade<=12?"Heavy":"Dense", weights:clarityScore.weights, components:clarityScore.components, recommendations:clarityScore.recommendations }
     };
   }
+  function runRuleTests() {
+    const results = RULE_TESTS.map(test => {
+      if (disabledRuleIds.has(test.ruleId)) {
+        return {
+          id: test.id,
+          ruleId: test.ruleId,
+          passed: false,
+          skipped: true,
+          issuePass: false,
+          replacementPass: false,
+          matched: 0,
+          expectedReplacement: test.expectedReplacement,
+          actualReplacements: []
+        };
+      }
+      const analysis = analyzeText(test.input, { source: "rule_test" });
+      const matches = analysis.issues.filter(issue => issue.ruleId === test.ruleId);
+      const issuePass = matches.length > 0;
+      const replacementPass = test.expectedReplacement === undefined
+        ? true
+        : matches.some(issue => issue.replacement === test.expectedReplacement);
+      return {
+        id: test.id,
+        ruleId: test.ruleId,
+        passed: issuePass && replacementPass,
+        skipped: false,
+        issuePass,
+        replacementPass,
+        matched: matches.length,
+        expectedReplacement: test.expectedReplacement,
+        actualReplacements: matches.map(issue => issue.replacement)
+      };
+    });
+    const activeResults = results.filter(result => !result.skipped);
+    return {
+      schemaVersion: TEST_REPORT_SCHEMA_VERSION,
+      contract: buildContractMetadata(),
+      total: results.length,
+      active: activeResults.length,
+      skipped: results.filter(result => result.skipped).length,
+      passed: activeResults.filter(result => result.passed).length,
+      failed: activeResults.filter(result => !result.passed).length,
+      results
+    };
+  }
 
-  window.MirrorFlowAssistEngine = { analyzeText, contract:buildContractMetadata(), rules:RULE_REGISTRY, buildRuleProfile, validateRuleProfile };
+  window.MirrorFlowAssistEngine = {
+    analyzeText,
+    contract: buildContractMetadata(),
+    rules: RULE_REGISTRY,
+    tests: RULE_TESTS,
+    buildRuleProfile,
+    validateRuleProfile,
+    runRuleTests,
+    isRuleDisabled: (id) => disabledRuleIds.has(id),
+    disableRule: (id) => { if (RULE_ID_SET.has(id)) { disabledRuleIds.add(id); return true; } return false; },
+    enableRule:  (id) => { disabledRuleIds.delete(id); return true; },
+    getDisabledRules: () => Array.from(disabledRuleIds),
+    resetProfile: () => { disabledRuleIds = new Set(); importedRuleProfile = null; profileValidation = null; },
+    importProfile: (profileData) => {
+      const profile = (profileData && profileData.ruleProfile) ? profileData.ruleProfile : profileData;
+      const v = validateRuleProfile(profile);
+      if (v.valid) {
+        importedRuleProfile = { id: v.profileId, name: v.profileName, schemaVersion: v.schemaVersion, importedAt: new Date().toISOString() };
+        disabledRuleIds = new Set(v.acceptedDisabledRuleIds);
+        profileValidation = v;
+      }
+      return v;
+    },
+    exportProfile: () => buildRuleProfile(disabledRuleIds, profileValidation || defaultProfileValidation(), importedRuleProfile)
+  };
 })();
 
 /* ========== ASSIST STATE + RENDER ========== */
 let mfAssistIgnore = new Set();
 let mfAssistFilter = 'all';
 let mfLastAssist   = null;
+let mfAssistDebounce = 0;
+let mfAssistLastTestReport = null;
+
+const SEV_ORDER = { high: 0, medium: 1, low: 2 };
 
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -4141,76 +4997,166 @@ function escAttr(s) {
   return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
 }
 
+function mfAssistIssueCounts(issues) {
+  const active = issues.filter(i => !mfAssistIgnore.has(i.ruleId + ':' + i.excerpt));
+  return {
+    all: active.length,
+    grammar: active.filter(i => i.category === 'grammar').length,
+    clarity: active.filter(i => i.category === 'clarity').length,
+    tone:    active.filter(i => i.category === 'tone').length,
+    policy:  active.filter(i => i.category === 'policy').length
+  };
+}
+
+function updateAssistFilterTabs(counts) {
+  const map = { all: counts.all, grammar: counts.grammar, clarity: counts.clarity, tone: counts.tone, policy: counts.policy };
+  const labels = { all:'All', grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Rules' };
+  document.querySelectorAll('.mf-assist-filter-btn').forEach(btn => {
+    const f = btn.dataset.filter;
+    const n = map[f] ?? 0;
+    btn.textContent = n > 0 ? `${labels[f]} ${n}` : labels[f];
+  });
+}
+
+function updateAssistDotBadge(total) {
+  const dot = document.getElementById('mfAssistDot');
+  if (!dot) return;
+  if (total > 0) {
+    dot.textContent = total > 9 ? '9+' : String(total);
+    dot.classList.add('visible');
+  } else {
+    dot.textContent = '';
+    dot.classList.remove('visible');
+  }
+}
+
 function renderPingAssistSummary(result) {
   const chip       = document.getElementById('mfAssistToneChip');
   const issuesEl   = document.getElementById('mfAssistIssues');
   const protectedEl= document.getElementById('mfAssistProtected');
+  const wordsEl    = document.getElementById('mfAssistWords');
   const gradeEl    = document.getElementById('mfAssistGrade');
-  const clarityEl  = document.getElementById('mfAssistClarity');
+  const recEl      = document.getElementById('mfAssistRec');
+
   if (!result) {
     if (chip) { chip.textContent = '—'; chip.dataset.risk = 'Low'; }
-    ['mfAssistIssues','mfAssistProtected','mfAssistGrade','mfAssistClarity',
+    ['mfAssistIssues','mfAssistProtected','mfAssistWords','mfAssistGrade',
      'mfBarValGrammar','mfBarValClarity','mfBarValTone','mfBarValPolicy'].forEach(id => {
       const el = document.getElementById(id); if (el) el.textContent = '--';
     });
     ['mfBarGrammar','mfBarClarity','mfBarTone','mfBarPolicy'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.width = '0%';
     });
+    if (recEl) recEl.textContent = '';
+    updateAssistDotBadge(0);
     return;
   }
-  const { issues = [], tone = {}, clarity = {}, protectedSpans = [] } = result;
-  const visible = issues.filter(i => !mfAssistIgnore.has(i.ruleId + ':' + i.excerpt));
-  const total   = visible.length;
-  const byCat   = cat => visible.filter(i => i.category === cat).length;
 
+  const { issues = [], tone = {}, clarity = {}, protectedSpans = [] } = result;
+  const counts = mfAssistIssueCounts(issues);
+  const total  = counts.all;
+
+  /* tone chip */
   const risk    = tone.risk    || 'Low';
   const primary = tone.primary || 'Neutral';
   if (chip) { chip.textContent = `${primary} · ${risk} risk`; chip.dataset.risk = risk; }
 
+  /* KPIs */
   if (issuesEl)    issuesEl.textContent    = total;
   if (protectedEl) protectedEl.textContent = protectedSpans.length;
-  if (gradeEl)     gradeEl.textContent     = clarity.grade    != null ? String(clarity.grade)    : '--';
-  if (clarityEl)   clarityEl.textContent   = clarity.quality  || '--';
+  if (wordsEl)     wordsEl.textContent     = clarity.words != null ? clarity.words : '--';
+  if (gradeEl)     gradeEl.textContent     = clarity.grade != null ? `G${clarity.grade}` : '--';
 
-  const pct = (n, max) => Math.min(100, Math.round((n / Math.max(max, 1)) * 100));
-  const gCount = byCat('grammar'), pCount = byCat('policy');
-  const clarScore = clarity.score != null ? Math.round(clarity.score) : 0;
-  const toneScore = tone.score    != null ? Math.round(tone.score)    : 0;
-  const sets = [
-    ['mfBarValGrammar', 'mfBarGrammar', gCount,     pct(gCount, Math.max(total,1))],
-    ['mfBarValClarity', 'mfBarClarity', clarScore+'%', clarScore],
-    ['mfBarValTone',    'mfBarTone',    toneScore+'%', toneScore],
-    ['mfBarValPolicy',  'mfBarPolicy',  pCount,     pct(pCount, Math.max(total,1))]
-  ];
-  sets.forEach(([valId, fillId, label, pctVal]) => {
+  /* bars — all show HEALTH (higher = cleaner/safer) */
+  const grammarHealth = Math.max(0, 100 - counts.grammar * 20);
+  const clarityHealth = clarity.quality != null ? Math.round(clarity.quality) : 0;
+  const toneHealth    = tone.score      != null ? Math.max(0, 100 - Math.round(tone.score)) : 0;
+  const policyHealth  = counts.policy === 0 ? 100 : Math.max(0, 100 - counts.policy * 50);
+
+  const grammarLabel  = counts.grammar === 0 ? 'Clean' : `${counts.grammar} issue${counts.grammar !== 1 ? 's' : ''}`;
+  const clarityLabel  = clarity.level || 'Clear';
+  const toneLabel     = tone.risk    || 'Low';
+  const policyLabel   = counts.policy === 0 ? 'Clear' : `${counts.policy} flag${counts.policy !== 1 ? 's' : ''}`;
+
+  [
+    ['mfBarValGrammar', 'mfBarGrammar', grammarLabel, grammarHealth],
+    ['mfBarValClarity', 'mfBarClarity', clarityLabel, clarityHealth],
+    ['mfBarValTone',    'mfBarTone',    toneLabel,    toneHealth],
+    ['mfBarValPolicy',  'mfBarPolicy',  policyLabel,  policyHealth]
+  ].forEach(([valId, fillId, label, pct]) => {
     const v = document.getElementById(valId); if (v) v.textContent = label;
-    const f = document.getElementById(fillId); if (f) f.style.width = pctVal + '%';
+    const f = document.getElementById(fillId); if (f) f.style.width = pct + '%';
   });
+
+  /* top recommendation */
+  const recs = clarity.recommendations || [];
+  if (recEl) recEl.textContent = recs[0] || '';
+
+  updateAssistDotBadge(total);
+  updateAssistFilterTabs(counts);
 }
 
 function renderPingAssistCards(result) {
-  const list = document.getElementById('mfAssistCardList');
+  const list        = document.getElementById('mfAssistCardList');
+  const clearBtn    = document.getElementById('mfAssistClearIgnored');
   if (!list) return;
+
+  /* show/hide "clear ignored" button */
+  if (clearBtn) clearBtn.style.display = mfAssistIgnore.size > 0 ? 'block' : 'none';
+
   if (!result) {
     list.innerHTML = '<div class="mf-assist-empty">Type a draft to run the writing check.</div>';
     return;
   }
   const { issues = [] } = result;
-  const visible = issues.filter(i => {
-    if (mfAssistIgnore.has(i.ruleId + ':' + i.excerpt)) return false;
-    return mfAssistFilter === 'all' || i.category === mfAssistFilter;
-  });
+
+  /* update filter tab counts (may have changed via ignore) */
+  updateAssistFilterTabs(mfAssistIssueCounts(issues));
+
+  const visible = issues
+    .filter(i => {
+      if (mfAssistIgnore.has(i.ruleId + ':' + i.excerpt)) return false;
+      return mfAssistFilter === 'all' || i.category === mfAssistFilter;
+    })
+    .sort((a, b) => (SEV_ORDER[a.severity] ?? 1) - (SEV_ORDER[b.severity] ?? 1));
+
   if (!visible.length) {
-    const msg = mfAssistFilter === 'all'
-      ? (issues.length ? 'All issues cleared for this draft.' : 'No issues found — looking good.')
-      : `No ${mfAssistFilter} issues.`;
+    const activeCount = issues.filter(i => !mfAssistIgnore.has(i.ruleId + ':' + i.excerpt)).length;
+    const msg = mfAssistFilter !== 'all'
+      ? `No ${mfAssistFilter} issues.`
+      : activeCount === 0 && mfAssistIgnore.size > 0
+        ? 'All issues ignored for this draft.'
+        : 'No issues found — looking good.';
     list.innerHTML = `<div class="mf-assist-empty">${msg}</div>`;
     return;
   }
-  list.innerHTML = visible.map(issue => {
-    const hasR = issue.replacement && issue.replacement !== issue.excerpt;
-    const afterClass = hasR && !issue.applySafe ? ' review-only' : '';
-    return `<div class="mf-assist-card" data-cat="${issue.category}">
+
+  const CAT_ORDER = ['grammar', 'clarity', 'tone', 'policy'];
+  if (mfAssistFilter === 'all') {
+    visible.sort((a, b) => {
+      const catDiff = CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category);
+      if (catDiff !== 0) return catDiff;
+      return (SEV_ORDER[a.severity] ?? 1) - (SEV_ORDER[b.severity] ?? 1);
+    });
+  }
+
+  const catLabels = { grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Policy' };
+  let html = '', currentCat = '';
+
+  visible.forEach(issue => {
+    /* group header when showing all */
+    if (mfAssistFilter === 'all' && issue.category !== currentCat) {
+      currentCat = issue.category;
+      const groupCount = visible.filter(i => i.category === currentCat).length;
+      html += `<div class="mf-assist-group-label">${catLabels[currentCat] || currentCat} · ${groupCount}</div>`;
+    }
+
+    const hasR     = issue.replacement != null && issue.replacement !== issue.excerpt;
+    const isSafe   = hasR && issue.applySafe;
+    const afterCls = hasR && !issue.applySafe ? ' review-only' : '';
+    const isActive = issue.id === mfActiveIssueId;
+
+    html += `<div class="mf-assist-card" data-cat="${issue.category}" data-issue-id="${escAttr(issue.id)}"${isActive ? ' data-active="true"' : ''}>
       <div class="mf-assist-card-head">
         <span class="mf-assist-badge" data-cat="${issue.category}">${issue.category}</span>
         <span class="mf-assist-sev" data-sev="${issue.severity}">${issue.severity}</span>
@@ -4219,14 +5165,16 @@ function renderPingAssistCards(result) {
       <div style="font:400 12px/1.5 var(--mf-font-ui);color:var(--mf-ink-2);margin-bottom:6px">${escHtml(issue.message)}</div>
       <div class="mf-assist-before-after">
         <div class="mf-assist-before">${escHtml(issue.excerpt)}</div>
-        ${hasR ? `<div class="mf-assist-after${afterClass}">${escHtml(issue.replacement)}</div>` : ''}
+        ${hasR ? `<div class="mf-assist-after${afterCls}">${escHtml(issue.replacement)}</div>` : ''}
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
-        ${hasR && issue.applySafe ? `<button class="mf-assist-act-btn apply" data-action="apply" data-excerpt="${escAttr(issue.excerpt)}" data-replacement="${escAttr(issue.replacement)}">Apply</button>` : ''}
+        ${isSafe ? `<button class="mf-assist-act-btn apply" data-action="apply" data-issue-id="${escAttr(issue.id)}">Apply</button>` : ''}
         <button class="mf-assist-act-btn" data-action="ignore" data-rule-id="${escAttr(issue.ruleId)}" data-excerpt="${escAttr(issue.excerpt)}">Ignore</button>
       </div>
     </div>`;
-  }).join('');
+  });
+
+  list.innerHTML = html;
 }
 
 function renderPingAssist() {
@@ -4234,28 +5182,453 @@ function renderPingAssist() {
   const text = getDraftPlain().trim();
   if (!text) {
     mfLastAssist = null;
+    mfActiveIssueId = null;
     renderPingAssistSummary(null);
     renderPingAssistCards(null);
+    renderPingAssistRows(null);
+    renderPingAssistSpans(null);
+    renderPingAssistRules();
+    renderPingAssistDiagnostics();
     return;
   }
   try {
     mfLastAssist = window.MirrorFlowAssistEngine.analyzeText(text, { context: 'cx' });
     renderPingAssistSummary(mfLastAssist);
     renderPingAssistCards(mfLastAssist);
+    renderPingAssistRows(mfLastAssist);
+    renderPingAssistSpans(mfLastAssist);
+    renderPingAssistRules();
+    renderPingAssistDiagnostics();
   } catch (_) {}
 }
 
+function renderPingAssistDebounced() {
+  clearTimeout(mfAssistDebounce);
+  mfAssistDebounce = setTimeout(renderPingAssist, 350);
+}
+
+function replaceEditorTextMatch(excerpt, replacement) {
+  const needle = String(excerpt || '');
+  if (!needle) return false;
+  const walker = document.createTreeWalker(editorEl, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    const idx = node.nodeValue.indexOf(needle);
+    if (idx < 0) continue;
+    node.nodeValue = node.nodeValue.slice(0, idx) + replacement + node.nodeValue.slice(idx + needle.length);
+    return true;
+  }
+  return false;
+}
+
+function plainToEditorHtml(value) {
+  return String(value || '').split('\n\n')
+    .map(p => `<p>${escHtml(p).replace(/\n/g, '<br>') || '<br>'}</p>`)
+    .join('');
+}
+
 function applyAssistReplacement(excerpt, replacement) {
+  if (replaceEditorTextMatch(excerpt, replacement)) {
+    refreshAll();
+    save();
+    return;
+  }
   const plain = getDraftPlain();
   const idx = plain.indexOf(excerpt);
   if (idx === -1) return;
   const newPlain = plain.slice(0, idx) + replacement + plain.slice(idx + excerpt.length);
-  editorEl.innerHTML = newPlain.split('\n\n')
-    .map(p => `<p>${p.replace(/\n/g, '<br>') || '<br>'}</p>`).join('');
+  editorEl.innerHTML = plainToEditorHtml(newPlain);
   refreshAll();
   save();
 }
 
+/* ---- focus issue: highlight excerpt in editor ---- */
+function buildEditorTextIndex() {
+  const chunks = [];
+  const walker = document.createTreeWalker(editorEl, NodeFilter.SHOW_TEXT);
+  let text = '', node;
+  while ((node = walker.nextNode())) {
+    const start = text.length;
+    text += node.nodeValue;
+    chunks.push({ node, start, end: text.length });
+    const par = node.parentElement;
+    if (par && /^(P|DIV|LI|H[1-6])$/.test(par.tagName)) text += '\n';
+  }
+  return { text, chunks };
+}
+
+function offsetToPoint(index, offset) {
+  const direct = index.chunks.find(c => offset >= c.start && offset <= c.end);
+  if (direct) return { node: direct.node, offset: Math.max(0, Math.min(direct.node.nodeValue.length, offset - direct.start)) };
+  const next = index.chunks.find(c => c.start > offset);
+  if (next) return { node: next.node, offset: 0 };
+  const last = index.chunks[index.chunks.length - 1];
+  return last ? { node: last.node, offset: last.node.nodeValue.length } : null;
+}
+
+let mfActiveIssueId = null;
+
+function focusPingIssue(issueId) {
+  if (!mfLastAssist) return;
+  const issue = mfLastAssist.issues.find(i => i.id === issueId);
+  if (!issue || issue.start == null || issue.end == null) return;
+  mfActiveIssueId = issueId;
+
+  // re-render cards to show active state
+  renderPingAssistCards(mfLastAssist);
+
+  // build text index and select range in editor
+  const index = buildEditorTextIndex();
+  let start = index.text.indexOf(issue.excerpt, Math.max(0, issue.start - 20));
+  if (start < 0) start = index.text.indexOf(issue.excerpt);
+  if (start < 0) start = issue.start;
+  const end = start + String(issue.excerpt || '').length;
+  const startPt = offsetToPoint(index, start);
+  const endPt   = offsetToPoint(index, end);
+  if (!startPt || !endPt) return;
+
+  const range = document.createRange();
+  range.setStart(startPt.node, startPt.offset);
+  range.setEnd(endPt.node, endPt.offset);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  const target = startPt.node.parentElement || editorEl;
+  target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  editorEl.focus({ preventScroll: true });
+}
+
+/* ---- apply using start/end offsets (more reliable than excerpt search) ---- */
+function applyAssistByOffset(issue) {
+  if (replaceEditorTextMatch(issue.excerpt, issue.replacement)) {
+    mfActiveIssueId = null;
+    refreshAll();
+    save();
+    return;
+  }
+  const plain = getDraftPlain();
+  let start = issue.start, end = issue.end;
+  // verify offset region matches excerpt (text may have shifted)
+  if (plain.slice(start, end) !== issue.excerpt) {
+    // fallback: search by excerpt
+    const idx = plain.indexOf(issue.excerpt);
+    if (idx === -1) { toast('Excerpt not found — re-run check'); return; }
+    start = idx; end = idx + issue.excerpt.length;
+  }
+  const newPlain = plain.slice(0, start) + issue.replacement + plain.slice(end);
+  editorEl.innerHTML = plainToEditorHtml(newPlain);
+  mfActiveIssueId = null;
+  refreshAll();
+  save();
+}
+
+/* ---- summary detail rows ---- */
+function mfAssistRowHtml(title, note, pct) {
+  return `<div class="mf-assist-row">
+    <div class="mf-assist-row-head">
+      <span class="mf-assist-row-title">${escHtml(title)}</span>
+    </div>
+    <div class="mf-assist-row-note">${escHtml(note)}</div>
+    ${pct != null ? `<div class="mf-assist-row-meter"><span class="mf-assist-row-fill" style="width:${Math.max(0,Math.min(100,Math.round(pct)))}%"></span></div>` : ''}
+  </div>`;
+}
+
+function renderPingAssistRows(result) {
+  const el = document.getElementById('mfAssistRows');
+  if (!el) return;
+  if (!result) { el.innerHTML = ''; return; }
+  const { issues = [], tone = {}, clarity = {} } = result;
+  const comps = Object.values(clarity.components || {}).sort((a, b) => b.score - a.score);
+  const topComp = comps.find(c => c.score > 0);
+  const grammarCount = issues.filter(i => i.category === 'grammar').length;
+  const toneCount    = issues.filter(i => i.category === 'tone').length;
+  const rows = [
+    mfAssistRowHtml('Reading load',
+      `${clarity.readability || 'Good'} · grade ${clarity.grade ?? '--'} · ${clarity.avgSentenceLength ?? '--'} words/sentence`,
+      Math.min(100, (clarity.grade || 0) * 7)),
+    mfAssistRowHtml('Clarity priority',
+      topComp ? topComp.recommendation : 'No clarity pressure detected.',
+      topComp ? topComp.impact : 0),
+    mfAssistRowHtml('Voice pressure',
+      `${tone.primary || 'Neutral'} · ${tone.risk || 'Low'} send risk · ${tone.apologyCount ?? 0} apolog${tone.apologyCount !== 1 ? 'ies' : 'y'}, ${tone.roboticCount ?? 0} robotic phrase${tone.roboticCount !== 1 ? 's' : ''}`,
+      tone.score ?? 0),
+    mfAssistRowHtml('Grammar signals',
+      `${grammarCount} phrase-level match${grammarCount !== 1 ? 'es' : ''} from ${result.rules?.active?.filter(r => r.category === 'grammar').length ?? 0} active grammar rules`,
+      Math.min(100, grammarCount * 24)),
+    mfAssistRowHtml('Tone signals',
+      `${toneCount} customer-facing voice signal${toneCount !== 1 ? 's' : ''} detected`,
+      tone.score ?? 0)
+  ];
+  el.innerHTML = rows.join('');
+}
+
+/* ---- protected spans list ---- */
+function renderPingAssistSpans(result) {
+  const el   = document.getElementById('mfAssistSpansList');
+  const lbl  = document.getElementById('mfAssistSpansLabel');
+  if (!el) return;
+  const spans = result?.protectedSpans || [];
+  if (lbl) lbl.textContent = `Protected tokens${spans.length ? ' · ' + spans.length : ''}`;
+  if (!spans.length) {
+    el.innerHTML = '<div class="mf-assist-empty" style="padding:8px 0">No protected tokens detected.</div>';
+    return;
+  }
+  el.innerHTML = spans.map(s =>
+    `<div class="mf-assist-span-row">
+      <span class="mf-assist-span-type">${escHtml(s.type)}</span>
+      <span class="mf-assist-span-text">${escHtml(s.text)}</span>
+    </div>`
+  ).join('');
+}
+
+/* ---- rule controls ---- */
+function renderPingAssistRules() {
+  const el = document.getElementById('mfAssistRuleList');
+  if (!el || typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const eng = window.MirrorFlowAssistEngine;
+  el.innerHTML = eng.rules.map(rule => {
+    const disabled = eng.isRuleDisabled(rule.id);
+    const catLabel = { grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Policy' }[rule.category] || rule.category;
+    return `<div class="mf-assist-rule-card" data-disabled="${disabled}">
+      <div class="mf-assist-rule-info">
+        <div class="mf-assist-rule-label">${escHtml(rule.label)}</div>
+        <div class="mf-assist-rule-meta">${catLabel} · ${rule.severity} · ${Math.round((rule.confidence || 0) * 100)}%</div>
+      </div>
+      <button class="mf-assist-rule-switch" type="button"
+        data-rule-toggle="${escAttr(rule.id)}"
+        aria-pressed="${!disabled}"
+        title="${disabled ? 'Enable' : 'Disable'} rule"></button>
+    </div>`;
+  }).join('');
+}
+
+function mfAssistSetText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function mfAssistBuildDiagnosticsPayload() {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return null;
+  const eng = window.MirrorFlowAssistEngine;
+  mfAssistLastTestReport = mfAssistLastTestReport || eng.runRuleTests();
+  return {
+    app: 'MirrorFlow Ping',
+    exportedAt: new Date().toISOString(),
+    contract: eng.contract,
+    ruleProfile: eng.exportProfile(),
+    testReport: mfAssistLastTestReport
+  };
+}
+
+function renderPingAssistDiagnostics(report) {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const eng = window.MirrorFlowAssistEngine;
+  const box = document.getElementById('mfAssistDiagnostics');
+  if (!box) return;
+  const r = report || mfAssistLastTestReport || eng.runRuleTests();
+  mfAssistLastTestReport = r;
+  const profile = eng.exportProfile();
+  const validation = profile.validation || {};
+  const disabledCount = Array.isArray(profile.disabledRuleIds) ? profile.disabledRuleIds.length : 0;
+  const activeRuleCount = Array.isArray(profile.activeRuleIds) ? profile.activeRuleIds.length : Math.max(0, eng.rules.length - disabledCount);
+  const warnings = Array.isArray(validation.warnings) ? validation.warnings : [];
+  const failures = (r.results || []).filter(result => !result.skipped && !result.passed);
+  const profileState = profile.valid === false ? 'invalid' : (validation.status || 'valid');
+  const uiState = failures.length ? 'fail' : profileState === 'warning' ? 'warn' : profileState === 'invalid' ? 'fail' : 'pass';
+
+  mfAssistSetText('mfAssistDiagStatus', failures.length ? 'Rule tests failing' : profileState === 'warning' ? 'Profile warnings' : 'Rule tests passing');
+  mfAssistSetText('mfAssistDiagPill', failures.length ? `${failures.length} fail` : uiState === 'warn' ? 'Warn' : 'Pass');
+  mfAssistSetText('mfAssistDiagTests', `${r.passed || 0}/${r.active || 0}`);
+  mfAssistSetText('mfAssistDiagRules', `${activeRuleCount}/${eng.rules.length}`);
+  mfAssistSetText('mfAssistDiagDisabled', String(disabledCount));
+  mfAssistSetText('mfAssistDiagProfile', profileState === 'warning' ? 'Warn' : profileState === 'invalid' ? 'Invalid' : 'Valid');
+
+  const pill = document.getElementById('mfAssistDiagPill');
+  if (pill) pill.dataset.state = uiState;
+
+  const note = document.getElementById('mfAssistDiagNote');
+  if (note) {
+    const skipped = r.skipped || 0;
+    if (failures.length) {
+      note.textContent = `${failures.length} active test${failures.length === 1 ? '' : 's'} failing. ${skipped} skipped by disabled rules.`;
+    } else if (warnings.length) {
+      note.textContent = `${r.passed || 0} active tests passing. Profile has ${warnings.length} warning${warnings.length === 1 ? '' : 's'}.`;
+    } else {
+      note.textContent = `${r.passed || 0} active tests passing. ${skipped} skipped by disabled rules.`;
+    }
+  }
+
+  const failBox = document.getElementById('mfAssistDiagFailures');
+  if (failBox) {
+    const rows = failures.length ? failures.slice(0, 4) : warnings.slice(0, 4).map((warning, idx) => ({
+      id: `W-${idx + 1}`,
+      ruleId: 'profile.warning',
+      detail: warning
+    }));
+    failBox.dataset.show = rows.length ? 'true' : 'false';
+    failBox.innerHTML = rows.map(row => {
+      const detail = row.detail || `matched ${row.matched || 0}; expected ${row.expectedReplacement == null ? 'issue' : row.expectedReplacement}`;
+      return `<div class="mf-assist-diag-failure">
+        <strong>${escHtml(row.id)} · ${escHtml(row.ruleId)}</strong>
+        <span>${escHtml(detail)}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function mfAssistInvalidateDiagnostics() {
+  mfAssistLastTestReport = null;
+  renderPingAssistDiagnostics();
+}
+
+function mfAssistRunTests() {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  mfAssistLastTestReport = window.MirrorFlowAssistEngine.runRuleTests();
+  renderPingAssistDiagnostics(mfAssistLastTestReport);
+  toast(mfAssistLastTestReport.failed ? 'Rule tests failing' : 'Rule tests passing');
+}
+
+async function mfAssistCopyDiagnosticsReport() {
+  const payload = mfAssistBuildDiagnosticsPayload();
+  if (!payload || !navigator.clipboard?.writeText) { toast('Copy failed - clipboard blocked'); return; }
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+    toast('Diagnostics copied');
+  } catch (_) {
+    toast('Copy failed - clipboard blocked');
+  }
+}
+
+function mfAssistDownloadDiagnosticsReport() {
+  const payload = mfAssistBuildDiagnosticsPayload();
+  if (!payload) return;
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mirrorflow-ping-assist-diagnostics.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 300);
+  toast('Diagnostics exported');
+}
+
+/* ---- analysis export ---- */
+function mfAssistExportJson() {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const eng = window.MirrorFlowAssistEngine;
+  const text = getDraftPlain();
+  const analysis = mfLastAssist || eng.analyzeText(text, { context: 'cx' });
+  const payload = {
+    app: 'MirrorFlow Ping',
+    exportedAt: new Date().toISOString(),
+    contract: eng.contract,
+    ruleProfile: eng.exportProfile(),
+    text,
+    analysis
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mirrorflow-assist-analysis.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 300);
+  toast('Analysis exported');
+}
+
+function mfAssistExportProfile() {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const payload = {
+    app: 'MirrorFlow Ping', exportedAt: new Date().toISOString(),
+    contract: window.MirrorFlowAssistEngine.contract,
+    ruleProfile: window.MirrorFlowAssistEngine.exportProfile()
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'mirrorflow-assist-rule-profile.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 300);
+  toast('Profile exported');
+}
+
+function mfAssistImportProfile(file) {
+  if (!file || typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(String(reader.result || '{}'));
+      const v = window.MirrorFlowAssistEngine.importProfile(data);
+      if (!v.valid) { toast('Invalid profile — ' + (v.errors[0] || 'unknown error')); return; }
+      mfAssistLastTestReport = null;
+      renderPingAssistRules();
+      renderPingAssist();
+      save();
+      toast(v.status === 'warning' ? 'Profile loaded with warnings' : 'Rule profile loaded');
+    } catch (_) { toast('Invalid profile JSON'); }
+  };
+  reader.readAsText(file);
+}
+
+function mfAssistResetProfile() {
+  if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  window.MirrorFlowAssistEngine.resetProfile();
+  mfAssistLastTestReport = null;
+  renderPingAssistRules();
+  renderPingAssist();
+  save();
+  toast('Profile reset to default');
+}
+
+/* ---- collapsible section toggle ---- */
+document.querySelectorAll('[data-section-toggle]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sec = document.getElementById(btn.dataset.sectionToggle);
+    if (!sec) return;
+    const isOpen = sec.dataset.open === 'true';
+    sec.dataset.open = isOpen ? 'false' : 'true';
+  });
+});
+
+/* ---- rule toggle delegation ---- */
+document.getElementById('mfAssistRuleList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-rule-toggle]');
+  if (!btn || typeof window.MirrorFlowAssistEngine === 'undefined') return;
+  const id = btn.dataset.ruleToggle;
+  const eng = window.MirrorFlowAssistEngine;
+  const wasDisabled = eng.isRuleDisabled(id);
+  if (wasDisabled) eng.enableRule(id); else eng.disableRule(id);
+  mfAssistLastTestReport = null;
+  renderPingAssistRules();
+  renderPingAssist();
+  save();
+  toast(wasDisabled ? 'Rule enabled' : 'Rule disabled');
+});
+
+/* ---- action buttons ---- */
+document.getElementById('mfAssistExportJson').addEventListener('click', mfAssistExportJson);
+document.getElementById('mfAssistExportProfile').addEventListener('click', mfAssistExportProfile);
+document.getElementById('mfAssistResetProfile').addEventListener('click', mfAssistResetProfile);
+document.getElementById('mfAssistImportProfile').addEventListener('click', () =>
+  document.getElementById('mfAssistProfileInput').click());
+document.getElementById('mfAssistProfileInput').addEventListener('change', e => {
+  mfAssistImportProfile(e.target.files && e.target.files[0]);
+  e.target.value = '';
+});
+
+const mfAssistDiagnosticsToggle = document.getElementById('mfAssistDiagnosticsToggle');
+if (mfAssistDiagnosticsToggle) {
+  mfAssistDiagnosticsToggle.addEventListener('click', () => {
+    const box = document.getElementById('mfAssistDiagnostics');
+    if (!box) return;
+    const nextOpen = box.dataset.open !== 'true';
+    box.dataset.open = nextOpen ? 'true' : 'false';
+    mfAssistDiagnosticsToggle.setAttribute('aria-expanded', String(nextOpen));
+  });
+}
+document.getElementById('mfAssistRunTests')?.addEventListener('click', mfAssistRunTests);
+document.getElementById('mfAssistCopyReport')?.addEventListener('click', mfAssistCopyDiagnosticsReport);
+document.getElementById('mfAssistDownloadReport')?.addEventListener('click', mfAssistDownloadDiagnosticsReport);
+
+/* filter bar */
 document.getElementById('mfAssistFilterBar').addEventListener('click', e => {
   const btn = e.target.closest('.mf-assist-filter-btn');
   if (!btn) return;
@@ -4265,36 +5638,73 @@ document.getElementById('mfAssistFilterBar').addEventListener('click', e => {
   renderPingAssistCards(mfLastAssist);
 });
 
+/* card actions + click-to-focus */
 document.getElementById('mfAssistCardList').addEventListener('click', e => {
-  const btn = e.target.closest('[data-action]');
-  if (!btn) return;
-  if (btn.dataset.action === 'apply') {
-    applyAssistReplacement(btn.dataset.excerpt, btn.dataset.replacement);
-    toast('Fix applied');
-  } else if (btn.dataset.action === 'ignore') {
-    mfAssistIgnore.add(btn.dataset.ruleId + ':' + btn.dataset.excerpt);
-    renderPingAssistCards(mfLastAssist);
-    renderPingAssistSummary(mfLastAssist);
-    save();
+  const btn  = e.target.closest('[data-action]');
+  const card = e.target.closest('.mf-assist-card[data-issue-id]');
+
+  if (btn) {
+    if (btn.dataset.action === 'apply') {
+      const issue = mfLastAssist?.issues.find(i => i.id === btn.dataset.issueId);
+      if (issue) {
+        applyAssistByOffset(issue);
+        mfActiveIssueId = null;
+        toast('Fix applied');
+      }
+    } else if (btn.dataset.action === 'ignore') {
+      mfAssistIgnore.add(btn.dataset.ruleId + ':' + btn.dataset.excerpt);
+      if (mfActiveIssueId === card?.dataset.issueId) mfActiveIssueId = null;
+      renderPingAssistCards(mfLastAssist);
+      renderPingAssistSummary(mfLastAssist);
+      save();
+    }
+    return;
   }
+
+  /* click anywhere on card (not a button) → focus in editor */
+  if (card) focusPingIssue(card.dataset.issueId);
+});
+
+/* clear ignored */
+document.getElementById('mfAssistClearIgnored').addEventListener('click', () => {
+  mfAssistIgnore.clear();
+  renderPingAssist();
+  save();
+  toast('Ignored issues restored');
 });
 
 /* ========== PERSISTENCE ========== */
 const KEY = 'mf-ping-state';
+function railWidthValue(value, min, max) {
+  const n = parseInt(String(value || '').replace('px', ''), 10);
+  if (!Number.isFinite(n)) return '';
+  return Math.max(min, Math.min(max, n)) + 'px';
+}
+function getRailWidth(prop) {
+  return shell.style.getPropertyValue(prop).trim();
+}
+function restoreRailWidth(prop, value, min, max) {
+  const px = railWidthValue(value, min, max);
+  if (px) shell.style.setProperty(prop, px);
+}
 function save() {
   try {
     localStorage.setItem(KEY, JSON.stringify({
       theme: html.dataset.theme,
       cursor,
       insights: shell.dataset.insights,
+      insightsWidth: getRailWidth('--mf-rail-insights-w'),
       phone: shell.dataset.phone,
+      phoneWidth: getRailWidth('--mf-rail-phone-w'),
       rightPanel: shell.dataset.rightPanel,
       workspaceMode: shell.dataset.workspaceMode,
       sideNotes,
       draft: editorEl.innerHTML,
       customer: customerEl.value,
-      chatHTML: phoneBody.innerHTML,
-      assistIgnore: Array.from(mfAssistIgnore)
+      chatHTML: getPersistablePhoneHTML(),
+      assistIgnore: Array.from(mfAssistIgnore),
+      assistDisabledRules: typeof window.MirrorFlowAssistEngine !== 'undefined'
+        ? window.MirrorFlowAssistEngine.getDisabledRules() : []
     }));
   } catch (_) {}
 }
@@ -4305,9 +5715,14 @@ function load() {
     if (s.theme && VARIANTS[s.theme]) html.dataset.theme = s.theme;
     if (s.cursor) Object.assign(cursor, s.cursor);
     if (s.insights) shell.dataset.insights = s.insights;
+    restoreRailWidth('--mf-rail-insights-w', s.insightsWidth, 180, 520);
     if (s.phone && s.phone !== 'expanded') shell.dataset.phone = s.phone;
+    restoreRailWidth('--mf-rail-phone-w', s.phoneWidth, 220, 560);
     if (s.rightPanel === 'phone' || s.rightPanel === 'notes' || s.rightPanel === 'assist') shell.dataset.rightPanel = s.rightPanel;
     if (Array.isArray(s.assistIgnore)) mfAssistIgnore = new Set(s.assistIgnore);
+    if (Array.isArray(s.assistDisabledRules) && typeof window.MirrorFlowAssistEngine !== 'undefined') {
+      s.assistDisabledRules.forEach(id => window.MirrorFlowAssistEngine.disableRule(id));
+    }
     if (s.workspaceMode) {
       shell.dataset.workspaceMode =
         s.workspaceMode === 'ping' ? 'insights' :
@@ -4352,9 +5767,11 @@ function toast(msg) {
 /* ========== INPUT WIRING ========== */
 function refreshAll() {
   updatePhoneDraft();
+  updateCustomerDraft();
+  updatePhoneInteractionCount();
   updateCounter();
   renderPingInsights();
-  renderPingAssist();
+  renderPingAssistDebounced();
 }
 editorEl.addEventListener('input', () => {
   lastEdit = Date.now();
@@ -4398,6 +5815,7 @@ function doSend() {
   draftOut.remove(); draftIn.remove();
   mfAssistIgnore.clear();
   mfLastAssist = null;
+  mfActiveIssueId = null;
   lastEdit = Date.now();
   refreshAll();
   save();
@@ -4567,6 +5985,7 @@ popoverEl.addEventListener('click', (e) => {
 
 /* ---------- PHONE BODY RENDER (sample placeholder, no threads) ---------- */
 function appendBubble(m) {
+  clearPhoneIdle();
   let el;
   if (m.who === 'time') {
     el = document.createElement('div');
@@ -4584,6 +6003,7 @@ function appendBubble(m) {
     el.textContent = m.t;
   }
   phoneBody.appendChild(el);
+  updatePhoneInteractionCount();
   return el;
 }
 
@@ -4893,10 +6313,15 @@ function updatePhoneScale() {
   const wrap = document.getElementById('phoneWrap');
   const stage = wrap && wrap.parentElement;
   if (!wrap || !stage) return;
-  const padX = 28, padY = 28;
+  const padX = 12, padY = 22;
   const availW = Math.max(0, stage.clientWidth  - padX);
   const availH = Math.max(0, stage.clientHeight - padY);
-  const baseW = 356, baseH = 720;
+  // Skip zero-dimension updates — happens before layout is flushed on init;
+  // the ResizeObserver fires again once real dimensions are available.
+  if (availW === 0 && availH === 0) return;
+  const style = getComputedStyle(wrap);
+  const baseW = parseFloat(style.getPropertyValue('--mf-phone-base-w')) || 372;
+  const baseH = parseFloat(style.getPropertyValue('--mf-phone-base-h')) || 724;
   const s = Math.max(0.32, Math.min(1, availW / baseW, availH / baseH));
   wrap.style.setProperty('--phone-scale', isFinite(s) ? s : 1);
 }
@@ -4905,19 +6330,30 @@ new ResizeObserver(updatePhoneScale).observe(document.querySelector('.mf-phone-s
 
 /* ========== INIT ========== */
 const _loaded = load();
-applyTheme();
+applyTheme();            // sync: sets CSS vars on bubbles immediately
 syncRailControls();
 syncModeControls();
 renderSideNotes();
-if (!_loaded || !_loaded.chatHTML) renderSample();
+if (!_loaded) renderSample();
 refreshAll();
+renderPingAssistRules();
+renderPingAssistDiagnostics();
+syncPhoneIdle();
 tickMeta();
 autosizeCustomer();
 updatePhoneScale();
 requestAnimationFrame(() => {
+  // Re-apply theme after browser's first layout/style pass — guarantees CSS
+  // custom-property gradients on marble swatches resolve against inline values,
+  // not the class-level defaults that were active before the first paint cycle.
+  applyTheme();
   updatePhoneScale();
   renderPingInsights();
-  requestAnimationFrame(updatePhoneScale);
+  requestAnimationFrame(() => {
+    updatePhoneScale();
+    // Final deferred scale call after all transitions have had one tick to start
+    setTimeout(updatePhoneScale, 0);
+  });
 });
 </script>
 </body>
