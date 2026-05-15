@@ -5,7 +5,286 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MirrorFlow Ping — Shell v6</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23000000'/%3E%3Cpath d='M6 16c4-5 7-5 10 0 3 5 6 5 10 0' fill='none' stroke='%23bf00ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="../mirrorflow.tokens.css" />
+<style id="mf-internal-token-layer">
+/* =========================================================
+   MirrorFlow Internal Token Layer
+   Embedded for standalone offline-first use.
+   Source: ../mirrorflow.tokens.css, with external font import removed.
+   ========================================================= */
+/* =========================================================
+   MirrorFlow Tokens — v3.0
+   Portable design token layer for the MirrorFlow ecosystem
+   (Ping, Sync, Coach, Insight, Labs)
+
+   Architecture (converges with Sync):
+     [data-theme]   = "pulse" | "slate" | "linen" | "paper"
+     [data-variant] = 5 variants per theme (mood/temperature)
+
+   Themes carry mode in their bones \u2014 no separate dark/light toggle.
+   Total: 4 themes \u00d7 5 variants = 20 looks
+   ========================================================= */
+
+:root {
+  --mf-font-ui: Inter, 'Segoe UI', Roboto, Helvetica, Arial, system-ui, -apple-system, sans-serif;
+  --mf-font-mono: 'Cascadia Mono', 'SFMono-Regular', Consolas, 'Liberation Mono', ui-monospace, monospace;
+  --mf-font-brand: Georgia, 'Times New Roman', serif;
+
+  --mf-space-1: 4px;  --mf-space-2: 8px;  --mf-space-3: 12px;
+  --mf-space-4: 16px; --mf-space-5: 20px; --mf-space-6: 24px;
+  --mf-space-8: 32px;
+
+  --mf-r-xs: 6px; --mf-r-sm: 8px; --mf-r-md: 12px;
+  --mf-r-lg: 16px; --mf-r-xl: 22px; --mf-r-pill: 999px;
+
+  --mf-ease: cubic-bezier(.4, 0, .2, 1);
+  --mf-ease-out: cubic-bezier(.16, 1, .3, 1);
+  --mf-dur-fast: 140ms;
+  --mf-dur-base: 220ms;
+  --mf-dur-slow: 320ms;
+
+  --mf-rail-insights-w: 280px;
+  --mf-rail-insights-collapsed: 56px;
+  --mf-rail-phone-w: 320px;
+  --mf-rail-phone-expanded: 420px;
+  --mf-topbar-h: 52px;
+  --mf-toolbar-h: 44px;
+
+  --mf-z-bg: 0; --mf-z-shell: 10;
+  --mf-z-phone: 20; --mf-z-overlay: 100;
+
+  /* status colours */
+  --mf-ok: #22c55e;
+  --mf-warn: #f59e0b;
+  --mf-err: #ef4444;
+  --mf-info: #3b82f6;
+}
+
+/* =========================================================
+   THEME BASES \u2014 each carries its own mode (dark/light)
+   ========================================================= */
+
+/* ============ PULSE (jet black, neon accents) ============ */
+[data-theme="pulse"] {
+  --mf-mode: dark;
+  --mf-bg-canvas: #000000;
+  --mf-bg-rail: #070707;
+  --mf-bg-surface: #0e0e10;
+  --mf-bg-elevated: #16161a;
+  --mf-bg-input: #050505;
+  --mf-bg-hover: rgba(255,255,255,0.04);
+  --mf-bg-active: rgba(255,255,255,0.08);
+
+  --mf-border: rgba(255,255,255,0.06);
+  --mf-border-strong: rgba(255,255,255,0.16);
+  --mf-divider: rgba(255,255,255,0.04);
+
+  --mf-ink: #ffffff;
+  --mf-ink-2: #b8b8c0;
+  --mf-ink-3: #6a6a72;
+  --mf-ink-4: #3e3e44;
+
+  --mf-shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+  --mf-shadow-md: 0 4px 16px rgba(0,0,0,0.7);
+  --mf-shadow-lg: 0 12px 40px rgba(0,0,0,0.8);
+
+  --mf-glass-blur: 0px;
+  --mf-noise-opacity: 0.04;
+  --mf-dot-opacity: 0.45;
+
+  /* mood swatch (jet black with neon edge) */
+  --mf-mood-1: #000000;
+  --mf-mood-2: #bf00ff;
+
+  /* default variant: electric (neon violet) */
+  --mf-accent: #bf00ff;
+  --mf-accent-2: #8000d4;
+  --mf-accent-soft: rgba(191,0,255,0.14);
+  --mf-glow-1: rgba(191,0,255,0.28);
+  --mf-glow-2: rgba(128,0,212,0.18);
+  --mf-dot: rgba(191,0,255,0.30);
+}
+
+/* ============ SLATE (dark, cool teal) ============ */
+[data-theme="slate"] {
+  --mf-mode: dark;
+  --mf-bg-canvas: #0e1416;
+  --mf-bg-rail: #161e22;
+  --mf-bg-surface: #1c252a;
+  --mf-bg-elevated: #232e34;
+  --mf-bg-input: #0f1518;
+  --mf-bg-hover: rgba(255,255,255,0.04);
+  --mf-bg-active: rgba(255,255,255,0.08);
+
+  --mf-border: rgba(255,255,255,0.06);
+  --mf-border-strong: rgba(255,255,255,0.14);
+  --mf-divider: rgba(255,255,255,0.04);
+
+  --mf-ink: #e0eaee;
+  --mf-ink-2: #aabac2;
+  --mf-ink-3: #6c7c84;
+  --mf-ink-4: #44525a;
+
+  --mf-shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
+  --mf-shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --mf-shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+
+  --mf-glass-blur: 0px;
+  --mf-noise-opacity: 0.04;
+  --mf-dot-opacity: 0.40;
+
+  /* mood swatch */
+  --mf-mood-1: #1f3338;
+  --mf-mood-2: #4db8c8;
+
+  /* default variant: forest */
+  --mf-accent: #34d399;
+  --mf-accent-2: #0e9f6e;
+  --mf-accent-soft: rgba(52,211,153,0.16);
+  --mf-glow-1: rgba(52,211,153,0.18);
+  --mf-glow-2: rgba(14,159,110,0.10);
+  --mf-dot: rgba(52,211,153,0.22);
+}
+
+/* ============ LINEN (light, warm cream) ============ */
+[data-theme="linen"] {
+  --mf-mode: light;
+  --mf-bg-canvas: #f1e6d3;
+  --mf-bg-rail: rgba(255,251,242,0.62);
+  --mf-bg-surface: rgba(255,251,242,0.78);
+  --mf-bg-elevated: rgba(255,253,247,0.92);
+  --mf-bg-input: rgba(255,251,242,0.7);
+  --mf-bg-hover: rgba(60,40,20,0.04);
+  --mf-bg-active: rgba(60,40,20,0.08);
+
+  --mf-border: rgba(60,40,20,0.10);
+  --mf-border-strong: rgba(60,40,20,0.20);
+  --mf-divider: rgba(60,40,20,0.06);
+
+  --mf-ink: #2a1d10;
+  --mf-ink-2: #5a4630;
+  --mf-ink-3: #8a755a;
+  --mf-ink-4: #b09c84;
+
+  --mf-shadow-sm: 0 1px 2px rgba(60,40,20,0.06);
+  --mf-shadow-md: 0 6px 20px rgba(60,40,20,0.10);
+  --mf-shadow-lg: 0 18px 48px rgba(60,40,20,0.14);
+
+  --mf-glass-blur: 18px;
+  --mf-noise-opacity: 0.02;
+  --mf-dot-opacity: 0.55;
+
+  --mf-mood-1: #e8c89a;
+  --mf-mood-2: #6b4c2a;
+
+  /* default variant: harvest */
+  --mf-accent: #b8732a;
+  --mf-accent-2: #8a4f10;
+  --mf-accent-soft: rgba(184,115,42,0.14);
+  --mf-glow-1: rgba(184,115,42,0.16);
+  --mf-glow-2: rgba(138,79,16,0.10);
+  --mf-dot: rgba(184,115,42,0.22);
+}
+
+/* ============ PAPER (light, cool pale) ============ */
+[data-theme="paper"] {
+  --mf-mode: light;
+  --mf-bg-canvas: #f6f3e4;
+  --mf-bg-rail: rgba(255,254,245,0.62);
+  --mf-bg-surface: rgba(255,254,245,0.80);
+  --mf-bg-elevated: rgba(255,255,250,0.92);
+  --mf-bg-input: rgba(255,254,245,0.70);
+  --mf-bg-hover: rgba(20,30,50,0.04);
+  --mf-bg-active: rgba(20,30,50,0.08);
+
+  --mf-border: rgba(20,30,50,0.10);
+  --mf-border-strong: rgba(20,30,50,0.20);
+  --mf-divider: rgba(20,30,50,0.05);
+
+  --mf-ink: #14181f;
+  --mf-ink-2: #43505e;
+  --mf-ink-3: #7a8694;
+  --mf-ink-4: #aab2bd;
+
+  --mf-shadow-sm: 0 1px 2px rgba(20,30,50,0.06);
+  --mf-shadow-md: 0 6px 20px rgba(20,30,50,0.08);
+  --mf-shadow-lg: 0 18px 48px rgba(20,30,50,0.12);
+
+  --mf-glass-blur: 18px;
+  --mf-noise-opacity: 0.02;
+  --mf-dot-opacity: 0.55;
+
+  --mf-mood-1: #f7f4e3;
+  --mf-mood-2: #4a7ba6;
+
+  /* default variant: sky */
+  --mf-accent: #2563eb;
+  --mf-accent-2: #1e3a8a;
+  --mf-accent-soft: rgba(37,99,235,0.14);
+  --mf-glow-1: rgba(37,99,235,0.14);
+  --mf-glow-2: rgba(30,58,138,0.08);
+  --mf-dot: rgba(37,99,235,0.20);
+}
+
+/* =========================================================
+   VARIANT OVERRIDES (accent / glows / dot only)
+   Theme base (bg, ink, mode) is preserved.
+   ========================================================= */
+
+/* ---- PULSE variants (jet black + neon) ---- */
+[data-theme="pulse"][data-variant="electric"] { --mf-accent:#bf00ff; --mf-accent-2:#8000d4; --mf-accent-soft:rgba(191,0,255,0.16); --mf-glow-1:rgba(191,0,255,0.32); --mf-glow-2:rgba(128,0,212,0.20); --mf-dot:rgba(191,0,255,0.34); }
+[data-theme="pulse"][data-variant="cyber"]    { --mf-accent:#00f0ff; --mf-accent-2:#00b8d4; --mf-accent-soft:rgba(0,240,255,0.14); --mf-glow-1:rgba(0,240,255,0.30); --mf-glow-2:rgba(0,184,212,0.18); --mf-dot:rgba(0,240,255,0.32); }
+[data-theme="pulse"][data-variant="acid"]     { --mf-accent:#aaff00; --mf-accent-2:#7acc00; --mf-accent-soft:rgba(170,255,0,0.14); --mf-glow-1:rgba(170,255,0,0.28); --mf-glow-2:rgba(122,204,0,0.16); --mf-dot:rgba(170,255,0,0.30); }
+[data-theme="pulse"][data-variant="heat"]     { --mf-accent:#ff4500; --mf-accent-2:#cc3300; --mf-accent-soft:rgba(255,69,0,0.16); --mf-glow-1:rgba(255,69,0,0.32); --mf-glow-2:rgba(204,51,0,0.20); --mf-dot:rgba(255,69,0,0.32); }
+[data-theme="pulse"][data-variant="fuchsia"]  { --mf-accent:#ff0080; --mf-accent-2:#cc0066; --mf-accent-soft:rgba(255,0,128,0.16); --mf-glow-1:rgba(255,0,128,0.30); --mf-glow-2:rgba(204,0,102,0.18); --mf-dot:rgba(255,0,128,0.32); }
+
+/* ---- SLATE variants ---- */
+[data-theme="slate"][data-variant="forest"] { --mf-accent:#34d399; --mf-accent-2:#0e9f6e; --mf-accent-soft:rgba(52,211,153,0.16); --mf-glow-1:rgba(52,211,153,0.18); --mf-glow-2:rgba(14,159,110,0.10); --mf-dot:rgba(52,211,153,0.22); }
+[data-theme="slate"][data-variant="mint"]   { --mf-accent:#6ee7b7; --mf-accent-2:#2dd4bf; --mf-accent-soft:rgba(110,231,183,0.18); --mf-glow-1:rgba(110,231,183,0.20); --mf-glow-2:rgba(45,212,191,0.14); --mf-dot:rgba(110,231,183,0.26); }
+[data-theme="slate"][data-variant="pine"]   { --mf-accent:#1f8b5a; --mf-accent-2:#0a4f33; --mf-accent-soft:rgba(31,139,90,0.16); --mf-glow-1:rgba(31,139,90,0.18); --mf-glow-2:rgba(10,79,51,0.12); --mf-dot:rgba(31,139,90,0.22); }
+[data-theme="slate"][data-variant="cobalt"] { --mf-accent:#3b6dff; --mf-accent-2:#1a3fc4; --mf-accent-soft:rgba(59,109,255,0.18); --mf-glow-1:rgba(59,109,255,0.22); --mf-glow-2:rgba(26,63,196,0.14); --mf-dot:rgba(59,109,255,0.26); }
+[data-theme="slate"][data-variant="nordic"] { --mf-accent:#7aa6c2; --mf-accent-2:#4f7d99; --mf-accent-soft:rgba(122,166,194,0.14); --mf-glow-1:rgba(122,166,194,0.16); --mf-glow-2:rgba(79,125,153,0.08); --mf-dot:rgba(122,166,194,0.18); }
+
+/* ---- LINEN variants ---- */
+[data-theme="linen"][data-variant="harvest"]    { --mf-accent:#b8732a; --mf-accent-2:#8a4f10; --mf-accent-soft:rgba(184,115,42,0.14); --mf-glow-1:rgba(184,115,42,0.16); --mf-glow-2:rgba(138,79,16,0.10); --mf-dot:rgba(184,115,42,0.22); }
+[data-theme="linen"][data-variant="champagne"]  { --mf-accent:#9d7c4a; --mf-accent-2:#6b5430; --mf-accent-soft:rgba(157,124,74,0.12); --mf-glow-1:rgba(157,124,74,0.14); --mf-glow-2:rgba(107,84,48,0.08); --mf-dot:rgba(157,124,74,0.18); }
+[data-theme="linen"][data-variant="marigold"]   { --mf-accent:#c8841a; --mf-accent-2:#955d05; --mf-accent-soft:rgba(200,132,26,0.16); --mf-glow-1:rgba(200,132,26,0.18); --mf-glow-2:rgba(149,93,5,0.10); --mf-dot:rgba(200,132,26,0.24); }
+[data-theme="linen"][data-variant="copper"]     { --mf-accent:#a85a28; --mf-accent-2:#722f10; --mf-accent-soft:rgba(168,90,40,0.14); --mf-glow-1:rgba(168,90,40,0.16); --mf-glow-2:rgba(114,47,16,0.10); --mf-dot:rgba(168,90,40,0.20); }
+[data-theme="linen"][data-variant="peach"]      { --mf-accent:#d97757; --mf-accent-2:#a64d28; --mf-accent-soft:rgba(217,119,87,0.14); --mf-glow-1:rgba(217,119,87,0.16); --mf-glow-2:rgba(166,77,40,0.10); --mf-dot:rgba(217,119,87,0.20); }
+
+/* ---- PAPER variants ---- */
+[data-theme="paper"][data-variant="sky"]       { --mf-accent:#2563eb; --mf-accent-2:#1e3a8a; --mf-accent-soft:rgba(37,99,235,0.14); --mf-glow-1:rgba(37,99,235,0.14); --mf-glow-2:rgba(30,58,138,0.08); --mf-dot:rgba(37,99,235,0.20); }
+[data-theme="paper"][data-variant="ice"]       { --mf-accent:#74b9e8; --mf-accent-2:#3b8bbf; --mf-accent-soft:rgba(116,185,232,0.14); --mf-glow-1:rgba(116,185,232,0.16); --mf-glow-2:rgba(59,139,191,0.08); --mf-dot:rgba(116,185,232,0.20); }
+[data-theme="paper"][data-variant="alabaster"] { --mf-accent:#5a6370; --mf-accent-2:#363c46; --mf-accent-soft:rgba(90,99,112,0.10); --mf-glow-1:rgba(90,99,112,0.10); --mf-glow-2:rgba(54,60,70,0.06); --mf-dot:rgba(90,99,112,0.16); }
+[data-theme="paper"][data-variant="denim"]     { --mf-accent:#4a7ba6; --mf-accent-2:#2a4a6b; --mf-accent-soft:rgba(74,123,166,0.14); --mf-glow-1:rgba(74,123,166,0.14); --mf-glow-2:rgba(42,74,107,0.08); --mf-dot:rgba(74,123,166,0.18); }
+[data-theme="paper"][data-variant="sage"]      { --mf-accent:#6f8a5e; --mf-accent-2:#4a5e3e; --mf-accent-soft:rgba(111,138,94,0.12); --mf-glow-1:rgba(111,138,94,0.14); --mf-glow-2:rgba(74,94,62,0.08); --mf-dot:rgba(111,138,94,0.18); }
+
+/* =========================================================
+   ATMOSPHERE \u2014 radial glows + dot pattern
+   Apply class .mf-atmosphere on body
+   ========================================================= */
+.mf-atmosphere { position: relative; isolation: isolate; }
+.mf-atmosphere::before {
+  content: ""; position: fixed; inset: 0;
+  z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(900px 700px at 15% 10%, var(--mf-glow-1), transparent 60%),
+    radial-gradient(700px 600px at 85% 20%, var(--mf-glow-2), transparent 60%),
+    radial-gradient(800px 600px at 50% 95%, var(--mf-glow-1), transparent 65%);
+  transition: background var(--mf-dur-slow) var(--mf-ease);
+}
+.mf-atmosphere::after {
+  content: ""; position: fixed; inset: 0;
+  z-index: -1; pointer-events: none;
+  opacity: var(--mf-dot-opacity);
+  background-image: radial-gradient(circle at 1px 1px, var(--mf-dot) 0 1px, transparent 1.2px);
+  background-size: 28px 28px;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  :root { --mf-dur-fast: 0ms; --mf-dur-base: 0ms; --mf-dur-slow: 0ms; }
+}
+</style>
 <style>
 /* =========================================================
    Ping Shell v6 — Pulse rebuild + rail fixes + deeper accent
