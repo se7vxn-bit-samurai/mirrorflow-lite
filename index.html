@@ -9,7 +9,7 @@
 /* =========================================================
    MirrorFlow Internal Token Layer
    Embedded for standalone offline-first use.
-   Source: ../mirrorflow.tokens.css, with external font import removed.
+   Token source is embedded here; no external stylesheet is required.
    ========================================================= */
 /* =========================================================
    MirrorFlow Tokens — v3.0
@@ -632,8 +632,11 @@ body {
   min-width: 0;
   transition: background var(--mf-dur-base) var(--mf-ease);
 }
-.mf-rail-insights .mf-rail-head,
-.mf-rail-insights .mf-rail-body { overflow: hidden; }
+.mf-rail-insights .mf-rail-head { overflow: hidden; }
+.mf-rail-insights .mf-rail-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
 .mf-rail-head {
   display: flex; align-items: center; gap: 8px;
   padding: 14px 16px; border-bottom: 1px solid var(--mf-divider);
@@ -651,7 +654,11 @@ body {
 }
 
 .mf-rail-body {
-  flex: 1; overflow-y: auto; padding: 14px;
+  flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; padding: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--mf-border-strong) transparent;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
   opacity: 1; transition: opacity var(--mf-dur-base) var(--mf-ease);
 }
 .mf-shell[data-insights="collapsed"] .mf-rail-body,
@@ -948,6 +955,9 @@ body {
   --mf-phone-top-offset: 12px;
   padding: 10px 0 8px;
   overflow: hidden;
+  contain: layout style;
+  transform: translateZ(0);
+  will-change: opacity, transform;
 }
 .mf-notes-stage {
   flex: 1;
@@ -1084,12 +1094,17 @@ body {
   flex: 0 0 auto;
   transform: translateX(-50%);
   transform-origin: top center;
+  contain: layout style;
+  backface-visibility: hidden;
+  will-change: transform, width, height;
 }
 .phone-inner {
   position: absolute; left: 0; top: 0;
   width: 356px; height: 720px;
   transform: translateZ(0) scale(var(--phone-scale));
   transform-origin: top left;
+  backface-visibility: hidden;
+  will-change: transform;
   display: grid;
   grid-template-rows: 44px 1fr 62px;
   border-radius: 48px;
@@ -1667,6 +1682,13 @@ html[data-theme="paper"] .phone-wrap {
   filter: blur(30px);
   opacity: var(--mf-phone-underglow-opacity);
 }
+.mf-shell[data-phone-motion="true"] .phone-wrap {
+  --mf-phone-aura-opacity: .2;
+  --mf-phone-underglow-opacity: .16;
+}
+.mf-shell[data-phone-motion="true"] .phone-inner {
+  transition: none;
+}
 .phone-inner {
   width: calc(var(--mf-phone-base-w) * 1px);
   height: calc(var(--mf-phone-base-h) * 1px);
@@ -1901,11 +1923,20 @@ html[data-theme="paper"] .phone-wrap {
 .mf-rail-body::-webkit-scrollbar,
 .mf-editor-surface::-webkit-scrollbar,
 .mf-notes-list::-webkit-scrollbar { width: 6px; }
+.mf-rail-body::-webkit-scrollbar-track,
+.mf-editor-surface::-webkit-scrollbar-track,
+.mf-notes-list::-webkit-scrollbar-track { background: transparent; }
 .mf-rail-body::-webkit-scrollbar-thumb,
 .mf-editor-surface::-webkit-scrollbar-thumb,
 .mf-notes-list::-webkit-scrollbar-thumb {
-  background: var(--mf-border-strong); border-radius: 3px;
+  background: var(--mf-border-strong);
+  border: 2px solid transparent;
+  border-radius: var(--mf-r-pill);
+  background-clip: padding-box;
 }
+.mf-rail-body::-webkit-scrollbar-thumb:hover,
+.mf-editor-surface::-webkit-scrollbar-thumb:hover,
+.mf-notes-list::-webkit-scrollbar-thumb:hover { background: var(--mf-accent); }
 
 /* ============================================================
    v6.2 — snippets, thread switcher, drill-down, phone resize
@@ -2123,6 +2154,25 @@ html[data-theme="paper"] .phone-wrap {
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
+.mf-insight-card[data-response-state],
+.mf-brief-stat[data-response-state] {
+  --mf-state-color: var(--mf-accent);
+}
+.mf-insight-card[data-response-state="ready"],
+.mf-brief-stat[data-response-state="ready"] { --mf-state-color: var(--mf-ok); }
+.mf-insight-card[data-response-state="needs_polish"],
+.mf-brief-stat[data-response-state="needs_polish"] { --mf-state-color: var(--mf-warn); }
+.mf-insight-card[data-response-state="risky"],
+.mf-brief-stat[data-response-state="risky"] { --mf-state-color: #ff5c7a; }
+.mf-insight-card[data-response-state="blocked"],
+.mf-brief-stat[data-response-state="blocked"] { --mf-state-color: var(--mf-err); }
+.mf-insight-card[data-response-state] .mf-score-row strong,
+.mf-brief-stat[data-response-state] b {
+  color: var(--mf-state-color);
+}
+.mf-insight-card[data-response-state] .mf-insight-bar > span {
+  background: linear-gradient(90deg, var(--mf-state-color), var(--mf-accent));
+}
 .mf-score-row {
   display: flex;
   align-items: baseline;
@@ -2244,8 +2294,6 @@ html[data-theme="paper"] .phone-wrap {
 .mf-mode-panel { display: none; }
 .mf-shell[data-workspace-mode="insights"] [data-panel-mode="insights"],
 .mf-shell[data-workspace-mode="drivers"] [data-panel-mode="drivers"],
-.mf-shell[data-workspace-mode="coach"] [data-panel-mode="coach"],
-.mf-shell[data-workspace-mode="review"] [data-panel-mode="review"],
 .mf-shell[data-workspace-mode="assist"] [data-panel-mode="assist"] {
   display: block;
 }
@@ -2545,6 +2593,16 @@ html[data-theme="paper"] .phone-wrap {
   transition: border-color var(--mf-dur-fast) var(--mf-ease), color var(--mf-dur-fast) var(--mf-ease);
 }
 .mf-assist-clear-btn:hover { border-color: var(--mf-accent); color: var(--mf-accent); }
+.mf-assist-clear-btn.is-primary {
+  border-color: var(--mf-accent);
+  background: var(--mf-accent-soft);
+  color: var(--mf-accent);
+}
+.mf-assist-clear-btn.is-primary:hover {
+  background: var(--mf-accent);
+  color: var(--mf-bg-canvas);
+  box-shadow: 0 0 12px var(--mf-glow-1);
+}
 
 /* issue count dot on dock button */
 .mf-assist-count {
@@ -2562,6 +2620,10 @@ html[data-theme="paper"] .phone-wrap {
   display: flex; align-items: center; justify-content: space-between;
   gap: 10px;
   padding: 0 0 4px; flex: 0 0 auto;
+}
+.mf-assist-head-actions {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 6px; flex-wrap: wrap;
 }
 .mf-assist-sum-eyebrow {
   display: block; color: var(--mf-ink-3);
@@ -2650,7 +2712,6 @@ html[data-theme="paper"] .phone-wrap {
 .mf-assist-card[data-cat="grammar"]::before  { background: #3b6dff; }
 .mf-assist-card[data-cat="clarity"]::before  { background: var(--mf-accent-2); }
 .mf-assist-card[data-cat="tone"]::before     { background: #f3a43b; }
-.mf-assist-card[data-cat="policy"]::before   { background: #ff5c7a; }
 .mf-assist-card:hover {
   border-color: var(--mf-accent-soft); box-shadow: 0 0 14px var(--mf-glow-2);
   transform: translateY(-1px);
@@ -2670,7 +2731,6 @@ html[data-theme="paper"] .phone-wrap {
 .mf-assist-badge[data-cat="grammar"] { background: rgba(59,109,255,.14); color: #3b6dff; }
 .mf-assist-badge[data-cat="clarity"] { background: var(--mf-accent-soft); color: var(--mf-accent-2); }
 .mf-assist-badge[data-cat="tone"]    { background: rgba(243,164,59,.14); color: #f3a43b; }
-.mf-assist-badge[data-cat="policy"]  { background: rgba(255,92,122,.14); color: #ff5c7a; }
 .mf-assist-sev {
   padding: 2px 6px; border-radius: var(--mf-r-pill);
   font: 700 9px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase;
@@ -3039,7 +3099,7 @@ html[data-theme="paper"] .phone-wrap {
 </header>
 
 <!-- ========= SHELL ========= -->
-<main class="mf-shell" id="shell" data-insights="open" data-phone="open" data-right-panel="phone" data-workspace-mode="insights">
+<main class="mf-shell" id="shell" data-insights="open" data-phone="open" data-right-panel="assist" data-workspace-mode="assist">
 
   <!-- ===== LEFT MODE DOCK ===== -->
   <aside class="mf-side-dock mf-left-dock" aria-label="Workspace mode dock">
@@ -3059,19 +3119,20 @@ html[data-theme="paper"] .phone-wrap {
     <div class="mf-dock-rule"></div>
 
     <div class="mf-dock-group" role="radiogroup" aria-label="MirrorFlow mode">
-      <button class="mf-dock-btn is-active" type="button" data-mode-toggle="insights" aria-pressed="true" title="Insights mode">
+      <button class="mf-dock-btn is-active" type="button" data-mode-toggle="assist" aria-pressed="true" title="Assist mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span class="mf-dock-label">Assist</span>
+      </button>
+      <button class="mf-dock-btn" type="button" data-mode-toggle="insights" aria-pressed="false" title="Insights mode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 5h16"></path>
           <path d="M4 12h10"></path>
           <path d="M4 19h7"></path>
         </svg>
         <span class="mf-dock-label">Insights</span>
-      </button>
-      <button class="mf-dock-btn" type="button" data-mode-toggle="coach" aria-pressed="false" title="Coach mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z"></path>
-        </svg>
-        <span class="mf-dock-label">Coach</span>
       </button>
       <button class="mf-dock-btn" type="button" data-mode-toggle="drivers" aria-pressed="false" title="Drivers mode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -3081,27 +3142,13 @@ html[data-theme="paper"] .phone-wrap {
         </svg>
         <span class="mf-dock-label">Drivers</span>
       </button>
-      <button class="mf-dock-btn" type="button" data-mode-toggle="review" aria-pressed="false" title="Review mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 11l2 2 4-5"></path>
-          <path d="M21 12a9 9 0 1 1-3-6.7"></path>
-        </svg>
-        <span class="mf-dock-label">Review</span>
-      </button>
-      <button class="mf-dock-btn" type="button" data-mode-toggle="assist" aria-pressed="false" title="Assist mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 20h9"></path>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-        </svg>
-        <span class="mf-dock-label">Assist</span>
-      </button>
     </div>
   </aside>
 
   <!-- ===== INSIGHTS RAIL ===== -->
   <aside class="mf-rail-insights" id="railInsights">
     <div class="mf-rail-head">
-      <span class="mf-rail-title" id="mfRailTitle">Insights</span>
+      <span class="mf-rail-title" id="mfRailTitle">Assist</span>
     </div>
 
     <div class="mf-rail-body">
@@ -3114,7 +3161,7 @@ html[data-theme="paper"] .phone-wrap {
           <span class="mf-detect-meta" id="mfDetectedMeta">Local</span>
         </div>
 
-        <article class="mf-insight-card">
+        <article class="mf-insight-card" id="mfResponseStateCard" data-response-state="blocked">
           <div class="mf-engine-head">
             <div class="mf-engine-title">
               <strong id="mfDomainLabel">Universal service</strong>
@@ -3135,7 +3182,7 @@ html[data-theme="paper"] .phone-wrap {
             <div class="mf-brief-line">
               <span>Priority</span>
               <b id="mfBriefPriority">Awaiting input</b>
-              <p id="mfBriefWhy">Type or send a customer message to generate a useful brief.</p>
+              <p id="mfBriefWhy">Write or paste text to generate a useful brief.</p>
             </div>
             <div class="mf-brief-line">
               <span>Recommended move</span>
@@ -3148,7 +3195,7 @@ html[data-theme="paper"] .phone-wrap {
               <span>Confidence</span>
               <b id="mfBriefConfidence">--</b>
             </div>
-            <div class="mf-brief-stat">
+            <div class="mf-brief-stat" id="mfBriefStateCard" data-response-state="blocked">
               <span>Send state</span>
               <b id="mfBriefSendState">--</b>
             </div>
@@ -3156,10 +3203,26 @@ html[data-theme="paper"] .phone-wrap {
         </article>
 
         <article class="mf-insight-card">
+          <div class="mf-insight-label">Guidance cue</div>
+          <div class="mf-engine-title">
+            <strong id="mfInsightCueTitle">Awaiting read</strong>
+            <span id="mfInsightCueWhy">Insights will surface one next move when the draft has enough signal.</span>
+          </div>
+          <div class="mf-coach-try" style="margin-top:10px">
+            <b id="mfInsightCueMove">No move yet</b>
+            <p id="mfInsightCueText">Write or paste text to generate a situation-aware cue.</p>
+            <div class="mf-coach-actions">
+              <button class="mf-coach-main-btn primary" id="mfInsightCueInsert" type="button" data-insight-insert="">Insert move</button>
+              <button class="mf-coach-main-btn" type="button" data-mode-jump="drivers">Show drivers</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="mf-insight-card">
           <div class="mf-insight-label">Query type</div>
           <div class="mf-engine-title">
-            <strong id="mfQueryType">No customer message</strong>
-            <span id="mfQueryMeta">Type a customer message to classify intent.</span>
+            <strong id="mfQueryType">No context yet</strong>
+            <span id="mfQueryMeta">Customer context is optional.</span>
           </div>
         </article>
 
@@ -3168,7 +3231,7 @@ html[data-theme="paper"] .phone-wrap {
           <div class="mf-pass-grid">
             <div class="mf-pass-row">
               <span class="mf-engine-dot"></span>
-              <div><b>Read</b><span id="mfPassRead">Customer meaning and pressure.</span></div>
+              <div><b>Read</b><span id="mfPassRead">Context, tone, and pressure.</span></div>
               <span class="mf-pass-state" id="mfPassReadState">--</span>
             </div>
             <div class="mf-pass-row">
@@ -3185,7 +3248,7 @@ html[data-theme="paper"] .phone-wrap {
         </article>
 
         <article class="mf-insight-card">
-          <div class="mf-insight-label">Customer signals</div>
+          <div class="mf-insight-label">Context signals</div>
           <div class="mf-engine-list" id="mfSignalList"></div>
         </article>
 
@@ -3217,6 +3280,10 @@ html[data-theme="paper"] .phone-wrap {
         <article class="mf-insight-card">
           <div class="mf-insight-label">Decision state</div>
           <div class="mf-driver-kv">
+            <span>State</span>
+            <b id="mfDriverStateCode">--</b>
+          </div>
+          <div class="mf-driver-kv">
             <span>Domain</span>
             <b id="mfDriverDomain">--</b>
           </div>
@@ -3233,6 +3300,54 @@ html[data-theme="paper"] .phone-wrap {
         <article class="mf-insight-card">
           <div class="mf-insight-label">Classification drivers</div>
           <div class="mf-engine-list" id="mfDomainDrivers"></div>
+        </article>
+
+        <article class="mf-insight-card">
+          <div class="mf-insight-label">Assist evidence</div>
+          <div class="mf-engine-list" id="mfAssistDrivers"></div>
+        </article>
+
+        <article class="mf-insight-card">
+          <div class="mf-insight-label">Assist diagnostics</div>
+          <div class="mf-assist-diagnostics" id="mfAssistDiagnostics" data-open="false">
+            <button class="mf-assist-diagnostics-toggle" id="mfAssistDiagnosticsToggle" type="button" aria-expanded="false">
+              <span>
+                <span class="mf-assist-diag-eyebrow">Diagnostics</span>
+                <strong id="mfAssistDiagStatus">Tests pending</strong>
+              </span>
+              <span class="mf-assist-diag-pill" id="mfAssistDiagPill" data-state="warn">--</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="m6 9 6 6 6-6"></path>
+              </svg>
+            </button>
+            <div class="mf-assist-diagnostics-body">
+              <div class="mf-assist-diag-grid">
+                <div class="mf-assist-diag-stat">
+                  <span>Tests</span>
+                  <strong id="mfAssistDiagTests">--</strong>
+                </div>
+                <div class="mf-assist-diag-stat">
+                  <span>Rules</span>
+                  <strong id="mfAssistDiagRules">--</strong>
+                </div>
+                <div class="mf-assist-diag-stat">
+                  <span>Disabled</span>
+                  <strong id="mfAssistDiagDisabled">--</strong>
+                </div>
+                <div class="mf-assist-diag-stat">
+                  <span>Profile</span>
+                  <strong id="mfAssistDiagProfile">--</strong>
+                </div>
+              </div>
+              <div class="mf-assist-diag-note" id="mfAssistDiagNote">Run tests to verify Assist rule health.</div>
+              <div class="mf-assist-diag-failures" id="mfAssistDiagFailures"></div>
+              <div class="mf-assist-diag-actions">
+                <button class="mf-assist-action-btn" id="mfAssistRunTests" type="button">Run tests</button>
+                <button class="mf-assist-action-btn" id="mfAssistCopyReport" type="button">Copy report</button>
+                <button class="mf-assist-action-btn" id="mfAssistDownloadReport" type="button">Download report</button>
+              </div>
+            </div>
+          </div>
         </article>
 
         <article class="mf-insight-card">
@@ -3253,68 +3368,6 @@ html[data-theme="paper"] .phone-wrap {
         <article class="mf-insight-card">
           <div class="mf-insight-label">Advice causes</div>
           <div class="mf-engine-list" id="mfAdviceDrivers"></div>
-        </article>
-      </div>
-
-      <div class="mf-insight-engine mf-mode-panel" id="pingCoachPanel" data-panel-mode="coach">
-        <div class="mf-detect-strip" aria-label="Coach state">
-          <div>
-            <span class="mf-detect-label">Coach state</span>
-            <strong class="mf-detect-value" id="mfCoachState">Coach</strong>
-          </div>
-          <span class="mf-detect-meta" id="mfCoachMeta">Local</span>
-        </div>
-
-        <article class="mf-insight-card mf-coach-read">
-          <div class="mf-insight-label">Coach read</div>
-          <div class="mf-coach-title" id="mfCoachHeadline">Run the engine first.</div>
-          <p class="mf-coach-why" id="mfCoachWhy">Coach will read the artifact, highlight the strongest gap, and offer one practice move.</p>
-          <div class="mf-score-row">
-            <strong id="mfCoachScore">--</strong>
-            <span id="mfCoachScoreLabel">Readiness</span>
-          </div>
-          <div class="mf-insight-bar"><span id="mfCoachBar" style="width:0%"></span></div>
-          <div class="mf-coach-state-row">
-            <span>Confidence</span>
-            <b id="mfCoachConfidence">--</b>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Coach stack</div>
-          <div class="mf-coach-stack" id="mfCoachStack"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Try this</div>
-          <div class="mf-coach-try">
-            <b id="mfCoachTryLabel">Awaiting practice move</b>
-            <p id="mfCoachTryText">Once the engine sees a useful move, it will appear here.</p>
-            <div class="mf-coach-actions">
-              <button class="mf-coach-main-btn primary" id="mfCoachInsertBtn" type="button" data-coach-insert="">Insert move</button>
-              <button class="mf-coach-main-btn" type="button" data-coach-mode="drivers">Show drivers</button>
-            </div>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Sensitive cues</div>
-          <div class="mf-engine-list" id="mfCoachSensitive"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Evidence</div>
-          <div class="mf-engine-list" id="mfCoachEvidence"></div>
-        </article>
-      </div>
-
-      <div class="mf-insight-engine mf-mode-panel" data-panel-mode="review">
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Review mode</div>
-          <div class="mf-engine-title">
-            <strong>Session review shell</strong>
-            <span>This can become the QA view once Drivers and Coach are stable.</span>
-          </div>
         </article>
       </div>
 
@@ -3370,13 +3423,6 @@ html[data-theme="paper"] .phone-wrap {
               <span class="mf-assist-bar-val" id="mfBarValTone">—</span>
             </div>
             <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarTone" style="width:0%"></span></div>
-          </div>
-          <div class="mf-assist-bar-row">
-            <div class="mf-assist-bar-label">
-              <span class="mf-assist-bar-name">Policy</span>
-              <span class="mf-assist-bar-val" id="mfBarValPolicy">—</span>
-            </div>
-            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarPolicy" style="width:0%"></span></div>
           </div>
         </div>
 
@@ -3550,53 +3596,16 @@ html[data-theme="paper"] .phone-wrap {
           <span class="mf-assist-sum-eyebrow">Writing check</span>
           <strong class="mf-assist-sum-title">Suggestions</strong>
         </div>
-        <button class="mf-assist-clear-btn" id="mfAssistClearIgnored" type="button" style="display:none" title="Restore ignored issues">Clear ignored</button>
+        <div class="mf-assist-head-actions">
+          <button class="mf-assist-clear-btn is-primary" id="mfAssistUndoApply" type="button" style="display:none" title="Restore the last Assist Apply change">Undo</button>
+          <button class="mf-assist-clear-btn" id="mfAssistClearIgnored" type="button" style="display:none" title="Restore ignored issues">Clear ignored</button>
+        </div>
       </div>
       <div class="mf-assist-filter-bar" id="mfAssistFilterBar">
         <button class="mf-assist-filter-btn is-active" data-filter="all">All</button>
         <button class="mf-assist-filter-btn" data-filter="grammar">Grammar</button>
         <button class="mf-assist-filter-btn" data-filter="clarity">Clarity</button>
         <button class="mf-assist-filter-btn" data-filter="tone">Tone</button>
-        <button class="mf-assist-filter-btn" data-filter="policy">Rules</button>
-      </div>
-      <div class="mf-assist-diagnostics" id="mfAssistDiagnostics" data-open="false">
-        <button class="mf-assist-diagnostics-toggle" id="mfAssistDiagnosticsToggle" type="button" aria-expanded="false">
-          <span>
-            <span class="mf-assist-diag-eyebrow">Diagnostics</span>
-            <strong id="mfAssistDiagStatus">Tests pending</strong>
-          </span>
-          <span class="mf-assist-diag-pill" id="mfAssistDiagPill" data-state="warn">--</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="m6 9 6 6 6-6"></path>
-          </svg>
-        </button>
-        <div class="mf-assist-diagnostics-body">
-          <div class="mf-assist-diag-grid">
-            <div class="mf-assist-diag-stat">
-              <span>Tests</span>
-              <strong id="mfAssistDiagTests">--</strong>
-            </div>
-            <div class="mf-assist-diag-stat">
-              <span>Rules</span>
-              <strong id="mfAssistDiagRules">--</strong>
-            </div>
-            <div class="mf-assist-diag-stat">
-              <span>Disabled</span>
-              <strong id="mfAssistDiagDisabled">--</strong>
-            </div>
-            <div class="mf-assist-diag-stat">
-              <span>Profile</span>
-              <strong id="mfAssistDiagProfile">--</strong>
-            </div>
-          </div>
-          <div class="mf-assist-diag-note" id="mfAssistDiagNote">Run tests to verify Assist rule health.</div>
-          <div class="mf-assist-diag-failures" id="mfAssistDiagFailures"></div>
-          <div class="mf-assist-diag-actions">
-            <button class="mf-assist-action-btn" id="mfAssistRunTests" type="button">Run tests</button>
-            <button class="mf-assist-action-btn" id="mfAssistCopyReport" type="button">Copy report</button>
-            <button class="mf-assist-action-btn" id="mfAssistDownloadReport" type="button">Download report</button>
-          </div>
-        </div>
       </div>
       <div id="mfAssistCardList">
         <div class="mf-assist-empty">Type a draft to run the writing check.</div>
@@ -3605,35 +3614,47 @@ html[data-theme="paper"] .phone-wrap {
 
   </aside>
 
-  <!-- ===== RIGHT PHONE DOCK ===== -->
-  <aside class="mf-side-dock mf-right-dock" aria-label="Phone dock">
+  <!-- ===== RIGHT PANEL DOCK ===== -->
+  <aside class="mf-side-dock mf-right-dock" aria-label="Right panel dock">
     <div class="mf-dock-group">
-      <button class="mf-dock-btn" id="tabPhone" type="button" data-panel-toggle="phone" aria-pressed="true" title="Toggle phone panel">
+      <button class="mf-dock-btn" id="tabRightPanel" type="button" data-panel-toggle="right" aria-pressed="true" title="Toggle right panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="M16 5v14"></path>
+          <path d="M18 9h1"></path>
+          <path d="M18 12h1"></path>
+        </svg>
+        <span class="mf-dock-state" aria-hidden="true"></span>
+        <span class="mf-dock-label">Toggle right panel</span>
+      </button>
+    </div>
+
+    <div class="mf-dock-rule"></div>
+
+    <div class="mf-dock-group" role="radiogroup" aria-label="Right panel mode">
+      <button class="mf-dock-btn is-active" id="tabAssist" type="button" data-panel-toggle="assist" aria-pressed="true" title="Assist panel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span class="mf-assist-count" id="mfAssistDot" aria-hidden="true"></span>
+        <span class="mf-dock-label">Assist</span>
+      </button>
+      <button class="mf-dock-btn" id="tabPhone" type="button" data-panel-toggle="phone" aria-pressed="false" title="Phone panel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect>
           <line x1="11" y1="18" x2="13" y2="18"></line>
         </svg>
-        <span class="mf-dock-state" aria-hidden="true"></span>
         <span class="mf-dock-label">Phone</span>
       </button>
-      <button class="mf-dock-btn" id="tabNotes" type="button" data-panel-toggle="notes" aria-pressed="false" title="Open side notes">
+      <button class="mf-dock-btn" id="tabNotes" type="button" data-panel-toggle="notes" aria-pressed="false" title="Side notes panel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 3h9l3 3v15H6z"></path>
           <path d="M15 3v4h4"></path>
           <path d="M9 11h6"></path>
           <path d="M9 15h6"></path>
         </svg>
-        <span class="mf-dock-state" aria-hidden="true"></span>
         <span class="mf-dock-label">Side Notes</span>
-      </button>
-      <button class="mf-dock-btn" id="tabAssist" type="button" data-panel-toggle="assist" aria-pressed="false" title="Open Assist suggestions">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 20h9"></path>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-        </svg>
-        <span class="mf-assist-count" id="mfAssistDot" aria-hidden="true"></span>
-        <span class="mf-dock-state" aria-hidden="true"></span>
-        <span class="mf-dock-label">Assist</span>
       </button>
     </div>
   </aside>
@@ -3722,7 +3743,7 @@ document.getElementById('shuffleBtn').addEventListener('click', () => {
 });
 
 function syncRailControls() {
-  const rightPanel = shell.dataset.rightPanel || 'phone';
+  const rightPanel = shell.dataset.rightPanel || 'assist';
   const insightsOpen = shell.dataset.insights !== 'collapsed';
   const rightOpen = shell.dataset.phone !== 'collapsed';
   const insightsBtn = document.getElementById('tabInsights');
@@ -3732,31 +3753,41 @@ function syncRailControls() {
     insightsBtn.classList.toggle('is-active', insightsOpen);
     insightsBtn.title = `${insightsOpen ? 'Collapse' : 'Open'} left panel`;
   }
+  const rightToggle = document.getElementById('tabRightPanel');
+  if (rightToggle) {
+    rightToggle.dataset.state = rightOpen ? 'open' : 'collapsed';
+    rightToggle.setAttribute('aria-pressed', String(rightOpen));
+    rightToggle.classList.toggle('is-active', rightOpen);
+    rightToggle.title = `${rightOpen ? 'Collapse' : 'Open'} right panel`;
+  }
   [
+    ['tabAssist', 'assist', 'assist'],
     ['tabPhone',  'phone',  'phone'],
-    ['tabNotes',  'notes',  'side notes'],
-    ['tabAssist', 'assist', 'assist summary']
+    ['tabNotes',  'notes',  'side notes']
   ].forEach(([id, panel, label]) => {
     const btn = document.getElementById(id);
     if (!btn) return;
-    const isActive = rightOpen && rightPanel === panel;
-    btn.dataset.state = isActive ? 'open' : 'collapsed';
+    const isActive = rightPanel === panel;
+    btn.dataset.state = isActive ? (rightOpen ? 'open' : 'selected') : 'inactive';
     btn.setAttribute('aria-pressed', String(isActive));
     btn.classList.toggle('is-active', isActive);
-    btn.title = `${isActive ? 'Collapse' : 'Open'} ${label} panel`;
+    btn.title = `${isActive && rightOpen ? 'Showing' : 'Open'} ${label} panel`;
   });
 }
 
+function normalizeWorkspaceMode(mode) {
+  if (mode === 'ping') return 'insights';
+  if (mode === 'engine') return 'drivers';
+  if (mode === 'coach' || mode === 'review') return 'insights';
+  return ['assist', 'insights', 'drivers'].includes(mode) ? mode : 'assist';
+}
+
 function syncModeControls() {
-  if (shell.dataset.workspaceMode === 'ping' || shell.dataset.workspaceMode === 'engine') {
-    shell.dataset.workspaceMode = shell.dataset.workspaceMode === 'engine' ? 'drivers' : 'insights';
-  }
-  const mode = shell.dataset.workspaceMode || 'insights';
+  const mode = normalizeWorkspaceMode(shell.dataset.workspaceMode);
+  shell.dataset.workspaceMode = mode;
   const titleMap = {
     insights: 'Insights',
-    coach: 'Coach',
     drivers: 'Drivers',
-    review: 'Review',
     assist: 'Assist'
   };
   mfSetText('mfRailTitle', titleMap[mode] || 'Insights');
@@ -3774,42 +3805,44 @@ document.getElementById('tabInsights').addEventListener('click', (e) => {
   syncRailControls();
 });
 
-/* PHONE — right dock toggle */
+/* RIGHT PANEL — dock toggle */
+document.getElementById('tabRightPanel').addEventListener('click', (e) => {
+  e.stopPropagation();
+  shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
+  if (!['assist', 'phone', 'notes'].includes(shell.dataset.rightPanel)) {
+    shell.dataset.rightPanel = 'assist';
+  }
+  if (shell.dataset.phone === 'open' && shell.dataset.rightPanel === 'assist') renderPingAssist();
+  syncRailControls();
+  if (shell.dataset.rightPanel === 'phone') beginPhonePanelMotion();
+  schedulePhoneScale();
+});
+
+/* PHONE — right dock mode */
 document.getElementById('tabPhone').addEventListener('click', (e) => {
   e.stopPropagation();
-  if (shell.dataset.rightPanel !== 'phone') {
-    shell.dataset.rightPanel = 'phone';
-    shell.dataset.phone = 'open';
-  } else {
-    shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
-  }
+  shell.dataset.rightPanel = 'phone';
+  shell.dataset.phone = 'open';
   syncRailControls();
-  updatePhoneScale();
+  beginPhonePanelMotion();
+  schedulePhoneScale();
 });
 
 document.getElementById('tabNotes').addEventListener('click', (e) => {
   e.stopPropagation();
-  if (shell.dataset.rightPanel !== 'notes') {
-    shell.dataset.rightPanel = 'notes';
-    shell.dataset.phone = 'open';
-  } else {
-    shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
-  }
+  shell.dataset.rightPanel = 'notes';
+  shell.dataset.phone = 'open';
   syncRailControls();
-  updatePhoneScale();
+  schedulePhoneScale();
 });
 
 document.getElementById('tabAssist').addEventListener('click', (e) => {
   e.stopPropagation();
-  if (shell.dataset.rightPanel !== 'assist') {
-    shell.dataset.rightPanel = 'assist';
-    shell.dataset.phone = 'open';
-    renderPingAssist();
-  } else {
-    shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
-  }
+  shell.dataset.rightPanel = 'assist';
+  shell.dataset.phone = 'open';
+  renderPingAssist();
   syncRailControls();
-  updatePhoneScale();
+  schedulePhoneScale();
 });
 
 document.querySelectorAll('[data-mode-toggle]').forEach(btn => {
@@ -4102,7 +4135,9 @@ const MF_PING_DOMAIN_PACKS = [
     modeLabel: 'Auto',
     summary: 'Appointments, slots, reservations, cancellations, or rescheduling.',
     keywords: ['booking','appointment','reservation','slot','schedule','reschedule','cancelled','canceled','calendar','availability','date','time','confirm','confirmation','double booked'],
-    jargon: ['slot window','calendar hold','reschedule flow']
+    jargon: ['slot window','calendar hold','reschedule flow'],
+    packType: 'booking_change',
+    packSummary: 'Checks booking anchor, date/time, confirmation, fallback, reference handling, and promise risk.'
   },
   {
     id: 'billing',
@@ -4110,7 +4145,9 @@ const MF_PING_DOMAIN_PACKS = [
     modeLabel: 'Auto',
     summary: 'Payments, invoices, charges, subscriptions, refunds, fees, or account balance.',
     keywords: ['payment','invoice','charge','charged','fee','bill','billing','subscription','renewal','refund','money','paid','overpaid','receipt','balance','direct debit'],
-    jargon: ['arrears','pro rata','chargeback','billing cycle']
+    jargon: ['arrears','pro rata','chargeback','billing cycle'],
+    packType: 'refund_payment',
+    packSummary: 'Checks money anchor, amount or stage, ownership, movement timing, payment path, reference handling, and promise risk.'
   },
   {
     id: 'account',
@@ -4157,6 +4194,15 @@ const MF_PING_SIGNALS = [
   { id:'vulnerability', label:'Potential vulnerability', weight:24, phrases:['overwhelmed','panic','can\'t cope','cant cope','worried','anxious','scared','i give up','helpless','mental health','disabled','vulnerable'], coach:'Slow the pace and reduce uncertainty.' },
   { id:'distrust', label:'Trust gap', weight:18, phrases:['mixed messages','not what i was told','your colleague said','nobody told me','different answers','contradiction','which one is true','left in the dark'], coach:'Clarify the record and avoid defensive wording.' },
   { id:'positive', label:'Positive tone', weight:-8, phrases:['thanks','thank you','appreciate','helpful','no rush','whenever you can'], coach:'Match warmth and keep the momentum.' }
+];
+
+const MF_PING_DRAFT_SIGNALS = [
+  { id:'instruction_load', label:'Hard instruction', weight:18, phrases:['you need to','you must','you have to','you should have'], coach:'Soften instructions into a clear request or next step.' },
+  { id:'vague_timing', label:'Vague timing', weight:16, phrases:['soon','shortly','asap','in due course','at some point','later'], coach:'Replace vague timing with a concrete update point where possible.' },
+  { id:'robotic_wording', label:'Robotic wording', weight:14, phrases:['as per','kindly','please note that','process','procedure','escalate internally'], coach:'Use plainer wording that still sounds accountable.' },
+  { id:'defensive_wording', label:'Defensive wording', weight:20, phrases:['as i said','as already explained','obviously','not our fault','policy says','per policy'], coach:'Remove defensive framing and keep the explanation neutral.' },
+  { id:'overpromise', label:'Promise risk', weight:22, phrases:['guarantee','definitely','promise','100%','will be resolved today'], coach:'Avoid firm promises unless the outcome is verified.' },
+  { id:'ownership_visible', label:'Ownership visible', weight:-8, phrases:['i will','i can','we will','we can','i have','we have'], coach:'Keep the owner and action visible.' }
 ];
 
 let activeInsightMode = 'auto';
@@ -4213,6 +4259,7 @@ function mfDetectDomain(customer, draft, mode) {
   const customerText = customer || '';
   const draftText = draft || '';
   const text = `${customerText} ${draftText}`;
+  const draftOnly = !customerText.trim() && !!draftText.trim();
   if (mode === 'claims' || mode === 'retail' || mode === 'general') {
     const forced = mfPackById(mode);
     return {
@@ -4232,7 +4279,7 @@ function mfDetectDomain(customer, draft, mode) {
       const customerHits = mfMatches(customerText, pack.keywords);
       const draftHits = mfMatches(draftText, pack.keywords);
       const hits = Array.from(new Set(customerHits.concat(draftHits)));
-      const score = customerHits.length * 22 + draftHits.length * 5 + Math.min(24, new Set(hits).size * 4);
+      const score = customerHits.length * 22 + draftHits.length * (draftOnly ? 18 : 5) + Math.min(24, new Set(hits).size * 4);
       return { pack, hits, score };
     })
     .sort((a, b) => b.score - a.score);
@@ -4271,9 +4318,12 @@ function mfDetectQueryType(customer, domain) {
   return { id: top.type.id, label: top.type.label, need: top.type.need, hits: top.hits.slice(0, 4), confidence: Math.min(96, 58 + top.score), candidates };
 }
 
-function mfDetectSignals(customer) {
-  const rows = MF_PING_SIGNALS.map(rule => {
-    const hits = mfMatches(customer, rule.phrases);
+function mfDetectSignals(text, sourceMode) {
+  const rules = sourceMode === 'draft_only'
+    ? MF_PING_DRAFT_SIGNALS.concat(MF_PING_SIGNALS)
+    : MF_PING_SIGNALS;
+  const rows = rules.map(rule => {
+    const hits = mfMatches(text, rule.phrases);
     return Object.assign({}, rule, { hits, score: hits.length ? Math.max(8, hits.length * Math.abs(rule.weight)) : 0 });
   }).filter(r => r.hits.length).sort((a, b) => b.score - a.score);
   const load = Math.max(0, Math.min(100, rows.reduce((sum, r) => sum + r.weight * r.hits.length, 0)));
@@ -4286,69 +4336,390 @@ function mfKeyTerms(customer, domain) {
   return Array.from(new Set(domainHits.concat(base))).slice(0, 12);
 }
 
-function mfCoverage(customer, draft, domain) {
+function mfCoverage(customer, draft, domain, sourceMode) {
+  if (sourceMode === 'draft_only') {
+    return { score: 100, terms: mfKeyTerms(draft, domain), missing: [], mode: 'draft_only' };
+  }
   const terms = mfKeyTerms(customer, domain);
-  if (!customer.trim()) return { score: 100, terms: [], missing: [] };
+  if (!customer.trim()) return { score: 100, terms: [], missing: [], mode: 'none' };
   if (!draft.trim()) return { score: 0, terms, missing: terms.slice(0, 6) };
   const d = mfNorm(draft);
   const hits = terms.filter(term => d.includes(term));
   const score = terms.length ? Math.round((hits.length / terms.length) * 100) : 100;
-  return { score, terms, missing: terms.filter(term => !d.includes(term)).slice(0, 6) };
+  return { score, terms, missing: terms.filter(term => !d.includes(term)).slice(0, 6), mode: 'customer' };
 }
 
-function mfDetectReply(customer, draft, domain, query, signals) {
+function mfLooksSupportLike(draft, domain, query) {
+  if (!String(draft || '').trim()) return false;
+  if (query && query.id && query.id !== 'general' && query.id !== 'none') return true;
+  const domainHits = domain && domain.id !== 'general' ? mfMatches(draft, domain.pack.keywords).length : 0;
+  const supportHits = mfMatches(draft, ['customer','booking','refund','payment','account','update','confirm','check','send you','let me know','happy to help','next step']).length;
+  return domainHits > 0 || supportHits > 0;
+}
+
+function mfDetectReply(customer, draft, domain, query, signals, sourceMode) {
   const d = mfNorm(draft);
   const avg = mfAverageSentence(draft);
   const hasDraft = !!d;
+  const draftOnly = sourceMode === 'draft_only';
+  const supportLike = draftOnly ? mfLooksSupportLike(draft, domain, query) : true;
   const empathy = mfMatches(draft, ['sorry','apologise','apologize','understand','i hear you','i appreciate','thank you','thanks']).length > 0;
   const ownership = /\b(i|we)('ll| will| can| have| am| are|\'ve| can)\b/i.test(draft) || mfMatches(draft, ['i am taking','i will check','i can check','we have fixed','i have picked']).length > 0;
   const timeline = /\b(today|tomorrow|within|by\s+\w+|before\s+\w+|after\s+\w+|end of day|eod|\d+\s+(working\s+)?days?)\b/i.test(draft);
   const nextStep = mfMatches(draft, ['next step','i will','i can','we will','send you','update you','confirm','check','arrange','resolve','call you']).length > 0;
-  const closeIndex = Math.max(d.indexOf('let me know'), d.indexOf('anything else'), d.indexOf('any questions'), d.indexOf('is that okay'), d.indexOf('happy to help'));
+  const closeIndex = Math.max(d.indexOf('let me know'), d.indexOf('send me'), d.indexOf('anything else'), d.indexOf('any questions'), d.indexOf('is that okay'), d.indexOf('happy to help'), d.indexOf('if that time does not work'), d.indexOf("if that doesn't work"));
   const close = closeIndex >= 0 && closeIndex > d.length * 0.58;
-  const coverage = mfCoverage(customer, draft, domain);
+  const coverage = mfCoverage(customer, draft, domain, sourceMode);
   const defensive = mfMatches(draft, ['as i said','as already explained','obviously','you must','not our fault','calm down','policy says','per policy']);
   const overpromise = mfMatches(draft, ['guarantee','definitely','promise','100%','will be resolved today']);
   const vagueTimeline = mfMatches(draft, ['soon','shortly','asap','in due course']).filter(Boolean);
   const jargon = mfMatches(draft, (domain.pack.jargon || []).concat(['escalate internally','backend','process flow']));
   const riskHits = defensive.concat(overpromise).concat(vagueTimeline).concat(jargon);
   const plain = avg <= 22 && jargon.length === 0;
-  let readiness = hasDraft ? 92 : 0;
+  let readiness = hasDraft ? (draftOnly ? 88 : 92) : 0;
   if (!hasDraft) readiness = 0;
-  if (signals.load >= 30 && !empathy) readiness -= 16;
-  if (!ownership) readiness -= 14;
-  if (!nextStep) readiness -= 14;
-  if ((query.id === 'status' || query.id === 'refund_payment' || signals.load >= 32) && !timeline) readiness -= 12;
-  if (!close) readiness -= 6;
-  if (coverage.score < 45) readiness -= 18;
-  else if (coverage.score < 70) readiness -= 8;
+  if (signals.load >= 30 && !empathy && !draftOnly) readiness -= 16;
+  if (!ownership && supportLike) readiness -= draftOnly ? 8 : 14;
+  if (!nextStep && supportLike) readiness -= draftOnly ? 8 : 14;
+  if ((query.id === 'status' || query.id === 'refund_payment' || signals.load >= 32) && !timeline && supportLike) readiness -= draftOnly ? 8 : 12;
+  if (!close && supportLike) readiness -= draftOnly ? 4 : 6;
+  if (!draftOnly) {
+    if (coverage.score < 45) readiness -= 18;
+    else if (coverage.score < 70) readiness -= 8;
+  }
   readiness -= Math.min(28, riskHits.length * 9);
+  if (!plain) readiness -= draftOnly ? 8 : 0;
   readiness = Math.max(0, Math.min(100, Math.round(readiness)));
   return {
-    hasDraft, empathy, ownership, timeline, nextStep, close, plain, avg,
+    hasDraft, empathy, ownership, timeline, nextStep, close, plain, avg, supportLike, sourceMode,
     coverage, riskHits, defensive, overpromise, vagueTimeline, jargon, readiness
   };
 }
 
-function mfBuildGaps(reply, query, signals) {
+function mfHasBookingTimeAnchor(text) {
+  return /\b(today|tomorrow|tonight|within|by\s+\w+|before\s+\w+|after\s+\w+|end of day|eod|\d+\s+(working\s+)?days?|monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|fri|sat|sun|\d{1,2}[:.]\d{2}|\d{1,2}\s?(am|pm))\b/i.test(text);
+}
+
+function mfEvaluateDomainPack(domain, query, customer, draft, reply, sourceMode) {
+  const packType = domain && domain.pack && domain.pack.packType;
+  const isBookingPack = packType === 'booking_change' || query.id === 'booking_change';
+  const isMoneyPack = packType === 'refund_payment' || query.id === 'refund_payment';
+  const activePack = isMoneyPack ? 'refund_payment' : isBookingPack ? 'booking_change' : 'none';
+  const active = activePack !== 'none';
+  const packMeta = {
+    booking_change: {
+      label: 'Booking / change pack',
+      summary: 'Checks booking anchor, date/time, confirmation, fallback, reference handling, and promise risk.'
+    },
+    refund_payment: {
+      label: 'Refund / payment pack',
+      summary: 'Checks money anchor, amount or stage, ownership, movement timing, payment path, reference handling, and promise risk.'
+    }
+  };
+  const base = {
+    active,
+    id: activePack,
+    label: active ? packMeta[activePack].label : 'No domain pack',
+    summary: active ? (domain.pack.packSummary || packMeta[activePack].summary) : '',
+    score: 100,
+    checks: [],
+    failed: []
+  };
+  if (!active || !reply.hasDraft) return base;
+
+  const combined = `${customer || ''} ${draft || ''}`;
+
+  function check(id, label, passed, note, fix, severity, required) {
+    const row = { id, label, passed, note: passed ? note : fix, fix, severity, required: required !== false };
+    base.checks.push(row);
+    if (!passed) base.failed.push(row);
+  }
+  function finalize() {
+    const required = base.checks.filter(row => row.required);
+    const passed = required.filter(row => row.passed).length;
+    base.score = required.length ? Math.round((passed / required.length) * 100) : 100;
+    return base;
+  }
+
+  if (isMoneyPack) {
+    const customerAskedReference = mfMatches(combined, ['reference','ref','invoice','receipt','transaction','payment id','refund id','order number','case number','ticket number']).length > 0;
+    const moneyAnchor = mfMatches(draft, ['refund','payment','invoice','charge','charged','fee','billing','bill','paid','money','payout','settlement','balance','direct debit','receipt']).length > 0;
+    const amountOrStage = /(?:£|\$|€)\s?\d|\b\d+(?:\.\d{2})?\b/i.test(draft) ||
+      mfMatches(draft, ['processed','processing','pending','approved','declined','reversed','credited','charged','submitted','raised','checking','being checked','under review','stage','status']).length > 0;
+    const owner = reply.ownership || mfMatches(draft, ['i will','i can','we will','we can','i have','we have','billing team','payments team','refund team','finance team']).length > 0;
+    const timeAnchor = reply.timeline || mfHasBookingTimeAnchor(draft) || mfMatches(draft, ['working days','business days','billing cycle','next statement','next update','bank processing']).length > 0;
+    const paymentPath = mfMatches(draft, ['original payment method','payment method','card','bank account','direct debit','account credit','statement','invoice','receipt','balance','manual payment','refund route','same card']).length > 0;
+    const reference = !customerAskedReference || /\b(ref|reference|invoice|receipt|transaction|payment id|refund id|order|case|ticket|[A-Z]{2,}-?\d{3,}|#\d{3,})\b/i.test(draft);
+    const promiseRisk = mfMatches(draft, ['guaranteed','guarantee','definitely refunded','definitely paid','definitely back','100% refunded','100% paid','will be resolved today','money will be in today','should be refunded','hopefully','probably']).length > 0;
+
+    check('money_anchor', 'Money anchor', moneyAnchor, 'Money topic is named.', 'Name the refund, payment, charge, invoice, fee, or balance.', 'medium');
+    check('money_stage', 'Amount or stage', amountOrStage, 'Amount or processing stage is visible.', 'Add the amount or current stage: pending, approved, processed, reversed, credited, or being checked.', 'high');
+    check('money_owner', 'Owner', owner, 'Owner is visible.', 'Say who is checking, correcting, refunding, or confirming the payment.', 'high');
+    check('money_timing', 'Movement timing', timeAnchor, 'Money movement timing is visible.', 'Add when the refund/payment update or movement should happen.', 'high');
+    check('money_path', 'Payment path', paymentPath, 'Payment route is clear.', 'Mention the payment method, original card, bank account, invoice, receipt, statement, or balance route.', 'medium');
+    check('money_reference', 'Reference handling', reference, 'Reference need is handled.', 'Include the invoice, receipt, transaction, payment, refund, order, case, or ticket reference.', customerAskedReference ? 'medium' : 'low', customerAskedReference);
+    check('money_promise', 'Promise control', !promiseRisk, 'No money movement overpromise found.', 'Avoid definite refund/payment promises until verified.', 'high');
+    return finalize();
+  }
+
+  const customerAskedReference = mfMatches(combined, ['reference','ref','booking id','booking number','confirmation number','case number','ticket number']).length > 0;
+  const bookingAnchor = mfMatches(draft, ['booking','appointment','reservation','slot','schedule','calendar','availability']).length > 0;
+  const timeAnchor = reply.timeline || mfHasBookingTimeAnchor(draft);
+  const confirmation = mfMatches(draft, ['confirmed','confirm','confirmation','booked','locked in','reserved','scheduled','rescheduled','cancelled','canceled','moved','changed']).length > 0;
+  const fallback = mfMatches(draft, ['if that does not work','if this does not work','if the time does not work','let me know','alternative','another slot','different time','move it','reschedule','available slot','fallback']).length > 0;
+  const reference = !customerAskedReference || /\b(ref|reference|booking id|booking number|confirmation number|case|ticket|[A-Z]{2,}-?\d{3,}|#\d{3,})\b/i.test(draft);
+  const promiseRisk = mfMatches(draft, ['guaranteed','guarantee','definitely confirmed','definitely booked','100% confirmed','will be resolved today','should be confirmed','should be booked','hopefully','probably']).length > 0;
+
+  check('booking_anchor', 'Booking anchor', bookingAnchor, 'Booking topic is named.', 'Name the booking, appointment, slot, or reservation.', 'medium');
+  check('booking_time', 'Time anchor', timeAnchor, 'Date, time, or update point is visible.', 'Add a date, time, slot, or clear update point.', 'high');
+  check('booking_confirmation', 'Confirmation state', confirmation, 'Booking status is explicit.', 'Say whether it is confirmed, changed, cancelled, moved, or still being checked.', 'high');
+  check('booking_reference', 'Reference handling', reference, 'Reference need is handled.', 'Include the booking reference or say where it will be confirmed.', customerAskedReference ? 'medium' : 'low', customerAskedReference);
+  check('booking_fallback', 'Fallback option', fallback, 'Fallback or reply path is visible.', 'Offer a fallback slot or ask them to send a better window.', 'low', false);
+  check('booking_promise', 'Promise control', !promiseRisk, 'No booking overpromise found.', 'Avoid definite booking promises unless verified.', 'high');
+
+  return finalize();
+}
+
+function mfBuildGaps(reply, query, signals, domainChecks, sourceMode) {
   const gaps = [];
   function add(id, label, note, severity) { gaps.push({ id, label, note, severity }); }
-  if (!reply.hasDraft) return [{ id:'draft_missing', label:'Draft missing', note:'Write or paste a reply to score readiness.', severity:'high' }];
-  if (signals.load >= 30 && !reply.empathy) add('ack_missing', 'Acknowledge pressure', 'Customer signal is loaded. Open with acknowledgement before process.', 'high');
-  if (!reply.ownership) add('ownership_missing', 'Ownership missing', 'Say who is checking, confirming, fixing, or escalating.', 'high');
-  if (!reply.nextStep) add('next_step_missing', 'Next step missing', 'Add the next concrete action, not only reassurance.', 'medium');
-  if ((query.id === 'status' || query.id === 'refund_payment') && !reply.timeline) add('timeline_missing', 'Timing missing', 'Status and money queries need a time anchor.', 'high');
-  if (reply.coverage.score < 70) add('coverage_gap', 'Customer ask under-covered', reply.coverage.missing.length ? 'Missing terms: ' + reply.coverage.missing.join(', ') : 'Mirror more of the customer ask.', 'medium');
+  const draftOnly = sourceMode === 'draft_only';
+  if (!reply.hasDraft) return [{ id:'draft_missing', label:'Draft missing', note:'Write or paste text to score writing readiness.', severity:'high' }];
+  if (signals.load >= 30 && !reply.empathy && !draftOnly) add('ack_missing', 'Acknowledge pressure', 'Customer signal is loaded. Open with acknowledgement before process.', 'high');
+  if (!reply.ownership && reply.supportLike) add('ownership_missing', draftOnly ? 'Ownership could be clearer' : 'Ownership missing', 'Say who is checking, confirming, fixing, or escalating.', draftOnly ? 'medium' : 'high');
+  if (!reply.nextStep && reply.supportLike) add('next_step_missing', draftOnly ? 'Action path could be clearer' : 'Next step missing', 'Add the next concrete action, not only reassurance.', 'medium');
+  if ((query.id === 'status' || query.id === 'refund_payment') && !reply.timeline && reply.supportLike) add('timeline_missing', 'Timing missing', draftOnly ? 'This topic would be stronger with a time anchor.' : 'Status and money queries need a time anchor.', draftOnly ? 'medium' : 'high');
+  if (!draftOnly && reply.coverage.score < 70) add('coverage_gap', 'Customer ask under-covered', reply.coverage.missing.length ? 'Missing terms: ' + reply.coverage.missing.join(', ') : 'Mirror more of the customer ask.', 'medium');
   if (reply.riskHits.length) add('risk_language', 'Risk language found', reply.riskHits.slice(0, 4).join(', '), 'high');
-  if (!reply.close) add('close_missing', 'Close is weak or early', 'End with a final offer, check, or confirmation.', 'low');
+  if (domainChecks && domainChecks.active) {
+    domainChecks.failed.forEach(check => {
+      if (!check.required && check.severity === 'low') return;
+      add('domain_' + check.id, check.label, check.fix || check.note, check.severity || 'medium');
+    });
+  }
+  if (!reply.close && reply.supportLike) add('close_missing', 'Close is weak or early', 'End with a final offer, check, or confirmation.', 'low');
   if (!reply.plain) add('plain_language', 'Plain language risk', 'Average sentence length or jargon is making the reply heavier.', 'medium');
   return gaps;
 }
 
-function mfBuildSuggestions(customer, domain, query, signals, reply, gaps) {
+function mfBuildResponseState(reply, gaps, signals, query, sourceMode) {
+  const draftOnly = sourceMode === 'draft_only';
+  const highGaps = gaps.filter(gap => gap.severity === 'high');
+  const mediumGaps = gaps.filter(gap => gap.severity === 'medium');
+  const riskGap = gaps.find(gap => gap.id === 'risk_language');
+  const topGap = highGaps[0] || gaps[0];
+  const adjustedScore = Math.max(0, Math.min(100, reply.readiness - (highGaps.length * 10) - (mediumGaps.length * 5)));
+
+  function cleanEvidence(items) {
+    return (items || []).filter(Boolean).map(item => String(item)).slice(0, 4);
+  }
+  function state(code, label, reason, next, evidence, severity) {
+    return {
+      code,
+      label,
+      score: reply.hasDraft ? adjustedScore : 0,
+      severity,
+      reason,
+      next,
+      evidence: cleanEvidence(evidence),
+      sourceMode
+    };
+  }
+
+  if (!reply.hasDraft) {
+    return state(
+      'blocked',
+      'Blocked',
+      'No draft exists to evaluate.',
+      'Write or paste text before scoring the response.',
+      ['Draft missing'],
+      'high'
+    );
+  }
+
+  if (!draftOnly && reply.coverage.score < 45) {
+    return state(
+      'blocked',
+      'Blocked',
+      'Customer ask is under-covered.',
+      'Mirror the unresolved customer detail before sending.',
+      reply.coverage.missing.length ? reply.coverage.missing : ['Coverage below 45%'],
+      'high'
+    );
+  }
+
+  if (riskGap || reply.overpromise.length || reply.defensive.length) {
+    return state(
+      'risky',
+      'Risky',
+      riskGap ? riskGap.note : 'Risk language is active.',
+      'Remove defensive, vague, or over-promising wording.',
+      reply.riskHits.length ? reply.riskHits : [riskGap && riskGap.label],
+      'high'
+    );
+  }
+
+  if (highGaps.length) {
+    return state(
+      'risky',
+      'Risky',
+      topGap.note,
+      'Fix the high-priority gap before treating this as send-ready.',
+      highGaps.map(gap => gap.label),
+      'high'
+    );
+  }
+
+  if (reply.readiness < 45) {
+    return state(
+      'blocked',
+      'Blocked',
+      'Too many response checks are unresolved.',
+      'Rework the draft before polishing details.',
+      gaps.map(gap => gap.label),
+      'high'
+    );
+  }
+
+  if (reply.readiness < 68) {
+    return state(
+      draftOnly && !reply.supportLike ? 'needs_polish' : 'risky',
+      draftOnly && !reply.supportLike ? 'Needs polish' : 'Risky',
+      topGap ? topGap.note : 'The response needs control before send.',
+      topGap ? 'Fix the strongest gap first.' : 'Tighten the wording and action path.',
+      topGap ? [topGap.label] : ['Readiness below 68%'],
+      draftOnly && !reply.supportLike ? 'medium' : 'high'
+    );
+  }
+
+  if (reply.readiness < 84 || gaps.length) {
+    return state(
+      'needs_polish',
+      'Needs polish',
+      topGap ? topGap.note : 'The response is usable but not fully clean.',
+      topGap ? 'Apply the strongest polish move.' : 'Tighten the close before sending.',
+      topGap ? [topGap.label] : ['Readiness below ready threshold'],
+      'medium'
+    );
+  }
+
+  return state(
+    'ready',
+    'Ready',
+    draftOnly ? 'No blocking writing risk is active.' : 'No blocking reply risk is active.',
+    draftOnly ? 'Keep the message direct.' : 'Send or copy when the final detail is confirmed.',
+    [
+      draftOnly ? 'Draft-only read' : 'Customer + draft read',
+      signals.load >= 30 ? 'Signal load ' + signals.load + '%' : 'Low pressure',
+      query.label
+    ],
+    'low'
+  );
+}
+
+function mfDomainSuggestion(check) {
+  const map = {
+    booking_anchor: {
+      label: 'Name the booking',
+      note: 'Make the reply clearly about the appointment, reservation, or slot.',
+      insert: 'I can check the booking and confirm the slot details.'
+    },
+    booking_time: {
+      label: 'Add the booking time',
+      note: 'Booking replies need a date, time, or clear update point.',
+      insert: 'I will confirm the exact date and time before the next update.'
+    },
+    booking_confirmation: {
+      label: 'Confirm the booking state',
+      note: 'Say whether it is confirmed, changed, cancelled, moved, or still being checked.',
+      insert: 'I will confirm whether the booking is locked in or needs to be moved.'
+    },
+    booking_reference: {
+      label: 'Handle the reference',
+      note: 'Include the booking reference or say where it will be confirmed.',
+      insert: 'I will include the booking reference in the confirmation.'
+    },
+    booking_fallback: {
+      label: 'Offer a fallback slot',
+      note: 'Give the customer a path if the slot does not work.',
+      insert: 'If that slot does not work, send me a better window and I can move it.'
+    },
+    booking_promise: {
+      label: 'Control the promise',
+      note: 'Avoid firm booking promises until the slot is verified.',
+      insert: 'I will verify the booking first, then confirm the exact slot.'
+    },
+    money_anchor: {
+      label: 'Name the money issue',
+      note: 'Make the reply clearly about the refund, payment, invoice, charge, fee, or balance.',
+      insert: 'I can check the refund or payment details and confirm the current status.'
+    },
+    money_stage: {
+      label: 'Add amount or stage',
+      note: 'Money replies need either the amount or the current processing stage.',
+      insert: 'I will confirm whether the refund is pending, approved, processed, or still being checked.'
+    },
+    money_owner: {
+      label: 'Add ownership',
+      note: 'Say who is checking, correcting, refunding, or confirming the payment.',
+      insert: 'I will check this with the payments team and confirm the next step.'
+    },
+    money_timing: {
+      label: 'Add money timing',
+      note: 'Give a clear update point or movement window for the refund/payment.',
+      insert: 'I will send you an update today with the payment status and expected movement window.'
+    },
+    money_path: {
+      label: 'Clarify payment path',
+      note: 'Mention the card, bank account, invoice, receipt, statement, or balance route.',
+      insert: 'If the refund is approved, it will return through the original payment method unless we confirm a different route.'
+    },
+    money_reference: {
+      label: 'Handle money reference',
+      note: 'Include the invoice, receipt, transaction, payment, refund, order, case, or ticket reference.',
+      insert: 'I will include the invoice or transaction reference in the confirmation.'
+    },
+    money_promise: {
+      label: 'Control money promise',
+      note: 'Avoid firm refund/payment promises until verified.',
+      insert: 'I will verify the payment status first, then confirm the exact movement window.'
+    }
+  };
+  return map[check.id] || {
+    label: check.label,
+    note: check.fix || check.note,
+    insert: ''
+  };
+}
+
+function mfBuildSuggestions(customer, domain, query, signals, reply, gaps, domainChecks, sourceMode) {
   const suggestions = [];
   const highSignal = signals.rows[0];
   function push(id, label, note, insert) { suggestions.push({ id, label, note, insert }); }
+  if (domainChecks && domainChecks.active) {
+    domainChecks.failed.slice(0, 3).forEach(check => {
+      const s = mfDomainSuggestion(check);
+      push('domain_' + check.id, s.label, s.note, s.insert);
+    });
+  }
+  if (sourceMode === 'draft_only') {
+    if (reply.riskHits.length) {
+      push('risk', 'Soften risk language', 'Replace defensive, vague, or over-promising wording with accountable language.', 'I can help with the next step and keep the update clear.');
+    }
+    if (!reply.plain) {
+      push('plain', 'Tighten the writing', 'Split long sentences and translate internal language into customer-facing wording.', 'I will keep this short, clear, and focused on the next step.');
+    }
+    if (reply.supportLike && !reply.ownership) {
+      push('own', 'Add ownership', 'Make the message feel held by a person, not a process.', 'I can check this now and confirm what happens next.');
+    }
+    if (reply.supportLike && !reply.nextStep) {
+      push('action', 'Add an action path', 'Give the reader a concrete next move.', 'The next step is for me to confirm the detail and send you the update.');
+    }
+    if (!suggestions.length) {
+      push('polish', 'Keep it clean', 'Writing is usable. Keep it direct and avoid adding process noise.', 'If anything changes, I will keep the next update clear.');
+    }
+    return suggestions.slice(0, 4);
+  }
   if (highSignal && !reply.empathy) {
     push('ack', 'Acknowledge first', highSignal.coach, 'I understand this has been frustrating, and I am going to keep the next step clear.');
   }
@@ -4370,12 +4741,13 @@ function mfBuildSuggestions(customer, domain, query, signals, reply, gaps) {
   return suggestions.slice(0, 4);
 }
 
-function mfBuildInsightBrief(customer, draft, domain, query, signals, reply, gaps, suggestions) {
+function mfBuildInsightBrief(customer, draft, domain, query, signals, reply, gaps, suggestions, responseState, sourceMode) {
   const highGap = gaps.find(g => g.severity === 'high');
   const firstGap = gaps[0];
   const topSignal = signals.rows[0];
   const primarySuggestion = suggestions[0];
   const hasCustomer = !!String(customer || '').trim();
+  const draftOnly = sourceMode === 'draft_only';
   const signalConfidence = topSignal ? Math.min(100, 58 + topSignal.score) : 58;
   const evidenceConfidence = Math.round(
     (domain.confidence * 0.28) +
@@ -4385,18 +4757,18 @@ function mfBuildInsightBrief(customer, draft, domain, query, signals, reply, gap
     ((reply.hasDraft ? reply.readiness : 35) * 0.14)
   );
 
-  let priority = 'Classify the customer ask';
-  let why = hasCustomer ? 'No major pressure marker yet. Keep the reply concrete and easy to scan.' : 'No customer message is available for the engine to read.';
+  let priority = draftOnly ? 'Improve the draft' : 'Classify the customer ask';
+  let why = hasCustomer ? 'No major pressure marker yet. Keep the reply concrete and easy to scan.' : 'Draft-only mode is active. The engine is reading the message itself for clarity, tone, and action quality.';
   let move = primarySuggestion ? primarySuggestion.label : 'Write a direct reply';
   let proof = primarySuggestion ? primarySuggestion.note : 'Drivers will expose matched terms and reply checks once there is input.';
-  let sendState = reply.hasDraft ? mfReadinessLabel(reply.readiness) : 'Draft missing';
+  let sendState = responseState.label;
 
   if (!reply.hasDraft) {
-    priority = 'Write or paste the draft';
-    why = 'The engine can read the customer ask, but cannot audit reply quality without the response.';
-    move = 'Create draft';
-    proof = 'Readiness, ownership, coverage, and risk checks need draft text.';
-    sendState = 'Hold';
+    priority = 'Write or paste text';
+    why = draftOnly ? 'Writing help starts as soon as there is a draft.' : 'The engine can read the customer ask, but cannot audit reply quality without the response.';
+    move = draftOnly ? 'Start writing' : 'Create draft';
+    proof = draftOnly ? 'Clarity, tone, risk, and action checks need draft text.' : 'Readiness, ownership, coverage, and risk checks need draft text.';
+    sendState = responseState.label;
   } else if (highGap) {
     priority = highGap.label;
     why = highGap.note;
@@ -4404,25 +4776,27 @@ function mfBuildInsightBrief(customer, draft, domain, query, signals, reply, gap
     proof = topSignal
       ? `${topSignal.label} signal plus ${highGap.severity} gap is driving this advice.`
       : `${highGap.severity} gap is driving this advice.`;
-    sendState = 'Hold';
+    sendState = responseState.label;
   } else if (firstGap) {
     priority = firstGap.label;
     why = firstGap.note;
     move = primarySuggestion ? primarySuggestion.label : 'Polish before send';
-    proof = `Coverage ${reply.coverage.score}% · ${gaps.length} polish item${gaps.length === 1 ? '' : 's'}.`;
-    sendState = 'Polish';
+    proof = draftOnly
+      ? `Draft-only writing read · ${gaps.length} polish item${gaps.length === 1 ? '' : 's'}.`
+      : `Coverage ${reply.coverage.score}% · ${gaps.length} polish item${gaps.length === 1 ? '' : 's'}.`;
+    sendState = responseState.label;
   } else if (topSignal && signals.load >= 30) {
     priority = topSignal.label;
     why = topSignal.coach;
-    move = primarySuggestion ? primarySuggestion.label : 'Match the customer pressure';
+    move = primarySuggestion ? primarySuggestion.label : (draftOnly ? 'Improve the wording' : 'Match the customer pressure');
     proof = `Signal load ${signals.load}% with hits: ${topSignal.hits.slice(0, 3).join(', ')}.`;
-    sendState = mfReadinessLabel(reply.readiness);
+    sendState = responseState.label;
   } else {
-    priority = 'Ready with a clean close';
-    why = 'No blocking gap is active. Keep the response direct and avoid adding process noise.';
-    move = primarySuggestion ? primarySuggestion.label : 'Send';
-    proof = `Coverage ${reply.coverage.score}% · no high-priority advice causes.`;
-    sendState = mfReadinessLabel(reply.readiness);
+    priority = draftOnly ? 'Clean writing state' : 'Ready with a clean close';
+    why = draftOnly ? 'No blocking writing risk is active. Keep the message direct and readable.' : 'No blocking gap is active. Keep the response direct and avoid adding process noise.';
+    move = primarySuggestion ? primarySuggestion.label : (draftOnly ? 'Keep draft' : 'Send');
+    proof = draftOnly ? 'Draft-only writing read · no high-priority advice causes.' : `Coverage ${reply.coverage.score}% · no high-priority advice causes.`;
+    sendState = responseState.label;
   }
 
   return {
@@ -4435,7 +4809,8 @@ function mfBuildInsightBrief(customer, draft, domain, query, signals, reply, gap
   };
 }
 
-function mfBuildDriverModel(customer, draft, domain, query, signals, reply, gaps, suggestions) {
+function mfBuildDriverModel(customer, draft, domain, query, signals, reply, gaps, suggestions, responseState, domainChecks, sourceMode) {
+  const draftOnly = sourceMode === 'draft_only';
   const domainRows = (domain.candidates && domain.candidates.length
     ? domain.candidates
     : [{ pack: domain.pack, hits: domain.hits || [], score: domain.confidence }]
@@ -4469,7 +4844,20 @@ function mfBuildDriverModel(customer, draft, domain, query, signals, reply, gaps
   }];
 
   const represented = reply.coverage.terms.filter(term => !reply.coverage.missing.includes(term)).slice(0, 6);
-  const coverageRows = [
+  const coverageRows = draftOnly ? [
+    {
+      label: 'Draft-only mode',
+      score: reply.readiness,
+      note: 'No customer source is required. The engine is scoring the message itself.',
+      tags: represented
+    },
+    {
+      label: 'Writing anchors',
+      score: Math.min(100, represented.length * 12),
+      note: represented.length ? represented.join(', ') : 'No strong topic anchors detected yet.',
+      tags: represented
+    }
+  ] : [
     {
       label: 'Coverage score',
       score: reply.coverage.score,
@@ -4495,12 +4883,24 @@ function mfBuildDriverModel(customer, draft, domain, query, signals, reply, gaps
     note: s.note,
     tags: ['suggestion']
   }));
+  if (domainChecks && domainChecks.active) {
+    domainChecks.checks.slice(0, 6).forEach(check => {
+      adviceRows.push({
+        label: check.label,
+        score: check.passed ? 18 : check.severity === 'high' ? 88 : check.severity === 'medium' ? 62 : 28,
+        note: check.note,
+        tags: [domainChecks.label, check.passed ? 'pass' : 'gap']
+      });
+    });
+  }
 
   return {
     state: {
+      source: draftOnly ? 'Draft-only' : 'Customer + draft',
+      response: `${responseState.label} · ${responseState.code}`,
       domain: `${domain.label} · ${domain.confidence}%`,
       intent: `${query.label} · ${query.confidence || 0}%`,
-      send: reply.hasDraft ? `${mfReadinessLabel(reply.readiness)} · ${reply.readiness}%` : 'Draft missing'
+      send: reply.hasDraft ? `${responseState.label} · ${responseState.score}%` : `${responseState.label} · draft missing`
     },
     domainRows,
     intentRows,
@@ -4512,7 +4912,10 @@ function mfBuildDriverModel(customer, draft, domain, query, signals, reply, gaps
       draftChars: (draft || '').length,
       signalLoad: signals.load,
       gapCount: gaps.length,
-      highGapCount: gaps.filter(g => g.severity === 'high').length
+      highGapCount: gaps.filter(g => g.severity === 'high').length,
+      responseState: responseState.code,
+      domainPack: domainChecks && domainChecks.active ? domainChecks.id : 'none',
+      domainPackScore: domainChecks && domainChecks.active ? domainChecks.score : null
     }
   };
 }
@@ -4528,14 +4931,20 @@ function mfBuildCoachModel(result) {
   const firstGap = result.gaps[0];
   const topSignal = result.signals.rows[0];
   const primarySuggestion = result.suggestions[0];
-  const score = result.reply.hasDraft ? result.reply.readiness : result.brief.confidence;
-  const label = result.reply.hasDraft ? mfReadinessLabel(result.reply.readiness) : 'Draft missing';
+  const responseState = result.responseState || { code: 'blocked', label: 'Blocked', score: 0, reason: 'No response state available.', next: 'Run the engine again.' };
+  const score = responseState.score;
+  const label = responseState.label;
   const highSignalIds = ['frustration', 'urgency', 'vulnerability', 'distrust'];
   const hasHighSignal = topSignal && highSignalIds.includes(topSignal.id);
+  const draftOnly = result.sourceMode === 'draft_only';
 
-  let headline = 'Keep the next move clear.';
+  let headline = draftOnly ? 'Guide the draft directly.' : 'Keep the next move clear.';
   if (!result.reply.hasDraft) {
-    headline = 'Write the draft before coaching.';
+    headline = draftOnly ? 'Write text before coaching.' : 'Write the draft before coaching.';
+  } else if (responseState.code === 'risky') {
+    headline = 'Risky: ' + mfCoachTrim(responseState.reason, 'Fix the risk before send.', 48);
+  } else if (responseState.code === 'blocked') {
+    headline = 'Blocked: ' + mfCoachTrim(responseState.reason, 'Rework before send.', 48);
   } else if (highGap) {
     headline = 'Fix: ' + highGap.label + '.';
   } else if (firstGap) {
@@ -4572,23 +4981,23 @@ function mfBuildCoachModel(result) {
     score,
     label,
     headline,
-    why: mfCoachTrim(result.brief.why || result.brief.proof, 'Coach is waiting for a useful read.', 160),
+    why: mfCoachTrim(responseState.reason || result.brief.why || result.brief.proof, 'Guidance is waiting for a useful read.', 160),
     confidence: result.brief.confidence,
     tryLabel: practiceLabel,
     tryText: mfCoachTrim(practiceNote, 'Practice move will appear once there is enough signal.', 150),
     tryInsert: practiceInsert,
     stack: [
       {
-        zone: 'Read',
+        zone: draftOnly ? 'Text' : 'Read',
         label: result.query.label,
         note: topSignal ? topSignal.coach : result.query.need,
         action: 'View',
         mode: 'drivers'
       },
       {
-        zone: 'Gap',
+        zone: responseState.code === 'ready' ? 'State' : 'Gap',
         label: gapRow.label,
-        note: gapRow.note,
+        note: responseState.code === 'ready' ? responseState.next : gapRow.note,
         action: gapRow.insert ? 'Fix' : 'View',
         insert: gapRow.insert,
         mode: gapRow.insert ? '' : 'drivers'
@@ -4603,25 +5012,32 @@ function mfBuildCoachModel(result) {
     ],
     sensitiveRows,
     evidenceRows: [
+      { label: 'Source', note: draftOnly ? 'Draft-only writing mode' : 'Customer message plus draft' },
       { label: 'Domain', note: result.domain.label + ' · ' + result.domain.confidence + '% confidence' },
       { label: 'Intent', note: result.query.label + ' · ' + result.query.need },
-      { label: 'Coverage', note: result.reply.hasDraft ? result.reply.coverage.score + '% customer ask coverage' : 'No draft coverage available yet.' },
-      { label: 'Send state', note: result.reply.hasDraft ? mfReadinessLabel(result.reply.readiness) + ' · ' + result.reply.readiness + '%' : 'Hold · draft missing' }
+      { label: 'Coverage', note: draftOnly ? 'Not required without customer source.' : (result.reply.hasDraft ? result.reply.coverage.score + '% customer ask coverage' : 'No draft coverage available yet.') },
+      { label: 'Response state', note: responseState.label + ' · ' + responseState.code + ' · ' + responseState.score + '%' }
     ]
   };
 }
 
 function MF_runPingUniversalEngine(customer, draft, mode) {
   const safeMode = ['auto','general','claims','retail'].includes(mode) ? mode : 'auto';
+  const hasCustomer = !!String(customer || '').trim();
+  const hasDraft = !!String(draft || '').trim();
+  const sourceMode = hasCustomer ? 'customer_context' : hasDraft ? 'draft_only' : 'blank';
+  const analysisText = hasCustomer ? customer : draft;
   const domain = mfDetectDomain(customer, draft, safeMode);
-  const query = mfDetectQueryType(customer || '', domain);
-  const signals = mfDetectSignals(customer || '');
-  const reply = mfDetectReply(customer || '', draft || '', domain, query, signals);
-  const gaps = mfBuildGaps(reply, query, signals);
-  const suggestions = mfBuildSuggestions(customer || '', domain, query, signals, reply, gaps);
-  const brief = mfBuildInsightBrief(customer || '', draft || '', domain, query, signals, reply, gaps, suggestions);
-  const drivers = mfBuildDriverModel(customer || '', draft || '', domain, query, signals, reply, gaps, suggestions);
-  return { mode: safeMode, domain, query, signals, reply, gaps, suggestions, brief, drivers };
+  const query = mfDetectQueryType(analysisText || '', domain);
+  const signals = mfDetectSignals(analysisText || '', sourceMode);
+  const reply = mfDetectReply(customer || '', draft || '', domain, query, signals, sourceMode);
+  const domainChecks = mfEvaluateDomainPack(domain, query, customer || '', draft || '', reply, sourceMode);
+  const gaps = mfBuildGaps(reply, query, signals, domainChecks, sourceMode);
+  const responseState = mfBuildResponseState(reply, gaps, signals, query, sourceMode);
+  const suggestions = mfBuildSuggestions(customer || '', domain, query, signals, reply, gaps, domainChecks, sourceMode);
+  const brief = mfBuildInsightBrief(customer || '', draft || '', domain, query, signals, reply, gaps, suggestions, responseState, sourceMode);
+  const drivers = mfBuildDriverModel(customer || '', draft || '', domain, query, signals, reply, gaps, suggestions, responseState, domainChecks, sourceMode);
+  return { mode: safeMode, sourceMode, hasCustomer, hasDraft, domain, query, signals, reply, responseState, domainChecks, gaps, suggestions, brief, drivers };
 }
 window.MF_runPingUniversalEngine = MF_runPingUniversalEngine;
 
@@ -4727,41 +5143,68 @@ function mfRenderDriverRows(containerId, rows, emptyText) {
   });
 }
 
-function mfRenderCoachStack(containerId, rows) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = '';
-  (rows || []).forEach(row => {
-    const wrap = document.createElement('div');
-    wrap.className = 'mf-coach-row';
+function mfBuildAssistDriverRows() {
+  const text = getDraftPlain().trim();
+  if (!text || !window.MirrorFlowAssistEngine || typeof window.MirrorFlowAssistEngine.analyzeText !== 'function') return [];
+  try {
+    const analysis = window.MirrorFlowAssistEngine.analyzeText(text, { surface: 'ping_drivers', mode: 'writing_only' });
+    const issues = analysis.issues || [];
+    const grammar = issues.filter(issue => issue.category === 'grammar').length;
+    const clarity = issues.filter(issue => issue.category === 'clarity').length;
+    const tone = issues.filter(issue => issue.category === 'tone').length;
+    const rows = [
+      {
+        label: 'Writing health',
+        note: `${issues.length} active writing issue${issues.length === 1 ? '' : 's'}`,
+        score: Math.max(0, 100 - issues.length * 12),
+        tags: ['Assist', 'grammar', 'clarity', 'tone']
+      },
+      {
+        label: 'Readability',
+        note: `${analysis.clarity.readability} · grade ${analysis.clarity.grade} · ${analysis.clarity.avgSentenceLength} words/sentence`,
+        score: analysis.clarity.quality,
+        tags: ['Assist', 'clarity']
+      },
+      {
+        label: 'Tone load',
+        note: `${analysis.tone.primary} · ${analysis.tone.risk} · ${tone} tone signal${tone === 1 ? '' : 's'}`,
+        score: Math.max(0, 100 - analysis.tone.score),
+        tags: ['Assist', 'tone']
+      },
+      {
+        label: 'Grammar rules',
+        note: `${grammar} grammar match${grammar === 1 ? '' : 'es'} · ${analysis.rules.active.filter(rule => rule.category === 'grammar').length} active rules`,
+        score: Math.max(0, 100 - grammar * 20),
+        tags: ['Assist', 'grammar']
+      }
+    ];
+    issues.slice(0, 4).forEach(issue => {
+      rows.push({
+        label: issue.label,
+        note: issue.message,
+        score: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 55 : 76,
+        tags: ['Assist', issue.category, issue.severity]
+      });
+    });
+    return rows;
+  } catch (_) {
+    return [];
+  }
+}
 
-    const dot = document.createElement('span');
-    dot.className = 'mf-engine-dot';
-
-    const body = document.createElement('div');
-    const kicker = document.createElement('span');
-    kicker.className = 'mf-coach-kicker';
-    kicker.textContent = row.zone || 'Coach';
-    const title = document.createElement('b');
-    title.textContent = row.label || '--';
-    const note = document.createElement('span');
-    note.textContent = row.note || '';
-    body.appendChild(kicker);
-    body.appendChild(title);
-    body.appendChild(note);
-
-    const action = document.createElement('button');
-    action.className = 'mf-coach-mini-btn';
-    action.type = 'button';
-    action.textContent = row.action || 'View';
-    if (row.insert) action.dataset.coachInsert = row.insert;
-    if (row.mode) action.dataset.coachMode = row.mode;
-
-    wrap.appendChild(dot);
-    wrap.appendChild(body);
-    wrap.appendChild(action);
-    container.appendChild(wrap);
-  });
+function renderInsightGuidanceCue(result) {
+  if (!result) return;
+  const cue = mfBuildCoachModel(result);
+  mfSetText('mfInsightCueTitle', cue.headline);
+  mfSetText('mfInsightCueWhy', cue.why);
+  mfSetText('mfInsightCueMove', cue.tryLabel);
+  mfSetText('mfInsightCueText', cue.tryText);
+  const btn = document.getElementById('mfInsightCueInsert');
+  if (btn) {
+    btn.dataset.insightInsert = cue.tryInsert || '';
+    btn.disabled = !cue.tryInsert;
+    btn.textContent = cue.tryInsert ? 'Insert move' : 'No insert yet';
+  }
 }
 
 function renderPingDrivers(result) {
@@ -4770,61 +5213,44 @@ function renderPingDrivers(result) {
   mfSetText('mfDriverMode', result.domain.label);
   mfSetText('mfDriverMeta', d.metrics.highGapCount
     ? d.metrics.highGapCount + ' high-priority driver' + (d.metrics.highGapCount === 1 ? '' : 's')
-    : d.metrics.gapCount + ' active driver' + (d.metrics.gapCount === 1 ? '' : 's'));
+    : d.state.source + ' · ' + d.metrics.gapCount + ' active driver' + (d.metrics.gapCount === 1 ? '' : 's'));
+  mfSetText('mfDriverStateCode', d.state.response);
   mfSetText('mfDriverDomain', d.state.domain);
   mfSetText('mfDriverIntent', d.state.intent);
   mfSetText('mfDriverSendState', d.state.send);
   mfRenderDriverRows('mfDomainDrivers', d.domainRows, 'No classification evidence yet.');
+  mfRenderDriverRows('mfAssistDrivers', mfBuildAssistDriverRows(), 'No Assist evidence yet.');
   mfRenderDriverRows('mfIntentDrivers', d.intentRows, 'No intent evidence yet.');
   mfRenderDriverRows('mfSignalDrivers', d.signalRows, 'No pressure signals found.');
   mfRenderDriverRows('mfCoverageDrivers', d.coverageRows, 'No coverage map yet.');
   mfRenderDriverRows('mfAdviceDrivers', d.adviceRows, 'No advice causes found.');
 }
 
-function renderPingCoach(result) {
-  if (!result) return;
-  const coach = mfBuildCoachModel(result);
-  mfSetText('mfCoachState', coach.label);
-  mfSetText('mfCoachMeta', result.domain.label);
-  mfSetText('mfCoachHeadline', coach.headline);
-  mfSetText('mfCoachWhy', coach.why);
-  mfSetText('mfCoachScore', result.reply.hasDraft ? coach.score + '%' : '--');
-  mfSetText('mfCoachScoreLabel', coach.label);
-  mfSetText('mfCoachConfidence', coach.confidence + '%');
-  const bar = document.getElementById('mfCoachBar');
-  if (bar) bar.style.width = Math.max(0, Math.min(100, coach.score)) + '%';
-  mfRenderCoachStack('mfCoachStack', coach.stack);
-  mfSetText('mfCoachTryLabel', coach.tryLabel);
-  mfSetText('mfCoachTryText', coach.tryText);
-  const insertBtn = document.getElementById('mfCoachInsertBtn');
-  if (insertBtn) {
-    insertBtn.dataset.coachInsert = coach.tryInsert || '';
-    insertBtn.disabled = !coach.tryInsert;
-    insertBtn.textContent = coach.tryInsert ? 'Insert move' : 'No insert yet';
-  }
-  mfRenderRows('mfCoachSensitive', coach.sensitiveRows, { kind: 'mf-engine-row' });
-  mfRenderRows('mfCoachEvidence', coach.evidenceRows, { kind: 'mf-engine-row' });
-}
-
 function renderPingInsights() {
   activeInsightMode = 'auto';
   const customerContext = getCustomerContextText();
   const result = MF_runPingUniversalEngine(customerContext, getDraftPlain(), activeInsightMode);
+  const draftOnly = result.sourceMode === 'draft_only';
+  const responseState = result.responseState || { code: 'blocked', label: 'Blocked', score: 0, reason: 'No response state available.', severity: 'high' };
   window.MF_PING_LAST_ENGINE = result;
   renderPingDrivers(result);
-  renderPingCoach(result);
+  renderInsightGuidanceCue(result);
 
   mfSetText('mfDetectedMode', result.domain.label);
-  mfSetText('mfDetectedMeta', result.domain.confidence + '% · ' + result.query.label);
-  mfSetText('mfModeBadge', 'Detected');
+  mfSetText('mfDetectedMeta', (draftOnly ? 'Draft-only · ' : '') + result.domain.confidence + '% · ' + result.query.label);
+  mfSetText('mfModeBadge', draftOnly ? 'Draft' : 'Detected');
   mfSetText('mfDomainLabel', result.domain.label);
   mfSetText('mfDomainMeta', result.domain.forced
     ? 'Forced mode. ' + result.domain.summary
     : result.domain.confidence + '% confidence. ' + (result.domain.hits.length ? 'Signals: ' + result.domain.hits.join(', ') : result.domain.summary));
-  mfSetText('mfReadyScore', result.reply.hasDraft ? result.reply.readiness + '%' : '--');
-  mfSetText('mfReadyLabel', mfReadinessLabel(result.reply.readiness));
+  const stateCard = document.getElementById('mfResponseStateCard');
+  if (stateCard) stateCard.dataset.responseState = responseState.code;
+  const briefStateCard = document.getElementById('mfBriefStateCard');
+  if (briefStateCard) briefStateCard.dataset.responseState = responseState.code;
+  mfSetText('mfReadyScore', result.reply.hasDraft ? responseState.score + '%' : '--');
+  mfSetText('mfReadyLabel', responseState.label);
   const readyBar = document.getElementById('mfReadyBar');
-  if (readyBar) readyBar.style.width = result.reply.readiness + '%';
+  if (readyBar) readyBar.style.width = responseState.score + '%';
   mfSetText('mfBriefPriority', result.brief.priority);
   mfSetText('mfBriefWhy', result.brief.why);
   mfSetText('mfBriefMove', result.brief.move);
@@ -4835,25 +5261,49 @@ function renderPingInsights() {
   mfSetText('mfQueryMeta', result.query.need);
   mfSetText('mfPassRead', result.signals.rows.length
     ? result.signals.rows.slice(0, 2).map(s => s.label).join(', ') + ' detected.'
-    : result.query.label + ' in ' + result.domain.label.toLowerCase() + '.');
+    : draftOnly ? 'Draft is being read directly.' : result.query.label + ' in ' + result.domain.label.toLowerCase() + '.');
   mfSetText('mfPassReadState', result.signals.load >= 30 ? 'Loaded' : 'Stable');
   mfSetText('mfPassWrite', result.reply.hasDraft
-    ? mfReadinessLabel(result.reply.readiness) + ' · coverage ' + result.reply.coverage.score + '%.'
+    ? draftOnly
+      ? responseState.label + ' · writing read.'
+      : responseState.label + ' · coverage ' + result.reply.coverage.score + '%.'
     : 'No draft to evaluate.');
-  mfSetText('mfPassWriteState', result.reply.hasDraft ? result.reply.readiness + '%' : '--');
+  mfSetText('mfPassWriteState', result.reply.hasDraft ? responseState.score + '%' : '--');
   const highGapCount = result.gaps.filter(g => g.severity === 'high').length;
   mfSetText('mfPassAudit', highGapCount
     ? highGapCount + ' high-priority issue' + (highGapCount === 1 ? '' : 's') + ' before send.'
-    : (result.gaps.length ? result.gaps.length + ' polish item' + (result.gaps.length === 1 ? '' : 's') + '.' : 'No blocking gaps.'));
-  mfSetText('mfPassAuditState', highGapCount ? 'Hold' : (result.gaps.length ? 'Polish' : 'Clear'));
+    : (responseState.reason || (result.gaps.length ? result.gaps.length + ' polish item' + (result.gaps.length === 1 ? '' : 's') + '.' : 'No blocking gaps.')));
+  mfSetText('mfPassAuditState', responseState.label);
 
   const signalRows = result.signals.rows.slice(0, 4).map(signal => ({
     label: signal.label,
     note: signal.coach + (signal.hits.length ? ' Hits: ' + signal.hits.slice(0, 3).join(', ') : '')
   }));
-  mfRenderRows('mfSignalList', signalRows, { empty: 'No strong customer signal detected.', kind: 'mf-engine-row' });
+  mfRenderRows('mfSignalList', signalRows, { empty: draftOnly ? 'No strong writing signal detected.' : 'No strong customer signal detected.', kind: 'mf-engine-row' });
 
-  const checkRows = [
+  const stateRow = {
+    label: 'State: ' + responseState.label,
+    note: responseState.reason + (responseState.next ? ' Next: ' + responseState.next : ''),
+    severity: responseState.severity || 'medium'
+  };
+  const domainCheckRows = result.domainChecks && result.domainChecks.active
+    ? result.domainChecks.checks.map(check => ({
+        label: check.label,
+        value: check.passed ? 'Pass' : 'Gap',
+        note: check.note,
+        severity: check.passed ? 'low' : check.severity
+      }))
+    : [];
+  const checkRows = draftOnly ? [
+    stateRow,
+    ...domainCheckRows,
+    { label:'Source', value:'Draft', note:'No customer message required. Writing help is reading this text directly.', severity:'low' },
+    { label:'Plain language', value: result.reply.plain ? 'Clear' : 'Heavy', note: result.reply.plain ? 'Sentence load and jargon are under control.' : 'Split long sentences or translate internal terms.', severity: result.reply.plain ? 'low' : 'medium' },
+    { label:'Action path', value: result.reply.supportLike ? (result.reply.nextStep ? 'Present' : 'Optional') : 'Universal', note: result.reply.supportLike ? (result.reply.nextStep ? 'Action path is visible.' : 'Add a next action if this is a support reply.') : 'General text mode; no customer reply action required.', severity: result.reply.supportLike && !result.reply.nextStep ? 'medium' : 'low' },
+    { label:'Risk', value: result.reply.riskHits.length ? 'Flagged' : 'Clear', note: result.reply.riskHits.length ? result.reply.riskHits.slice(0, 4).join(', ') : 'No hard risk phrase found.', severity: result.reply.riskHits.length ? 'high' : 'low' }
+  ] : [
+    stateRow,
+    ...domainCheckRows,
     { label:'Coverage', value: result.reply.coverage.score + '%', note: result.reply.coverage.score >= 70 ? 'Customer ask is represented.' : 'Missing: ' + (result.reply.coverage.missing.join(', ') || 'customer detail'), severity: result.reply.coverage.score >= 70 ? 'low' : 'medium' },
     { label:'Ownership', value: result.reply.ownership ? 'Present' : 'Missing', note: result.reply.ownership ? 'Sender action is visible.' : 'Add who will do what.', severity: result.reply.ownership ? 'low' : 'high' },
     { label:'Next step', value: result.reply.nextStep ? 'Present' : 'Missing', note: result.reply.nextStep ? 'Action path is visible.' : 'Add the next concrete action.', severity: result.reply.nextStep ? 'low' : 'medium' },
@@ -4865,29 +5315,19 @@ function renderPingInsights() {
 }
 
 document.getElementById('pingInsightEngine').addEventListener('click', (e) => {
+  const jump = e.target.closest('[data-mode-jump]');
+  if (jump && jump.dataset.modeJump) {
+    shell.dataset.workspaceMode = normalizeWorkspaceMode(jump.dataset.modeJump);
+    shell.dataset.insights = 'open';
+    syncModeControls();
+    syncRailControls();
+    save();
+    return;
+  }
   const btn = e.target.closest('[data-insight-insert]');
   if (!btn) return;
   insertAtCursor(btn.dataset.insightInsert);
   toast('Inserted insight move');
-});
-
-document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
-  const insertBtn = e.target.closest('[data-coach-insert]');
-  if (insertBtn && insertBtn.dataset.coachInsert) {
-    insertAtCursor(insertBtn.dataset.coachInsert);
-    toast('Inserted coach move');
-    return;
-  }
-  const modeBtn = e.target.closest('[data-coach-mode]');
-  if (modeBtn && modeBtn.dataset.coachMode) {
-    shell.dataset.workspaceMode = modeBtn.dataset.coachMode;
-    shell.dataset.insights = 'open';
-    syncModeControls();
-    syncRailControls();
-    renderPingInsights();
-    save();
-    toast('Drivers mode');
-  }
 });
 
 /* ========== MIRRORFLOW ASSIST ENGINE (inlined) ========== */
@@ -4901,7 +5341,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
   const RULE_PROFILE_ID = "mirrorflow-assist-local-default";
   const RULE_PROFILE_SCHEMA_VERSION = "1.1.0";
   const TEST_REPORT_SCHEMA_VERSION = "1.0.0";
-  const RULE_CATEGORIES = ["grammar", "clarity", "tone", "policy"];
+  const RULE_CATEGORIES = ["grammar", "clarity", "tone"];
   const RULE_SEVERITIES = ["high", "medium", "low"];
   const CLARITY_MODEL_VERSION = "clarity-score-v3";
   const CLARITY_SCORE_WEIGHTS = { length: 30, vagueTiming: 20, wordiness: 18, jargon: 16, specificity: 16 };
@@ -4926,15 +5366,15 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     { id:"grammar.confusion.less_than", category:"grammar", subtype:"confusion", label:"Then / than", severity:"medium", confidence:0.78, pattern:/\bless then\b/gi, replacement:"less than", message:"Use 'than' for comparison." },
     { id:"tone.robotic.as_per", category:"tone", subtype:"robotic", label:"Procedural wording", severity:"medium", confidence:0.74, pattern:/\bas per\b/gi, replacement:"following", message:"This sounds procedural. Use plainer wording." },
     { id:"tone.defensive.as_you_know", category:"tone", subtype:"defensive", label:"Defensive opener", severity:"medium", confidence:0.78, pattern:/\bas you know\b/gi, replacement:"to confirm", message:"This can sound defensive. Use a neutral opener." },
-    { id:"tone.blame.you_should_have", category:"tone", subtype:"blame", label:"Blame framing", severity:"high", confidence:0.80, pattern:/\byou should have\b/gi, replacement:"the usual next step is to", message:"Avoid framing the issue as the customer's fault." },
+    { id:"tone.blame.you_should_have", category:"tone", subtype:"blame", label:"Blame framing", severity:"high", confidence:0.80, pattern:/\byou should have\b/gi, replacement:"the usual next step is to", message:"Avoid making the reader feel at fault." },
     { id:"tone.blame.you_failed_to", category:"tone", subtype:"blame", label:"Blame wording", severity:"high", confidence:0.86, pattern:/\byou failed to\b/gi, replacement:"we do not have", message:"Avoid direct blame wording." },
     { id:"tone.escalation.calm_down", category:"tone", subtype:"escalation", label:"Escalating phrase", severity:"high", confidence:0.92, pattern:/\bcalm down\b/gi, replacement:null, message:"This phrase is likely to escalate the conversation." },
     { id:"tone.passive_aggressive.obviously", category:"tone", subtype:"passive_aggressive", label:"Passive-aggressive wording", severity:"medium", confidence:0.76, pattern:/\bobviously\b/gi, replacement:"", message:"This word can read as dismissive." },
     { id:"tone.command.you_need_to", category:"tone", subtype:"imperative", label:"Hard instruction", severity:"medium", confidence:0.74, pattern:/(^|[.!?]\s+)you need to\b/gi, replacement:"$1please", message:"This can sound like an order. Soften the instruction." },
-    { id:"tone.dismissive.not_my_problem", category:"tone", subtype:"dismissive", label:"Dismissive wording", severity:"high", confidence:0.94, pattern:/\b(that'?s not my problem|not my problem)\b/gi, replacement:null, message:"This dismisses the customer's issue. Rewrite manually." },
-    { id:"tone.accusatory.you_are_wrong", category:"tone", subtype:"accusatory", label:"Accusatory wording", severity:"high", confidence:0.90, pattern:/\byou are wrong\b/gi, replacement:"I can clarify this", message:"Avoid telling the customer they are wrong." },
+    { id:"tone.dismissive.not_my_problem", category:"tone", subtype:"dismissive", label:"Dismissive wording", severity:"high", confidence:0.94, pattern:/\b(that'?s not my problem|not my problem)\b/gi, replacement:null, message:"This dismisses the reader's issue. Rewrite manually." },
+    { id:"tone.accusatory.you_are_wrong", category:"tone", subtype:"accusatory", label:"Accusatory wording", severity:"high", confidence:0.90, pattern:/\byou are wrong\b/gi, replacement:"I can clarify this", message:"Avoid telling the reader they are wrong." },
     { id:"tone.robotic.kindly", category:"tone", subtype:"robotic", label:"Over-formal wording", severity:"low", confidence:0.64, pattern:/\bkindly\b/gi, replacement:"please", message:"This can sound stiff in chat." },
-    { id:"tone.absolute.no_way", category:"tone", subtype:"absolute", label:"Absolute refusal", severity:"high", confidence:0.86, pattern:/\b(no way|impossible)\b/gi, replacement:null, message:"This refusal may feel abrupt. Offer an available option." },
+    { id:"tone.absolute.no_way", category:"tone", subtype:"absolute", label:"Absolute refusal", severity:"high", confidence:0.86, pattern:/\b(no way|impossible)\b/gi, replacement:null, message:"This refusal may feel abrupt. Offer a clear alternative." },
     { id:"clarity.specificity.very_soon", category:"clarity", subtype:"specificity", label:"Vague timing", severity:"medium", confidence:0.72, pattern:/\bvery soon\b/gi, replacement:"as soon as I have the update", message:"Vague timing weakens trust." },
     { id:"clarity.wordiness.in_order_to", category:"clarity", subtype:"wordiness", label:"Wordy phrase", severity:"low", confidence:0.86, pattern:/\bin order to\b/gi, replacement:"to", message:"Shorten this phrase." },
     { id:"clarity.wordiness.due_to_fact", category:"clarity", subtype:"wordiness", label:"Wordy cause phrase", severity:"medium", confidence:0.88, pattern:/\bdue to the fact that\b/gi, replacement:"because", message:"Use the shorter cause phrase." },
@@ -4945,9 +5385,8 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     { id:"clarity.wordiness.with_regards_to", category:"clarity", subtype:"wordiness", label:"Wordy topic phrase", severity:"low", confidence:0.84, pattern:/\bwith regards to\b/gi, replacement:"about", message:"Use a shorter topic phrase." },
     { id:"clarity.wordiness.prior_to", category:"clarity", subtype:"wordiness", label:"Wordy time phrase", severity:"low", confidence:0.90, pattern:/\bprior to\b/gi, replacement:"before", message:"Use the shorter time phrase." },
     { id:"clarity.wordiness.at_later_date", category:"clarity", subtype:"wordiness", label:"Wordy date phrase", severity:"low", confidence:0.82, pattern:/\bat a later date\b/gi, replacement:"later", message:"Use the shorter time phrase." },
-    { id:"clarity.jargon.backend", category:"clarity", subtype:"jargon", label:"Internal jargon", severity:"medium", confidence:0.76, pattern:/\bbackend\b/gi, replacement:"internal system", message:"Use customer-facing wording instead of internal jargon." },
-    { id:"clarity.hedging.just", category:"clarity", subtype:"hedging", label:"Removable softener", severity:"low", confidence:0.62, pattern:/\bjust\b/gi, replacement:"", message:"This softener is usually removable." },
-    { id:"policy.promise.guaranteed_today", category:"policy", subtype:"promise", label:"Unverified guarantee", severity:"high", confidence:0.82, pattern:/\b(?:is |are |will be )?(?:guaranteed|promised|definitely confirmed) today\b/gi, replacement:"will be confirmed once verified", message:"Avoid making a firm same-day promise unless it is verified." }
+    { id:"clarity.jargon.backend", category:"clarity", subtype:"jargon", label:"Internal jargon", severity:"medium", confidence:0.76, pattern:/\bbackend\b/gi, replacement:"system", message:"Use plain wording instead of internal jargon." },
+    { id:"clarity.hedging.just", category:"clarity", subtype:"hedging", label:"Removable softener", severity:"low", confidence:0.62, pattern:/\bjust\b/gi, replacement:"", message:"This softener is usually removable." }
   ];
 
   const STRUCTURAL_RULES = [
@@ -4957,7 +5396,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
         sentenceList(text).forEach(sentence => {
           if (wordsOf(sentence).length <= 26) return;
           const start = text.indexOf(sentence);
-          push({ ruleId:this.id, category:this.category, subtype:this.subtype, label:this.label, start, end:start+sentence.length, message:"Long sentence. Split it before sending.", replacement:null, severity:this.severity, confidence:this.confidence, excerpt:sentence.slice(0,70)+(sentence.length>70?"...":"") }, protectedSpans);
+          push({ ruleId:this.id, category:this.category, subtype:this.subtype, label:this.label, start, end:start+sentence.length, message:"Long sentence. Split it for readability.", replacement:null, severity:this.severity, confidence:this.confidence, excerpt:sentence.slice(0,70)+(sentence.length>70?"...":"") }, protectedSpans);
         });
       }
     },
@@ -5000,7 +5439,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     { id: "C-010", ruleId: "clarity.wordiness.with_regards_to", input: "With regards to your booking, I can help.", expectedReplacement: "about" },
     { id: "C-011", ruleId: "clarity.wordiness.prior_to", input: "Please send this prior to the appointment.", expectedReplacement: "before" },
     { id: "C-012", ruleId: "clarity.wordiness.at_later_date", input: "We can check this at a later date.", expectedReplacement: "later" },
-    { id: "C-013", ruleId: "clarity.jargon.backend", input: "The backend is still updating.", expectedReplacement: "internal system" },
+    { id: "C-013", ruleId: "clarity.jargon.backend", input: "The backend is still updating.", expectedReplacement: "system" },
     { id: "T-001", ruleId: "tone.robotic.as_per", input: "As per our process, I will update you.", expectedReplacement: "following" },
     { id: "T-002", ruleId: "tone.defensive.as_you_know", input: "As you know, this was already sent.", expectedReplacement: "to confirm" },
     { id: "T-003", ruleId: "tone.blame.you_should_have", input: "You should have sent this earlier.", expectedReplacement: "the usual next step is to" },
@@ -5012,8 +5451,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     { id: "T-009", ruleId: "tone.dismissive.not_my_problem", input: "That is not my problem.", expectedReplacement: null },
     { id: "T-010", ruleId: "tone.accusatory.you_are_wrong", input: "You are wrong about this.", expectedReplacement: "I can clarify this" },
     { id: "T-011", ruleId: "tone.robotic.kindly", input: "Kindly send the reference.", expectedReplacement: "please" },
-    { id: "T-012", ruleId: "tone.absolute.no_way", input: "No way, that is impossible.", expectedReplacement: null },
-    { id: "P-001", ruleId: "policy.promise.guaranteed_today", input: "The refund is guaranteed today.", expectedReplacement: "will be confirmed once verified" }
+    { id: "T-012", ruleId: "tone.absolute.no_way", input: "No way, that is impossible.", expectedReplacement: null }
   ];
 
   function isPlainObject(v) { return Boolean(v) && typeof v==="object" && !Array.isArray(v); }
@@ -5095,7 +5533,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
         length:buildClarityComponent("length","Reading length",CLARITY_SCORE_WEIGHTS.length,0,{grade:0,avgSentenceLength:0,longSentences:0},"Split long sentences and keep chat replies under one main idea per sentence."),
         vagueTiming:buildClarityComponent("vagueTiming","Vague timing",CLARITY_SCORE_WEIGHTS.vagueTiming,0,{issues:0,terms:0},"Replace vague timing with a concrete update point or next action."),
         wordiness:buildClarityComponent("wordiness","Wordiness",CLARITY_SCORE_WEIGHTS.wordiness,0,{issues:0},"Apply safe phrase cuts where the replacement does not change meaning."),
-        jargon:buildClarityComponent("jargon","Internal jargon",CLARITY_SCORE_WEIGHTS.jargon,0,{issues:0},"Translate internal system language into customer-facing wording."),
+      jargon:buildClarityComponent("jargon","Internal jargon",CLARITY_SCORE_WEIGHTS.jargon,0,{issues:0},"Translate internal system language into plain wording."),
         specificity:buildClarityComponent("specificity","Specificity",CLARITY_SCORE_WEIGHTS.specificity,0,{vagueReferents:0,concreteAnchors:0,nextStepAnchors:0},"Name the exact item, next step, owner, or timing anchor.")
       };
       return { model:CLARITY_MODEL_VERSION, score:0, quality:100, level:"Clear", risk:"Low", weights:Object.assign({},CLARITY_SCORE_WEIGHTS), components, recommendations:[] };
@@ -5115,7 +5553,7 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
       length:buildClarityComponent("length","Reading length",CLARITY_SCORE_WEIGHTS.length,lengthPressure,{grade:metrics.grade,avgSentenceLength,longSentences:metrics.longSentences},"Split long sentences and keep chat replies under one main idea per sentence."),
       vagueTiming:buildClarityComponent("vagueTiming","Vague timing",CLARITY_SCORE_WEIGHTS.vagueTiming,(vagueTimingIssues.length*12)+(Math.max(0,vagueTimingTerms-vagueTimingIssues.length)*6),{issues:vagueTimingIssues.length,terms:vagueTimingTerms},"Replace vague timing with a concrete update point or next action."),
       wordiness:buildClarityComponent("wordiness","Wordiness",CLARITY_SCORE_WEIGHTS.wordiness,wordinessIssues.length*5,{issues:wordinessIssues.length},"Apply safe phrase cuts where the replacement does not change meaning."),
-      jargon:buildClarityComponent("jargon","Internal jargon",CLARITY_SCORE_WEIGHTS.jargon,jargonIssues.length*10,{issues:jargonIssues.length},"Translate internal system language into customer-facing wording."),
+      jargon:buildClarityComponent("jargon","Internal jargon",CLARITY_SCORE_WEIGHTS.jargon,jargonIssues.length*10,{issues:jargonIssues.length},"Translate internal system language into plain wording."),
       specificity:buildClarityComponent("specificity","Specificity",CLARITY_SCORE_WEIGHTS.specificity,specificityPressure,{vagueReferents,concreteAnchors,nextStepAnchors},"Name the exact item, next step, owner, or timing anchor.")
     };
     const score=Object.values(components).reduce((sum,item)=>sum+item.score,0);
@@ -5180,7 +5618,8 @@ document.getElementById('pingCoachPanel').addEventListener('click', (e) => {
     const tone={ primary:toneScore>32?"Risky":toneScore>16?"Formal":"Neutral", risk:toneScore>32?"High":toneScore>16?"Medium":"Low", apologyCount, roboticCount, score:Math.min(100,toneScore) };
     return {
       engine:ENGINE_ID, contract:buildContractMetadata(), offline:true,
-      context:Object.assign({channel:"messenger",dialect:"en-GB"},es.context),
+      context:Object.assign({channel:"writing",dialect:"en-GB"},es.context),
+      contextBridge:{ ping:null, issues:0 },
       protectedSpans, issues:issues.sort((a,b)=>a.start-b.start),
       rules:{ profile:buildRuleProfile(es.disabledRuleIds,es.profileValidation,es.profileMeta), active:getActiveRules(es.disabledRuleIds).map(r=>({id:r.id,category:r.category,label:r.label,severity:r.severity})), disabled:Array.from(es.disabledRuleIds), categories:RULE_CATEGORIES.slice() },
       tone,
@@ -5266,6 +5705,17 @@ let mfAssistFilter = 'all';
 let mfLastAssist   = null;
 let mfAssistDebounce = 0;
 let mfAssistLastTestReport = null;
+let mfAssistLastApply = null;
+let mfAssistRestoringUndo = false;
+let mfAssistApplyingFix = false;
+
+function mfAssistSetUndoState(state) {
+  mfAssistLastApply = state || null;
+  const btn = document.getElementById('mfAssistUndoApply');
+  if (!btn) return;
+  btn.style.display = mfAssistLastApply ? 'block' : 'none';
+  if (mfAssistLastApply) btn.title = 'Undo ' + (mfAssistLastApply.label || 'last Assist fix');
+}
 
 const SEV_ORDER = { high: 0, medium: 1, low: 2 };
 
@@ -5282,14 +5732,13 @@ function mfAssistIssueCounts(issues) {
     all: active.length,
     grammar: active.filter(i => i.category === 'grammar').length,
     clarity: active.filter(i => i.category === 'clarity').length,
-    tone:    active.filter(i => i.category === 'tone').length,
-    policy:  active.filter(i => i.category === 'policy').length
+    tone:    active.filter(i => i.category === 'tone').length
   };
 }
 
 function updateAssistFilterTabs(counts) {
-  const map = { all: counts.all, grammar: counts.grammar, clarity: counts.clarity, tone: counts.tone, policy: counts.policy };
-  const labels = { all:'All', grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Rules' };
+  const map = { all: counts.all, grammar: counts.grammar, clarity: counts.clarity, tone: counts.tone };
+  const labels = { all:'All', grammar:'Grammar', clarity:'Clarity', tone:'Tone' };
   document.querySelectorAll('.mf-assist-filter-btn').forEach(btn => {
     const f = btn.dataset.filter;
     const n = map[f] ?? 0;
@@ -5320,10 +5769,10 @@ function renderPingAssistSummary(result) {
   if (!result) {
     if (chip) { chip.textContent = '—'; chip.dataset.risk = 'Low'; }
     ['mfAssistIssues','mfAssistProtected','mfAssistWords','mfAssistGrade',
-     'mfBarValGrammar','mfBarValClarity','mfBarValTone','mfBarValPolicy'].forEach(id => {
+     'mfBarValGrammar','mfBarValClarity','mfBarValTone'].forEach(id => {
       const el = document.getElementById(id); if (el) el.textContent = '--';
     });
-    ['mfBarGrammar','mfBarClarity','mfBarTone','mfBarPolicy'].forEach(id => {
+    ['mfBarGrammar','mfBarClarity','mfBarTone'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.width = '0%';
     });
     if (recEl) recEl.textContent = '';
@@ -5350,18 +5799,15 @@ function renderPingAssistSummary(result) {
   const grammarHealth = Math.max(0, 100 - counts.grammar * 20);
   const clarityHealth = clarity.quality != null ? Math.round(clarity.quality) : 0;
   const toneHealth    = tone.score      != null ? Math.max(0, 100 - Math.round(tone.score)) : 0;
-  const policyHealth  = counts.policy === 0 ? 100 : Math.max(0, 100 - counts.policy * 50);
 
   const grammarLabel  = counts.grammar === 0 ? 'Clean' : `${counts.grammar} issue${counts.grammar !== 1 ? 's' : ''}`;
   const clarityLabel  = clarity.level || 'Clear';
   const toneLabel     = tone.risk    || 'Low';
-  const policyLabel   = counts.policy === 0 ? 'Clear' : `${counts.policy} flag${counts.policy !== 1 ? 's' : ''}`;
 
   [
     ['mfBarValGrammar', 'mfBarGrammar', grammarLabel, grammarHealth],
     ['mfBarValClarity', 'mfBarClarity', clarityLabel, clarityHealth],
-    ['mfBarValTone',    'mfBarTone',    toneLabel,    toneHealth],
-    ['mfBarValPolicy',  'mfBarPolicy',  policyLabel,  policyHealth]
+    ['mfBarValTone',    'mfBarTone',    toneLabel,    toneHealth]
   ].forEach(([valId, fillId, label, pct]) => {
     const v = document.getElementById(valId); if (v) v.textContent = label;
     const f = document.getElementById(fillId); if (f) f.style.width = pct + '%';
@@ -5410,7 +5856,7 @@ function renderPingAssistCards(result) {
     return;
   }
 
-  const CAT_ORDER = ['grammar', 'clarity', 'tone', 'policy'];
+  const CAT_ORDER = ['grammar', 'clarity', 'tone'];
   if (mfAssistFilter === 'all') {
     visible.sort((a, b) => {
       const catDiff = CAT_ORDER.indexOf(a.category) - CAT_ORDER.indexOf(b.category);
@@ -5419,7 +5865,7 @@ function renderPingAssistCards(result) {
     });
   }
 
-  const catLabels = { grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Policy' };
+  const catLabels = { grammar:'Grammar', clarity:'Clarity', tone:'Tone' };
   let html = '', currentCat = '';
 
   visible.forEach(issue => {
@@ -5471,7 +5917,7 @@ function renderPingAssist() {
     return;
   }
   try {
-    mfLastAssist = window.MirrorFlowAssistEngine.analyzeText(text, { context: 'cx' });
+    mfLastAssist = window.MirrorFlowAssistEngine.analyzeText(text, { surface: 'ping_assist', mode: 'writing_only' });
     renderPingAssistSummary(mfLastAssist);
     renderPingAssistCards(mfLastAssist);
     renderPingAssistRows(mfLastAssist);
@@ -5510,15 +5956,16 @@ function applyAssistReplacement(excerpt, replacement) {
   if (replaceEditorTextMatch(excerpt, replacement)) {
     refreshAll();
     save();
-    return;
+    return true;
   }
   const plain = getDraftPlain();
   const idx = plain.indexOf(excerpt);
-  if (idx === -1) return;
+  if (idx === -1) return false;
   const newPlain = plain.slice(0, idx) + replacement + plain.slice(idx + excerpt.length);
   editorEl.innerHTML = plainToEditorHtml(newPlain);
   refreshAll();
   save();
+  return true;
 }
 
 /* ---- focus issue: highlight excerpt in editor ---- */
@@ -5583,7 +6030,7 @@ function applyAssistByOffset(issue) {
     mfActiveIssueId = null;
     refreshAll();
     save();
-    return;
+    return true;
   }
   const plain = getDraftPlain();
   let start = issue.start, end = issue.end;
@@ -5591,7 +6038,7 @@ function applyAssistByOffset(issue) {
   if (plain.slice(start, end) !== issue.excerpt) {
     // fallback: search by excerpt
     const idx = plain.indexOf(issue.excerpt);
-    if (idx === -1) { toast('Excerpt not found — re-run check'); return; }
+    if (idx === -1) { toast('Excerpt not found - re-run check'); return false; }
     start = idx; end = idx + issue.excerpt.length;
   }
   const newPlain = plain.slice(0, start) + issue.replacement + plain.slice(end);
@@ -5599,6 +6046,7 @@ function applyAssistByOffset(issue) {
   mfActiveIssueId = null;
   refreshAll();
   save();
+  return true;
 }
 
 /* ---- summary detail rows ---- */
@@ -5621,7 +6069,8 @@ function renderPingAssistRows(result) {
   const topComp = comps.find(c => c.score > 0);
   const grammarCount = issues.filter(i => i.category === 'grammar').length;
   const toneCount    = issues.filter(i => i.category === 'tone').length;
-  const rows = [
+  const rows = [];
+  rows.push(
     mfAssistRowHtml('Reading load',
       `${clarity.readability || 'Good'} · grade ${clarity.grade ?? '--'} · ${clarity.avgSentenceLength ?? '--'} words/sentence`,
       Math.min(100, (clarity.grade || 0) * 7)),
@@ -5629,15 +6078,15 @@ function renderPingAssistRows(result) {
       topComp ? topComp.recommendation : 'No clarity pressure detected.',
       topComp ? topComp.impact : 0),
     mfAssistRowHtml('Voice pressure',
-      `${tone.primary || 'Neutral'} · ${tone.risk || 'Low'} send risk · ${tone.apologyCount ?? 0} apolog${tone.apologyCount !== 1 ? 'ies' : 'y'}, ${tone.roboticCount ?? 0} robotic phrase${tone.roboticCount !== 1 ? 's' : ''}`,
+      `${tone.primary || 'Neutral'} · ${tone.risk || 'Low'} tone load · ${tone.apologyCount ?? 0} apolog${tone.apologyCount !== 1 ? 'ies' : 'y'}, ${tone.roboticCount ?? 0} robotic phrase${tone.roboticCount !== 1 ? 's' : ''}`,
       tone.score ?? 0),
     mfAssistRowHtml('Grammar signals',
       `${grammarCount} phrase-level match${grammarCount !== 1 ? 'es' : ''} from ${result.rules?.active?.filter(r => r.category === 'grammar').length ?? 0} active grammar rules`,
       Math.min(100, grammarCount * 24)),
     mfAssistRowHtml('Tone signals',
-      `${toneCount} customer-facing voice signal${toneCount !== 1 ? 's' : ''} detected`,
+      `${toneCount} voice signal${toneCount !== 1 ? 's' : ''} detected`,
       tone.score ?? 0)
-  ];
+  );
   el.innerHTML = rows.join('');
 }
 
@@ -5667,7 +6116,7 @@ function renderPingAssistRules() {
   const eng = window.MirrorFlowAssistEngine;
   el.innerHTML = eng.rules.map(rule => {
     const disabled = eng.isRuleDisabled(rule.id);
-    const catLabel = { grammar:'Grammar', clarity:'Clarity', tone:'Tone', policy:'Policy' }[rule.category] || rule.category;
+    const catLabel = { grammar:'Grammar', clarity:'Clarity', tone:'Tone' }[rule.category] || rule.category;
     return `<div class="mf-assist-rule-card" data-disabled="${disabled}">
       <div class="mf-assist-rule-info">
         <div class="mf-assist-rule-label">${escHtml(rule.label)}</div>
@@ -5795,7 +6244,7 @@ function mfAssistExportJson() {
   if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
   const eng = window.MirrorFlowAssistEngine;
   const text = getDraftPlain();
-  const analysis = mfLastAssist || eng.analyzeText(text, { context: 'cx' });
+  const analysis = mfLastAssist || eng.analyzeText(text, { surface: 'ping_assist', mode: 'writing_only' });
   const payload = {
     app: 'MirrorFlow Ping',
     exportedAt: new Date().toISOString(),
@@ -5906,6 +6355,17 @@ if (mfAssistDiagnosticsToggle) {
 document.getElementById('mfAssistRunTests')?.addEventListener('click', mfAssistRunTests);
 document.getElementById('mfAssistCopyReport')?.addEventListener('click', mfAssistCopyDiagnosticsReport);
 document.getElementById('mfAssistDownloadReport')?.addEventListener('click', mfAssistDownloadDiagnosticsReport);
+document.getElementById('mfAssistUndoApply')?.addEventListener('click', () => {
+  if (!mfAssistLastApply) return;
+  mfAssistRestoringUndo = true;
+  editorEl.innerHTML = mfAssistLastApply.beforeHtml;
+  mfAssistRestoringUndo = false;
+  mfAssistSetUndoState(null);
+  mfActiveIssueId = null;
+  refreshAll();
+  save();
+  toast('Assist fix undone');
+});
 
 /* filter bar */
 document.getElementById('mfAssistFilterBar').addEventListener('click', e => {
@@ -5926,9 +6386,26 @@ document.getElementById('mfAssistCardList').addEventListener('click', e => {
     if (btn.dataset.action === 'apply') {
       const issue = mfLastAssist?.issues.find(i => i.id === btn.dataset.issueId);
       if (issue) {
-        applyAssistByOffset(issue);
-        mfActiveIssueId = null;
-        toast('Fix applied');
+        const beforeHtml = editorEl.innerHTML;
+        let applied = false;
+        mfAssistApplyingFix = true;
+        try {
+          applied = applyAssistByOffset(issue);
+        } finally {
+          mfAssistApplyingFix = false;
+        }
+        if (applied) {
+          mfAssistSetUndoState({
+            beforeHtml,
+            afterHtml: editorEl.innerHTML,
+            issueId: issue.id,
+            ruleId: issue.ruleId,
+            label: issue.label,
+            appliedAt: Date.now()
+          });
+          mfActiveIssueId = null;
+          toast('Fix applied - Undo available');
+        }
       }
     } else if (btn.dataset.action === 'ignore') {
       mfAssistIgnore.add(btn.dataset.ruleId + ':' + btn.dataset.excerpt);
@@ -6003,10 +6480,7 @@ function load() {
       s.assistDisabledRules.forEach(id => window.MirrorFlowAssistEngine.disableRule(id));
     }
     if (s.workspaceMode) {
-      shell.dataset.workspaceMode =
-        s.workspaceMode === 'ping' ? 'insights' :
-        s.workspaceMode === 'engine' ? 'drivers' :
-        s.workspaceMode;
+      shell.dataset.workspaceMode = normalizeWorkspaceMode(s.workspaceMode);
     }
     if (Array.isArray(s.sideNotes)) sideNotes = normalizeSideNotes(s.sideNotes);
     if (s.draft) editorEl.innerHTML = s.draft;
@@ -6054,12 +6528,14 @@ function refreshAll() {
 }
 editorEl.addEventListener('input', () => {
   lastEdit = Date.now();
+  if (!mfAssistApplyingFix && !mfAssistRestoringUndo) mfAssistSetUndoState(null);
   refreshAll();
   save();
 });
 customerEl.addEventListener('input', () => {
   updateCustomerDraft();
   renderPingInsights();
+  renderPingAssistDebounced();
   save();
 });
 
@@ -6095,6 +6571,7 @@ function doSend() {
   mfAssistIgnore.clear();
   mfLastAssist = null;
   mfActiveIssueId = null;
+  mfAssistSetUndoState(null);
   lastEdit = Date.now();
   refreshAll();
   save();
@@ -6304,6 +6781,7 @@ function exec(cmd, arg) {
   editorEl.focus();
   try { document.execCommand(cmd, false, arg || null); } catch (_) {}
   lastEdit = Date.now();
+  mfAssistSetUndoState(null);
   refreshAll();
   syncToolbarState();
   save();
@@ -6372,6 +6850,7 @@ function cleanFormatting() {
     editorEl.innerHTML = text.split(/\n+/).map(p => `<p>${escapeHTML(p)}</p>`).join('');
   }
   lastEdit = Date.now();
+  mfAssistSetUndoState(null);
   refreshAll(); save();
   toast('Formatting cleaned');
 }
@@ -6380,6 +6859,7 @@ function clearDraft() {
   if (!confirm('Clear the current draft?')) return;
   editorEl.innerHTML = '<p><br></p>';
   lastEdit = Date.now();
+  mfAssistSetUndoState(null);
   refreshAll(); save();
   toast('Draft cleared');
 }
@@ -6400,6 +6880,7 @@ async function pasteDraft() {
     const text = await navigator.clipboard.readText();
     if (!text) { toast('Clipboard empty'); return; }
     insertAtCursor(text);
+    mfAssistSetUndoState(null);
     toast('Pasted');
   } catch {
     toast('Paste failed — try Cmd+V');
@@ -6430,7 +6911,7 @@ popoverEl.addEventListener('click', (e) => {
   closePopover();
   if (a === 'reset') {
     editorEl.innerHTML = '<p><br></p>';
-    lastEdit = Date.now(); refreshAll(); save();
+    lastEdit = Date.now(); mfAssistSetUndoState(null); refreshAll(); save();
     toast('Draft reset');
   } else if (a === 'export') {
     copyDraft();
@@ -6463,6 +6944,7 @@ function doSendV2() {
   editorEl.innerHTML = '<p><br></p>';
   customerEl.value = '';
   draftOut.remove(); draftIn.remove();
+  mfAssistSetUndoState(null);
   lastEdit = Date.now();
   refreshAll();
   phoneBody.scrollTop = phoneBody.scrollHeight;
@@ -6504,6 +6986,7 @@ function newSession() {
   customerEl.value = '';
   phoneBody.innerHTML = '';
   draftOut.remove(); draftIn.remove();
+  mfAssistSetUndoState(null);
   lastEdit = Date.now();
   autosizeCustomer();
   refreshAll();
@@ -6565,13 +7048,13 @@ document.addEventListener('mousemove', (e) => {
     shell.dataset.phone = 'collapsed';
     phoneDrag = false;
     document.body.style.cursor = ''; document.body.style.userSelect = '';
-    updatePhoneScale();
+    schedulePhoneScale();
     return;
   }
   shell.dataset.phone = 'open';
   const clamped = Math.max(220, Math.min(560, w));
   shell.style.setProperty('--mf-rail-phone-w', clamped + 'px');
-  updatePhoneScale();
+  schedulePhoneScale();
 });
 document.addEventListener('mouseup', () => {
   if (!phoneDrag) return;
@@ -6583,11 +7066,34 @@ document.addEventListener('mouseup', () => {
 phoneResize.addEventListener('dblclick', () => {
   shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
   shell.style.removeProperty('--mf-rail-phone-w');
-  updatePhoneScale();
+  beginPhonePanelMotion();
+  schedulePhoneScale();
   save();
 });
 
 /* ---------- LITE-STYLE FLUID PHONE SCALING ---------- */
+let phoneScaleRaf = 0;
+let phoneMotionTimer = 0;
+
+function schedulePhoneScale() {
+  if (phoneScaleRaf) cancelAnimationFrame(phoneScaleRaf);
+  phoneScaleRaf = requestAnimationFrame(() => {
+    phoneScaleRaf = 0;
+    updatePhoneScale();
+  });
+}
+
+function beginPhonePanelMotion() {
+  if (shell.dataset.rightPanel !== 'phone' || shell.dataset.phone !== 'open') return;
+  shell.dataset.phoneMotion = 'true';
+  clearTimeout(phoneMotionTimer);
+  schedulePhoneScale();
+  phoneMotionTimer = setTimeout(() => {
+    delete shell.dataset.phoneMotion;
+    schedulePhoneScale();
+  }, 360);
+}
+
 function updatePhoneScale() {
   const wrap = document.getElementById('phoneWrap');
   const stage = wrap && wrap.parentElement;
@@ -6604,8 +7110,8 @@ function updatePhoneScale() {
   const s = Math.max(0.32, Math.min(1, availW / baseW, availH / baseH));
   wrap.style.setProperty('--phone-scale', isFinite(s) ? s : 1);
 }
-window.addEventListener('resize', updatePhoneScale);
-new ResizeObserver(updatePhoneScale).observe(document.querySelector('.mf-phone-stage'));
+window.addEventListener('resize', schedulePhoneScale);
+new ResizeObserver(schedulePhoneScale).observe(document.querySelector('.mf-phone-stage'));
 
 /* ========== INIT ========== */
 const _loaded = load();
