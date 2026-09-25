@@ -5201,7 +5201,7 @@ const MF_PING_DOMAIN_PACKS = [
     label: 'Claims',
     modeLabel: 'Claims',
     summary: 'Insurance, repairs, cover, liability, settlement, excess, or claim progress.',
-    keywords: ['claim','claims','policy','insurance','insurer','settlement','payout','excess','garage','repair','engineer','liability','fault','non fault','third party','windscreen','valuation','total loss','written off','cover','covered','premium','no claims','ncd','ncb','accident'],
+    keywords: ['claim','claims','policy','insurance','insurer','settlement','payout','excess','garage','repair','engineer','liability','fault','non fault','third party','windscreen','valuation','total loss','written off','cover','covered','premium','no claims','ncd','ncb','accident','underwriter','salvage'],
     jargon: ['ncd','ncb','bacs','subrogation','liability','excess','endorsement','indemnity']
   },
   {
@@ -5209,7 +5209,7 @@ const MF_PING_DOMAIN_PACKS = [
     label: 'Retail / order support',
     modeLabel: 'Retail',
     summary: 'Orders, delivery, refunds, returns, replacements, products, stores, or couriers.',
-    keywords: ['order','delivery','delivered','parcel','courier','tracking','refund','return','replacement','exchange','item','product','store','checkout','purchase','receipt','damaged','missing','warehouse','stock'],
+    keywords: ['order','delivery','delivered','parcel','courier','tracking','refund','return','replacement','exchange','item','product','store','checkout','purchase','receipt','damaged','missing','warehouse','stock','tracking number','consignment'],
     jargon: ['rma','sku','fulfilment','backorder','dispatch exception']
   },
   {
@@ -5245,7 +5245,7 @@ const MF_PING_DOMAIN_PACKS = [
     label: 'Technical support',
     modeLabel: 'Auto',
     summary: 'Errors, bugs, crashes, devices, setup, installation, or service failure.',
-    keywords: ['error','bug','crash','broken','not working','device','install','installation','setup','website','screen','loading','failed','failure','sync','download','update'],
+    keywords: ['error','bug','crash','broken','not working','device','install','installation','setup','website','screen','loading','failed','failure','sync','download','update','firmware','compatibility','latency'],
     jargon: ['cache','api','endpoint','payload','server error','client']
   },
   {
@@ -5276,6 +5276,7 @@ const MF_PING_SIGNALS = [
   { id:'urgency', label:'Urgency', weight:20, phrases:['urgent','today','now','asap','immediately','need this sorted','affecting my schedule','before monday','deadline','cannot wait','can\'t wait'], coach:'Give a concrete next step and time.' },
   { id:'vulnerability', label:'Potential vulnerability', weight:24, phrases:['overwhelmed','panic','can\'t cope','cant cope','worried','anxious','scared','i give up','helpless','mental health','disabled','vulnerable'], coach:'Slow the pace and reduce uncertainty.' },
   { id:'distrust', label:'Trust gap', weight:18, phrases:['mixed messages','not what i was told','your colleague said','nobody told me','different answers','contradiction','which one is true','left in the dark'], coach:'Clarify the record and avoid defensive wording.' },
+  { id:'impatience', label:'Impatience', weight:20, phrases:['how much longer','still waiting','no update yet','taking too long','any news yet','waiting for ages'], coach:'Provide a concrete update point and acknowledge the wait.' },
   { id:'positive', label:'Positive tone', weight:-8, phrases:['thanks','thank you','appreciate','helpful','no rush','whenever you can'], coach:'Match warmth and keep the momentum.' }
 ];
 
@@ -5285,6 +5286,7 @@ const MF_PING_DRAFT_SIGNALS = [
   { id:'robotic_wording', label:'Robotic wording', weight:14, phrases:['as per','kindly','please note that','process','procedure','escalate internally'], coach:'Use plainer wording that still sounds accountable.' },
   { id:'defensive_wording', label:'Defensive wording', weight:20, phrases:['as i said','as already explained','obviously','not our fault','policy says','per policy'], coach:'Remove defensive framing and keep the explanation neutral.' },
   { id:'overpromise', label:'Promise risk', weight:22, phrases:['guarantee','definitely','promise','100%','will be resolved today'], coach:'Avoid firm promises unless the outcome is verified.' },
+  { id:'hesitation', label:'Hesitation', weight:12, phrases:['might be able to','possibly','perhaps','maybe','i think we could'], coach:'Use more confident language if the action is confirmed.' },
   { id:'ownership_visible', label:'Ownership visible', weight:-8, phrases:['i will','i can','we will','we can','i have','we have'], coach:'Keep the owner and action visible.' }
 ];
 
@@ -6831,7 +6833,17 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id:"clarity.wordiness.in_process_of", category:"clarity", subtype:"wordiness", label:"Wordy action phrase", severity:"low", confidence:0.82, pattern:/\bin the process of\b/gi, replacement:"", message:"Use the active verb directly." },
     { id:"clarity.wordiness.timely_manner", category:"clarity", subtype:"wordiness", label:"Stiff timing phrase", severity:"low", confidence:0.84, pattern:/\bin a timely manner\b/gi, replacement:"promptly", message:"Use a shorter timing phrase." },
     { id:"clarity.wordiness.position_to", category:"clarity", subtype:"wordiness", label:"Wordy ability phrase", severity:"low", confidence:0.84, pattern:/\bin a position to\b/gi, replacement:"able to", message:"Use a shorter ability phrase." },
-    { id:"clarity.wordiness.purpose_of", category:"clarity", subtype:"wordiness", label:"Wordy purpose phrase", severity:"low", confidence:0.84, pattern:/\bfor the purpose of\b/gi, replacement:"for", message:"Use a shorter purpose phrase." }
+    { id:"clarity.wordiness.purpose_of", category:"clarity", subtype:"wordiness", label:"Wordy purpose phrase", severity:"low", confidence:0.84, pattern:/\bfor the purpose of\b/gi, replacement:"for", message:"Use a shorter purpose phrase." },
+    { id:"grammar.confusion.affect_effect", category:"grammar", subtype:"confusion", label:"Affect / effect", severity:"high", confidence:0.92, pattern:/\bwill effect\b/gi, replacement:"will affect", message:"Use 'affect' as a verb for influencing something." },
+    { id:"grammar.confusion.accept_except", category:"grammar", subtype:"confusion", label:"Accept / except", severity:"high", confidence:0.92, pattern:/\bplease except\b/gi, replacement:"please accept", message:"Use 'accept' to mean receive or agree to." },
+    { id:"clarity.nominalization.make_decision", category:"clarity", subtype:"wordiness", label:"Nominalization", severity:"low", confidence:0.85, pattern:/\bmake a decision\b/gi, replacement:"decide", message:"Use the verb directly for better clarity." },
+    { id:"clarity.nominalization.provide_assistance", category:"clarity", subtype:"wordiness", label:"Nominalization", severity:"low", confidence:0.85, pattern:/\bprovide assistance\b/gi, replacement:"help", message:"Use a simpler verb." },
+    { id:"clarity.wordiness.at_all_times", category:"clarity", subtype:"wordiness", label:"Wordy phrase", severity:"low", confidence:0.90, pattern:/\bat all times\b/gi, replacement:"always", message:"Shorten this phrase." },
+    { id:"clarity.wordiness.near_future", category:"clarity", subtype:"wordiness", label:"Vague timing", severity:"medium", confidence:0.80, pattern:/\bin the near future\b/gi, replacement:"soon", message:"Use a more specific or shorter timing." },
+    { id:"tone.passive_aggressive.per_my_last", category:"tone", subtype:"passive_aggressive", label:"Passive-aggressive marker", severity:"high", confidence:0.88, pattern:/\bper my last(?: (?:email|message|correspondence))?\b/gi, replacement:"as mentioned", message:"This phrase often signals frustration. Use a neutral alternative." },
+    { id:"tone.filler.to_be_honest", category:"tone", subtype:"filler", label:"Subtle filler", severity:"low", confidence:0.82, pattern:/\bto be honest\b/gi, replacement:"", message:"This filler can sometimes undermine trust." },
+    { id:"tone.minimizing.just_checking", category:"tone", subtype:"minimizing", label:"Minimizing language", severity:"low", confidence:0.75, pattern:/\bjust checking\b/gi, replacement:"checking", message:"Avoid minimizing your actions." },
+    { id:"tone.robotic.please_be_advised_that", category:"tone", subtype:"robotic", label:"Robotic preface", severity:"low", confidence:0.85, pattern:/\bplease be advised that\b/gi, replacement:"", message:"This preface adds unnecessary formality." }
   ];
 
   const STRUCTURAL_RULES = [
@@ -6971,7 +6983,17 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id: "T-017", ruleId: "tone.apology.sorry_for_inconvenience", input: "Sorry for inconvenience.", expectedReplacement: "I'm sorry for the inconvenience" },
     { id: "T-018", ruleId: "tone.command.be_patient", input: "Please be patient while I check.", expectedReplacement: "thanks for your patience" },
     { id: "T-019", ruleId: "tone.dismissive.nothing_i_can_do", input: "There is nothing I can do.", expectedReplacement: null },
-    { id: "T-020", ruleId: "tone.blame.you_did_not", input: "You did not send the reference.", expectedReplacement: "we haven't received" }
+    { id: "T-020", ruleId: "tone.blame.you_did_not", input: "You did not send the reference.", expectedReplacement: "we haven't received" },
+    { id: "G-036", ruleId: "grammar.confusion.affect_effect", input: "This will effect the booking.", expectedReplacement: "will affect" },
+    { id: "G-037", ruleId: "grammar.confusion.accept_except", input: "Please except my apologies.", expectedReplacement: "please accept" },
+    { id: "C-029", ruleId: "clarity.nominalization.make_decision", input: "We need to make a decision today.", expectedReplacement: "decide" },
+    { id: "C-030", ruleId: "clarity.nominalization.provide_assistance", input: "I can provide assistance with that.", expectedReplacement: "help" },
+    { id: "C-031", ruleId: "clarity.wordiness.at_all_times", input: "We are here to help at all times.", expectedReplacement: "always" },
+    { id: "C-032", ruleId: "clarity.wordiness.near_future", input: "I will update you in the near future.", expectedReplacement: "soon" },
+    { id: "T-021", ruleId: "tone.passive_aggressive.per_my_last", input: "Per my last email, we are waiting.", expectedReplacement: "as mentioned" },
+    { id: "T-022", ruleId: "tone.filler.to_be_honest", input: "To be honest, I am not sure.", expectedReplacement: "" },
+    { id: "T-023", ruleId: "tone.minimizing.just_checking", input: "I am just checking the status.", expectedReplacement: "checking" },
+    { id: "T-024", ruleId: "tone.robotic.please_be_advised_that", input: "Please be advised that the slot is closed.", expectedReplacement: "" }
   ];
 
   function isPlainObject(v) { return Boolean(v) && typeof v==="object" && !Array.isArray(v); }
