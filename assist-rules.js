@@ -101,7 +101,7 @@
   rule("grammar.spelling.common_typos", "grammar", "spelling", "Spelling", "medium", 0.95,
     new RegExp("\\b(?:" + typoKeys.join("|") + ")\\b", "gi"),
     m => matchCase(m[0], TYPOS[m[0].toLowerCase()]),
-    "Likely misspelling.");
+    (m, rep) => "\u201c" + m[0] + "\u201d is a common misspelling of \u201c" + rep + "\u201d.");
   T("grammar.spelling.common_typos", "Please confrim the apointment.", "confirm");
   T("grammar.spelling.common_typos", "Thier order is delayed.", "Their");
   T("grammar.spelling.common_typos", "Your refudn is on its way.", "refund");
@@ -337,7 +337,7 @@
     shes:"she's", whos:"who's", shouldve:"should've", wouldve:"would've", couldve:"could've", wheres:"where's" };
   rule("grammar.contraction.missing_apostrophe", "grammar", "contraction", "Missing apostrophe", "medium", 0.88,
     new RegExp("\\b(?:" + Object.keys(APOS).join("|") + ")\\b", "gi"),
-    m => matchCase(m[0], APOS[m[0].toLowerCase()]), "Use the apostrophe in this contraction.");
+    m => matchCase(m[0], APOS[m[0].toLowerCase()]), (m, rep) => "Use the apostrophe: \u201c" + rep + "\u201d.");
   T("grammar.contraction.missing_apostrophe", "I havent seen it and thats fine.", "haven't");
   N("grammar.contraction.missing_apostrophe", "That's fine and I haven't seen it.");
 
@@ -639,6 +639,107 @@
   });
   T("clarity.voice.passive_heavy", "The file was sent. The refund was processed.", null);
   N("clarity.voice.passive_heavy", "I sent the file and we will process it.");
+
+  /* ---------- writing-craft rules: openers, apologies, closings, hedging, run-ons, acronyms ---------- */
+  const SS = "(?<=^|[.!?]\\s+|\\n)";   /* sentence start */
+  rule("clarity.opener.wanted_to_reach_out", "clarity", "opener", "Weak opener", "low", 0.74,
+    /\bI (?:just )?wanted to (?:reach out|touch base|check in|follow up)(?: (?:and|to))?\b/gi,
+    null, "Get to the point. Start with the ask or the update.");
+  T("clarity.opener.wanted_to_reach_out", "I just wanted to reach out and confirm.", null);
+  rule("clarity.opener.writing_to", "clarity", "opener", "Weak opener", "low", 0.70,
+    /\b(?:I am|I'm) writing (?:to|in regards to|regarding)\b/gi,
+    null, "The reader knows you are writing. Start with the point ('I'm confirming…', 'Your refund…').");
+  T("clarity.opener.writing_to", "I am writing to confirm the date.", null);
+  rule("clarity.opener.wondering_if", "clarity", "opener", "Indirect request", "low", 0.76,
+    /\bI was (?:just )?(?:wondering|hoping) if you (could|would|might)\b/gi,
+    "$1 you", "Ask directly: 'Could you…'.", { keepCase: false, safe: false });
+  T("clarity.opener.wondering_if", "I was wondering if you could send the form.", "could you");
+  N("clarity.opener.wondering_if", "Could you send the form?");
+
+  rule("tone.apology.bother", "tone", "over_apology", "Over-apologetic opener", "low", 0.80,
+    /\b(?:sorry|apologies|apologi[sz]e)(?: (?:to|for))? (?:bother|bothering|disturb|disturbing|trouble|troubling|interrupt|interrupting)(?: you)?\b/gi,
+    "", "You do not need to apologise for writing. Start with the point.", { safe: false });
+  T("tone.apology.bother", "Sorry to bother you, but the file is late.", "");
+  N("tone.apology.bother", "Sorry for the delay with your refund.");
+  rule("tone.closing.curt", "tone", "curt_closing", "Curt or pointed closing", "high", 0.86,
+    /\b(?:let me know if you (?:actually )?read|read (?:the|my) (?:email|message) (?:again|properly|carefully)|do i have to (?:repeat|say) (?:it|this) again|as (?:stated|mentioned|noted) above|see above)\b/gi,
+    null, "This reads as pointed. Restate the key point calmly instead of referring back.");
+  T("tone.closing.curt", "As stated above, the date is fixed.", null);
+  T("tone.closing.curt", "Do I have to repeat this again?", null);
+  N("tone.closing.curt", "Let me know if anything is unclear.");
+  rule("tone.command.bare_request", "tone", "command", "Blunt request", "medium", 0.68,
+    new RegExp(SS + "(?![^.!?\\n]*\\bplease\\b)(Send|Give|Tell|Provide|Confirm|Reply|Call|Email|Forward|Upload|Share|Wait) (?:me|us|the|your|it|this|that|them|a)\\b", "g"),
+    null, "A bare command can read as an order. Try 'Could you…' or add 'please'.");
+  T("tone.command.bare_request", "Send me the report.", null);
+  N("tone.command.bare_request", "Please send me the report. Could you send me the file?");
+
+  rule("grammar.punctuation.comma_splice", "grammar", "run_on", "Possible comma splice", "medium", 0.58,
+    /(?<=^|[.!?]\s+|\n)(?!(?:if|when|once|as|because|although|while|since|after|before|unless|whenever|though|whether|however|thanks|thank|yes|no|sure|hi|hello|dear|great|ok|okay|sorry|first|then|next|also|instead|otherwise|finally|so|now|please)\b)((?:I|We|You|They|He|She|It|This|That|The [a-z]+) [^.!?\n,]{8,60}), (I|we|you|they|he|she|it|this|that) (?:am|are|is|was|were|have|has|had|will|can|could|would|do|does|did|[a-z]+ed)\b/g,
+    null, "Two full sentences joined by a comma. Use a full stop, a semicolon, or 'and'.");
+  T("grammar.punctuation.comma_splice", "I checked the order yesterday, I will call you today.", null);
+  N("grammar.punctuation.comma_splice", "If you want, I can call you. Thanks, I will check. I checked the order, and I will call.");
+  rule("grammar.structure.fragment", "grammar", "fragment", "Possible sentence fragment", "medium", 0.55,
+    new RegExp(SS + "((?:Because|Although|Though|Whereas|Which|Whilst)(?! of\\b)(?: [A-Za-z']+){3,11})\\.(?=\\s|$)", "g"),
+    null, "This clause cannot stand alone. Join it to the sentence before or after it.");
+  T("grammar.structure.fragment", "We rebooked it. Because the slot changed today.", null);
+  N("grammar.structure.fragment", "Because of the delay, we rebooked it. Which one is it?");
+
+  /* acronyms the reader may not know (first use only) */
+  const ACRO_OK = new Set(("OK,FAQ,PDF,URL,URLS,SMS,VAT,ID,UK,US,USA,EU,UTC,GMT,ETA,ASAP,FYI,CEO,AM,PM,TV,PC,DIY,VIP,PIN,OTP,CV,HR,IT,PS,RSVP,ATM,LLC,LTD,PLC,NHS,HMRC,DVLA,SIM,USB,GPS,VPN,WIFI,HTML,CSS,PDFS,APP,ISP,SSN,DOB,QR,AI,TBC,TBD,NB,RIP,BBC,ITV,EV,MOT,DVD,CD,PO,UPS,DHL,BT,EE,O2,Q1,Q2,Q3,Q4").split(","));
+  structural.push({
+    id: "clarity.jargon.unexplained_acronym", category: "clarity", subtype: "jargon", label: "Unexplained acronym", severity: "low", confidence: 0.58,
+    run({ text, push, context }) {
+      const known = new Set(String((context && context.knownText) || "").match(/\b[A-Z]{2,5}\b/g) || []);
+      const seen = new Set(); const re = /\b[A-Z]{2,5}\b/g; let m;
+      while ((m = re.exec(text))) {
+        const a = m[0];
+        if (ACRO_OK.has(a) || known.has(a) || seen.has(a)) continue;
+        seen.add(a);
+        if (text[m.index - 1] === "(" && text[m.index + a.length] === ")") continue;
+        if (text.slice(m.index + a.length, m.index + a.length + 2) === " (" ) continue;
+        push({ ruleId: this.id, category: this.category, subtype: this.subtype, label: this.label, start: m.index, end: m.index + a.length,
+          message: "Spell out '" + a + "' on first use unless the reader definitely knows it.", replacement: null, severity: this.severity,
+          confidence: this.confidence, excerpt: a });
+      }
+    }
+  });
+  T("clarity.jargon.unexplained_acronym", "Please check the QBR pack.", null);
+  N("clarity.jargon.unexplained_acronym", "Send the PDF and the FAQ, and the Quarterly Business Review (QBR) pack.");
+
+  /* several hedges in one sentence */
+  structural.push({
+    id: "tone.hedging.stacked", category: "tone", subtype: "hedging", label: "Stacked hedges", severity: "medium", confidence: 0.70,
+    run({ text, push }) {
+      const H = /\b(?:i think|i guess|i suppose|maybe|perhaps|possibly|probably|might|sort of|kind of|a bit|somewhat|seems|i feel like|not sure but|just|could possibly)\b/gi;
+      spansOf(text).forEach(({ sentence, start, end }) => {
+        const hits = sentence.match(H) || [];
+        if (hits.length < 3) return;
+        push({ ruleId: this.id, category: this.category, subtype: this.subtype, label: this.label, start, end: Math.min(end, start + 90),
+          message: hits.length + " hedges in one sentence (" + hits.slice(0, 3).join(", ") + ") make you sound unsure. Keep one at most.",
+          replacement: null, severity: this.severity, confidence: this.confidence, excerpt: text.slice(start, Math.min(end, start + 90)) });
+      });
+    }
+  });
+  T("tone.hedging.stacked", "I think maybe we could possibly try that.", null);
+  N("tone.hedging.stacked", "I think we should try that.");
+
+  /* ambiguous "she/he" after two named people */
+  structural.push({
+    id: "clarity.reference.ambiguous_pronoun", category: "clarity", subtype: "reference", label: "Ambiguous pronoun", severity: "medium", confidence: 0.55,
+    run({ text, push }) {
+      const NOT = /^(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December|Terms|Conditions|Thanks|Hello|Dear|Best|Kind)$/;
+      const re = /\b([A-Z][a-z]{2,}) and ([A-Z][a-z]{2,})\b([^.!?\n]{0,70}?)\b(she|he|her|his|him)\b/g; let m;
+      while ((m = re.exec(text))) {
+        if (NOT.test(m[1]) || NOT.test(m[2])) continue;
+        const s = m.index, e = m.index + m[0].length;
+        push({ ruleId: this.id, category: this.category, subtype: this.subtype, label: this.label, start: s, end: e,
+          message: "'" + m[4] + "' could mean " + m[1] + " or " + m[2] + ". Use the name.", replacement: null, severity: this.severity,
+          confidence: this.confidence, excerpt: text.slice(s, e) });
+      }
+    }
+  });
+  T("clarity.reference.ambiguous_pronoun", "Tell Sam and Priya that she should review it.", null);
+  N("clarity.reference.ambiguous_pronoun", "Tell Sam and Priya that Priya should review it.");
 
   window.MirrorFlowAssistRules = { regex, structural, tests, negatives, matchCase };
 })();

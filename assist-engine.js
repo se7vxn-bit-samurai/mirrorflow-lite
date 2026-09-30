@@ -499,7 +499,7 @@
   }
   function issueFromRegexRule(rule, match) {
     const replacement=applyReplacement(match, rule);
-    const issue={ ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:rule.message, replacement, severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
+    const issue={ ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:typeof rule.message==="function"?rule.message(match,replacement):rule.message, replacement, severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
     if (rule.safe===false) issue.applySafe=false;
     return issue;
   }
@@ -558,7 +558,7 @@
       safe:applied.every(issue => issue.applySafe)
     };
   }
-  function buildRewritePreviews(text, issues, ruleState) {
+  function buildRewritePreviews(text, issues, ruleState, context) {
     const base = String(text || "").trim();
     const variants = [
       {
@@ -570,14 +570,14 @@
       },
       {
         id:"shorter",
-        title:"Shorter",
+        title:"Tighter",
         intent:"Cut wordiness and removable softeners.",
         test:issue => issue.category === "grammar" ||
           (issue.category === "clarity" && ["wordiness", "hedging"].includes(issue.subtype))
       },
       {
         id:"softer",
-        title:"Softer tone",
+        title:"Warmer",
         intent:"Reduce hard, defensive, or accusatory wording.",
         test:issue => issue.category === "grammar" || issue.category === "tone"
       }
@@ -587,7 +587,7 @@
       let applied = applyIssueSet(text, issues, variant.test);
       /* fixes can unlock further fixes ("thier is" -> "their is" -> "there is"), so re-check the result up to twice */
       for (let pass = 0; pass < 2 && applied.appliedRuleIds.length; pass++) {
-        const next = applyIssueSet(applied.text, runRuleRegistry(applied.text, protectSpans(applied.text), ruleState), variant.test);
+        const next = applyIssueSet(applied.text, runRuleRegistry(applied.text, protectSpans(applied.text), ruleState, context), variant.test);
         if (!next.appliedRuleIds.length || next.text === applied.text) break;
         applied = { text:next.text, appliedRuleIds:applied.appliedRuleIds.concat(next.appliedRuleIds) };
       }
@@ -605,7 +605,7 @@
       };
     }).filter(Boolean);
   }
-  function runRuleRegistry(text, protectedSpans, ruleState) {
+  function runRuleRegistry(text, protectedSpans, ruleState, context) {
     const issues=[], lower=text.toLowerCase();
     const push=(issue,spans)=>addIssue(issues,spans||protectedSpans,issue);
     getActiveRegexRules(ruleState).forEach(rule=>{
@@ -618,7 +618,7 @@
         push(issueFromRegexRule(rule,m),protectedSpans);
       }
     });
-    getActiveStructuralRules(ruleState).forEach(rule=>rule.run({text,lower,protectedSpans,issues,push}));
+    getActiveStructuralRules(ruleState).forEach(rule=>rule.run({text,lower,protectedSpans,issues,push,context:context||{}}));
     return dedupeIssues(issues);
   }
   /* drop exact duplicates and keep the stronger of two same-category issues that overlap */
@@ -642,11 +642,43 @@
     }
     return { context:safeCtx, disabledRuleIds, profileValidation:profileValidation||defaultProfileValidation(), profileMeta:importedRuleProfile||null };
   }
+  /* Reads the draft as a quick chat reply or a fuller email, and tunes rules to match. No setting needed. */
+  function detectRegister(text) {
+    const t=String(text||"").trim();
+    const words=(t.match(/[A-Za-z0-9']+/g)||[]).length;
+    const paragraphs=t.split(/\n\s*\n/).filter(Boolean).length;
+    const greeting=/^(hi|hello|dear|hey|good (morning|afternoon|evening))\b/i.test(t);
+    const signoff=/(regards|thanks|thank you|best wishes|cheers|sincerely|yours)[,.!]?\s*\n+\s*[A-Za-z][^\n]{0,30}$/i.test(t);
+    if ((greeting && (words>=45||paragraphs>=2)) || signoff || paragraphs>=3 || words>=110) return "email";
+    return "chat";
+  }
+  const CHAT_SUPPRESS=new Set(["clarity.length.long_paragraph","clarity.structure.repeated_sentence_start","clarity.voice.passive_heavy","grammar.structure.fragment","clarity.opener.wanted_to_reach_out","clarity.opener.writing_to","clarity.opener.wondering_if","clarity.jargon.approximately"]);
+  const EMAIL_RAISE=new Set(["hedging","opener","wordiness","jargon","over_apology"]);
+  function tuneForRegister(issues, register) {
+    if (register==="chat") {
+      issues=issues.filter(i=>!CHAT_SUPPRESS.has(i.ruleId));
+      issues.forEach(i=>{ if (i.ruleId==="tone.command.bare_request") i.severity="low"; });
+    } else {
+      issues.forEach(i=>{ if (EMAIL_RAISE.has(i.subtype) && i.severity==="low") i.severity="medium"; });
+    }
+    issues.forEach((i,n)=>{ i.id="iss_"+(n+1); });
+    return issues;
+  }
+  function buildRationale(issues, score, projected, safeCount) {
+    if (!issues.length) return "No issues found.";
+    const by={grammar:[0,0],clarity:[0,0],tone:[0,0]};
+    issues.forEach(i=>{ const c=by[i.category]; if (c) { c[0]++; if (i.severity==="high") c[1]++; } });
+    const parts=Object.keys(by).filter(k=>by[k][0]).sort((a,b)=>by[b][0]-by[a][0]).slice(0,2)
+      .map(k=>by[k][0]+" "+k+" issue"+(by[k][0]===1?"":"s")+(by[k][1]?" ("+by[k][1]+" high)":""));
+    const lift=projected>score&&safeCount?" Applying the "+safeCount+" safe fix"+(safeCount===1?"":"es")+" would reach about "+projected+".":"";
+    return parts.join(" and ")+" pull this down."+lift;
+  }
   function analyzeText(text, context) {
     const es=resolveEngineContext(context);
     const protectedSpans=protectSpans(text);
     const lower=text.toLowerCase();
-    const issues=runRuleRegistry(text,protectedSpans,es.disabledRuleIds);
+    const register=(es.context&&es.context.register)||detectRegister(text);
+    const issues=tuneForRegister(runRuleRegistry(text,protectedSpans,es.disabledRuleIds,es.context),register);
     const words=wordsOf(text), sentences=sentenceList(text);
     const syllables=words.reduce((sum,w)=>sum+syllableCount(w),0);
     const sentenceCount=Math.max(1,sentences.length), wordCount=words.length;
@@ -660,13 +692,20 @@
     const toneScore=apologyCount*10+roboticCount*14+frustrationWords*5;
     const tone={ primary:toneScore>32?"Risky":toneScore>16?"Formal":"Neutral", risk:toneScore>32?"High":toneScore>16?"Medium":"Low", apologyCount, roboticCount, score:Math.min(100,toneScore) };
     const quality=buildWritingQuality(issues,clarityScore,tone,{wordCount,grade,avgSentenceLength,longSentences});
+    const safeFixes=issues.filter(canApplyIssue);
+    quality.projected=quality.score;
+    if (safeFixes.length && !(context&&context._noProject)) {
+      const fixed=applyIssueSet(text,issues,null).text;
+      quality.projected=Math.max(quality.score,analyzeText(fixed,Object.assign({},context,{_noProject:true})).quality.score);
+    }
+    quality.rationale=buildRationale(issues,quality.score,quality.projected,safeFixes.length);
     return {
       engine:ENGINE_ID, contract:buildContractMetadata(), offline:true,
-      context:Object.assign({channel:"writing",dialect:"en-GB"},es.context),
+      context:Object.assign({channel:"writing",dialect:"en-GB",register},es.context),
       contextBridge:{ ping:null, issues:0 },
       protectedSpans, issues:issues.sort((a,b)=>a.start-b.start),
       rules:{ profile:buildRuleProfile(es.disabledRuleIds,es.profileValidation,es.profileMeta), active:getActiveRules(es.disabledRuleIds).map(r=>({id:r.id,category:r.category,label:r.label,severity:r.severity})), disabled:Array.from(es.disabledRuleIds), categories:RULE_CATEGORIES.slice() },
-      rewrites:buildRewritePreviews(text,issues,es.disabledRuleIds),
+      rewrites:buildRewritePreviews(text,issues,es.disabledRuleIds,es.context),
       quality,
       tone,
       clarity:{ model:clarityScore.model, score:clarityScore.score, quality:clarityScore.quality, level:clarityScore.level, risk:clarityScore.risk, grade, words:wordCount, sentences:sentences.length, avgSentenceLength, longSentences, readability:grade<=9?"Good":grade<=12?"Heavy":"Dense", weights:clarityScore.weights, components:clarityScore.components, recommendations:clarityScore.recommendations }
@@ -687,7 +726,7 @@
           actualReplacements: []
         };
       }
-      const analysis = analyzeText(test.input, { source: "rule_test" });
+      const analysis = analyzeText(test.input, { source: "rule_test", register: "email" });
       const matches = analysis.issues.filter(issue => issue.ruleId === test.ruleId);
       const issuePass = matches.length > 0;
       const replacementPass = test.expectedReplacement === undefined
@@ -707,7 +746,7 @@
     });
     RULE_NEGATIVE_TESTS.forEach(test => {
       if (disabledRuleIds.has(test.ruleId)) { results.push({ id:test.id, ruleId:test.ruleId, passed:false, skipped:true, matched:0 }); return; }
-      const hits = analyzeText(test.input, { source:"rule_test" }).issues.filter(issue => issue.ruleId === test.ruleId);
+      const hits = analyzeText(test.input, { source:"rule_test", register:"email" }).issues.filter(issue => issue.ruleId === test.ruleId);
       results.push({ id:test.id, ruleId:test.ruleId, passed:hits.length === 0, skipped:false, negative:true, matched:hits.length,
         detail:hits.length ? "false positive on: " + hits.map(h => JSON.stringify(h.excerpt)).join(", ") : "" });
     });

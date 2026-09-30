@@ -17,8 +17,14 @@ Open `index.html` in a browser to run it.
 | `styles.css` | Design tokens and components |
 | `app.js` | UI, state, persistence |
 | `assist-rules.js` | Grammar / clarity / tone rule pack (spelling, confusables, agreement, punctuation, wordiness, tone) with tests |
+| `assist-dictionary.js` | Generated spelling data (Bloom filter of ~274k UK+US words, 20k ranked common words). Rebuild with `tools/build-dictionary.js` |
+| `assist-spell.js` | Dictionary spell checker: conservative, learns words, ignores names, codes and words the customer used |
 | `assist-engine.js` | Rule runner, scoring, rewrites, profiles, self-tests |
 | `insights-packs.js` | Adaptive check packs: refund, booking, delivery, complaint, status, access, technical, cover, explanation, plus signal-driven extras |
 | `insights-engine.js` | Message classification, send-readiness, suggestions |
 
 Run the rule self-tests from **Review → Advanced → Diagnostics**. They include false-positive guards.
+
+## Data credits
+Spelling data is built from [`word-list`](https://github.com/sindresorhus/word-list) (MIT, Sindre Sorhus) and
+[`popular-english-words`](https://github.com/tkoop/popular-english-words) (ISC, Tim Koop).

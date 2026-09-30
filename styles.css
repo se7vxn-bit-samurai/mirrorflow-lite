@@ -3442,3 +3442,22 @@ button:focus-visible, .mf-tb-btn:focus-visible, .mf-chip:focus-visible, .mf-assi
   background: var(--mf-accent);
   box-shadow: 0 0 8px var(--mf-glow-1);
 }
+
+/* ---- inline issue underlines + fix card ---- */
+::highlight(mf-grammar) { text-decoration: underline wavy #ff5c7a; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+::highlight(mf-clarity) { text-decoration: underline wavy #4da3ff; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+::highlight(mf-tone)    { text-decoration: underline wavy #f5a524; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.mf-issue-tip {
+  position: fixed; z-index: 60; width: min(320px, calc(100vw - 16px));
+  padding: 12px; border-radius: var(--mf-r-md);
+  background: var(--mf-bg-canvas); border: 1px solid var(--mf-border-strong);
+  box-shadow: 0 12px 40px rgba(0,0,0,.55), 0 0 24px var(--mf-glow-1);
+  font: 500 12.5px/1.45 var(--mf-font-ui); color: var(--mf-ink);
+}
+.mf-issue-tip[hidden] { display: none; }
+.mf-tip-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.mf-tip-msg { color: var(--mf-ink-2); }
+.mf-tip-fix { margin-top: 8px; padding: 6px 8px; border-radius: var(--mf-r-sm); background: var(--mf-bg-surface); font-family: var(--mf-font-mono); font-size: 12px; }
+.mf-tip-fix s { color: #ff5c7a; }
+.mf-tip-fix strong { color: var(--mf-accent); }
+.mf-tip-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }

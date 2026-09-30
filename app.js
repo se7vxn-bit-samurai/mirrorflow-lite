@@ -1225,13 +1225,18 @@ function renderAssistRightStatus(result) {
   const state = counts.all === 0 ? 'clean' : risk === 'High' ? 'risk' : safeCount ? 'action' : 'review';
   box.dataset.state = state;
   mfAssistSetText('mfAssistRightScope', scoped ? 'Selection' : 'Draft');
-  mfAssistSetText('mfAssistRightScore', Number.isFinite(score) ? `${score}%` : '--');
+  const projected = result.quality?.projected;
+  mfAssistSetText('mfAssistRightScore', Number.isFinite(score)
+    ? (Number.isFinite(projected) && projected > score && safeCount ? `${score}→${projected}%` : `${score}%`) : '--');
   mfAssistSetText('mfAssistRightIssues', String(counts.all));
   mfAssistSetText('mfAssistRightFixes', String(safeCount));
   const note = counts.all === 0
     ? `${scoped ? 'Selection' : 'Draft'} is clean. ${rewriteCount} rewrite preview${rewriteCount === 1 ? '' : 's'} available.`
     : `${counts.grammar} grammar · ${counts.clarity} clarity · ${counts.tone} tone. ${safeCount} safe fix${safeCount === 1 ? '' : 'es'}${rewriteCount ? ` · ${rewriteCount} rewrite${rewriteCount === 1 ? '' : 's'}` : ''}.`;
-  mfAssistSetText('mfAssistRightNote', note);
+  const reg = result.context && result.context.register;
+  mfAssistSetText('mfAssistRightNote', note + (reg ? ` Reading as ${reg === 'email' ? 'an email' : 'a chat reply'}.` : ''));
+  const noteEl = document.getElementById('mfAssistRightNote');
+  if (noteEl) noteEl.title = (result.quality && result.quality.rationale) || '';
 }
 
 function updateAssistDotBadge(total) {
@@ -1346,6 +1351,7 @@ function renderPingAssistRewrites(result) {
 }
 
 function renderPingAssistCards(result) {
+  queueMicrotask(renderEditorHighlights);
   const list        = document.getElementById('mfAssistCardList');
   const clearBtn    = document.getElementById('mfAssistClearIgnored');
   const applySafeBtn= document.getElementById('mfAssistApplySafe');
@@ -1438,7 +1444,8 @@ function renderPingAssistCards(result) {
         ${hasR ? `<div class="mf-assist-preview-label">Suggestion</div><div class="mf-assist-after${afterCls}">${escHtml(previewReplacement)}</div>` : ''}
       </div>
       <div style="display:flex;gap:6px;margin-top:8px">
-        ${isSafe ? `<button class="mf-assist-act-btn apply" data-action="apply" data-issue-id="${escAttr(issue.id)}">Apply</button>` : ''}
+        ${hasR ? `<button class="mf-assist-act-btn apply" data-action="apply" data-issue-id="${escAttr(issue.id)}">${isSafe ? 'Apply' : 'Use'}</button>` : ''}
+        ${issue.learnable ? `<button class="mf-assist-act-btn" data-action="learn" data-word="${escAttr(issue.learnable)}">Add word</button>` : ''}
         ${canCopyReplacement ? `<button class="mf-assist-act-btn" data-action="copy" data-replacement="${escAttr(issue.replacement)}">Copy</button>` : ''}
         <button class="mf-assist-act-btn" data-action="ignore" data-rule-id="${escAttr(issue.ruleId)}" data-excerpt="${escAttr(issue.excerpt)}">Ignore</button>
         <button class="mf-assist-act-btn" data-action="ignore-rule" data-rule-id="${escAttr(issue.ruleId)}">Rule off</button>
@@ -1455,6 +1462,7 @@ function renderPingAssist() {
   const text = mfAssistAnalysisText();
   syncAssistScopeControls();
   if (!text) {
+    clearEditorHighlights();
     mfAssistClearDraftState();
     renderPingAssistSummary(null);
     renderPingAssistRewrites(null);
@@ -1466,7 +1474,8 @@ function renderPingAssist() {
     return;
   }
   try {
-    mfLastAssist = window.MirrorFlowAssistEngine.analyzeText(text, { surface: 'ping_assist', mode: 'writing_only' });
+    mfLastAssist = window.MirrorFlowAssistEngine.analyzeText(text, { surface: 'ping_assist', mode: 'writing_only', knownText: getCustomerContextText() });
+    mfLastAssist.sourceText = text;
     mfLastAssist.editorScope = scope;
     renderPingAssistSummary(mfLastAssist);
     renderPingAssistRewrites(mfLastAssist);
@@ -1545,6 +1554,33 @@ function offsetToPoint(index, offset) {
 
 let mfActiveIssueId = null;
 
+/* Finds an issue in the editor DOM text by counting how many identical excerpts precede it, so repeated words
+   ("i", "the") resolve to the right occurrence even when whitespace differs from the analysed text. */
+function mfAssistLocate(issue, index) {
+  const ex = String(issue && issue.excerpt || '');
+  const plain = mfLastAssist && mfLastAssist.sourceText;
+  if (!ex || plain == null || issue.start == null) return null;
+  let nth = 0, pos = -1;
+  while ((pos = plain.indexOf(ex, pos + 1)) !== -1 && pos < issue.start) nth++;
+  let p = -1;
+  for (let k = 0; k <= nth; k++) { p = index.text.indexOf(ex, p + 1); if (p < 0) return null; }
+  return { start: p, end: p + ex.length };
+}
+
+function mfReplaceEditorRange(start, end, replacement) {
+  const index = buildEditorTextIndex();
+  const s = offsetToPoint(index, start), e = offsetToPoint(index, end);
+  if (!s || !e) return false;
+  const range = document.createRange();
+  range.setStart(s.node, s.offset);
+  range.setEnd(e.node, e.offset);
+  range.deleteContents();
+  const node = document.createTextNode(replacement);
+  range.insertNode(node);
+  editorEl.normalize();
+  return true;
+}
+
 function focusPingIssue(issueId) {
   if (!mfLastAssist) return;
   const issue = mfLastAssist.issues.find(i => i.id === issueId);
@@ -1556,8 +1592,8 @@ function focusPingIssue(issueId) {
 
   // build text index and select range in editor
   const index = buildEditorTextIndex();
-  let start = index.text.indexOf(issue.excerpt, Math.max(0, issue.start - 20));
-  if (start < 0) start = index.text.indexOf(issue.excerpt);
+  const loc = mfAssistLocate(issue, index);
+  let start = loc ? loc.start : index.text.indexOf(issue.excerpt, Math.max(0, issue.start - 20));
   if (start < 0) start = issue.start;
   const end = start + String(issue.excerpt || '').length;
   const startPt = offsetToPoint(index, start);
@@ -1575,10 +1611,119 @@ function focusPingIssue(issueId) {
   editorEl.focus({ preventScroll: true });
 }
 
+/* ---- inline underlines (CSS Custom Highlight API: no DOM changes inside the editor) ---- */
+const MF_HL = typeof CSS !== 'undefined' && !!CSS.highlights && typeof Highlight !== 'undefined';
+let mfHighlightMap = [];
+
+function clearEditorHighlights() {
+  mfHighlightMap = [];
+  if (!MF_HL) return;
+  ['grammar', 'clarity', 'tone'].forEach(c => CSS.highlights.delete('mf-' + c));
+}
+
+function renderEditorHighlights() {
+  clearEditorHighlights();
+  if (!MF_HL || !mfLastAssist || mfLastAssist.editorScope === 'selection') return;
+  const index = buildEditorTextIndex();
+  const buckets = { grammar: [], clarity: [], tone: [] };
+  mfLastAssist.issues.forEach(issue => {
+    if (mfAssistIsIssueIgnored(issue) || !buckets[issue.category]) return;
+    const ex = String(issue.excerpt || '');
+    if (!/\S/.test(ex) || ex.length > 60) return;
+    const loc = mfAssistLocate(issue, index);
+    if (!loc) return;
+    const s = offsetToPoint(index, loc.start), e = offsetToPoint(index, loc.end);
+    if (!s || !e) return;
+    const range = document.createRange();
+    try { range.setStart(s.node, s.offset); range.setEnd(e.node, e.offset); } catch (_) { return; }
+    buckets[issue.category].push(range);
+    mfHighlightMap.push({ issue, range });
+  });
+  Object.keys(buckets).forEach(c => { if (buckets[c].length) CSS.highlights.set('mf-' + c, new Highlight(...buckets[c])); });
+}
+
+/* small fix card next to an underlined word */
+const mfIssueTip = document.createElement('div');
+mfIssueTip.className = 'mf-issue-tip';
+mfIssueTip.hidden = true;
+mfIssueTip.setAttribute('role', 'dialog');
+document.body.appendChild(mfIssueTip);
+let mfTipIssueId = null;
+
+function hideIssueTip() { mfIssueTip.hidden = true; mfTipIssueId = null; }
+
+function showIssueTip(entry) {
+  const issue = entry.issue;
+  const hasR = issue.replacement != null && issue.replacement !== issue.excerpt;
+  const rep = issue.replacement === '' ? 'Remove' : issue.replacement;
+  mfTipIssueId = issue.id;
+  mfIssueTip.dataset.cat = issue.category;
+  mfIssueTip.innerHTML = `
+    <div class="mf-tip-head"><span class="mf-assist-badge" data-cat="${issue.category}">${issue.category}</span><b>${escHtml(issue.label)}</b></div>
+    <div class="mf-tip-msg">${escHtml(issue.message)}</div>
+    ${hasR ? `<div class="mf-tip-fix"><s>${escHtml(issue.excerpt)}</s> → <strong>${escHtml(rep)}</strong></div>` : ''}
+    <div class="mf-tip-actions">
+      ${hasR ? '<button type="button" class="mf-assist-act-btn apply" data-tip="apply">' + (issue.replacement === '' ? 'Remove' : 'Fix') + '</button>' : ''}
+      ${issue.learnable ? '<button type="button" class="mf-assist-act-btn" data-tip="learn">Add word</button>' : ''}
+      <button type="button" class="mf-assist-act-btn" data-tip="ignore">Ignore</button>
+      <button type="button" class="mf-assist-act-btn" data-tip="open">Details</button>
+    </div>`;
+  mfIssueTip.hidden = false;
+  const r = entry.range.getBoundingClientRect();
+  const w = mfIssueTip.offsetWidth, h = mfIssueTip.offsetHeight;
+  const left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left));
+  const below = r.bottom + 8 + h < window.innerHeight;
+  mfIssueTip.style.left = left + 'px';
+  mfIssueTip.style.top = (below ? r.bottom + 8 : Math.max(8, r.top - h - 8)) + 'px';
+}
+
+editorEl.addEventListener('click', () => {
+  const sel = window.getSelection();
+  if (!sel.rangeCount || !sel.isCollapsed || !mfHighlightMap.length) { hideIssueTip(); return; }
+  const hit = mfHighlightMap
+    .filter(en => { try { return en.range.isPointInRange(sel.anchorNode, sel.anchorOffset); } catch (_) { return false; } })
+    .sort((x, y) => String(x.issue.excerpt).length - String(y.issue.excerpt).length)[0];
+  if (hit) showIssueTip(hit); else hideIssueTip();
+});
+editorEl.addEventListener('input', hideIssueTip);
+editorEl.addEventListener('scroll', hideIssueTip, { passive: true });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideIssueTip(); });
+document.addEventListener('mousedown', e => { if (!mfIssueTip.hidden && !mfIssueTip.contains(e.target) && !editorEl.contains(e.target)) hideIssueTip(); });
+mfIssueTip.addEventListener('mousedown', e => e.preventDefault());
+mfIssueTip.addEventListener('click', e => {
+  const btn = e.target.closest('[data-tip]');
+  const issue = mfLastAssist && mfLastAssist.issues.find(i => i.id === mfTipIssueId);
+  if (!btn || !issue) return;
+  const kind = btn.dataset.tip;
+  hideIssueTip();
+  if (kind === 'apply') mfAssistApplyIssueById(issue.id);
+  else if (kind === 'learn') mfAssistLearnWord(issue.learnable);
+  else if (kind === 'ignore') {
+    mfAssistIgnore.add(mfAssistIssueKey(issue));
+    renderPingAssistCards(mfLastAssist);
+    renderPingAssistSummary(mfLastAssist);
+    save();
+  } else if (kind === 'open') {
+    shell.dataset.rightPanel = 'assist';
+    shell.dataset.phone = 'open';
+    syncRailControls();
+    focusPingIssue(issue.id);
+    const card = document.querySelector('.mf-assist-card[data-issue-id="' + issue.id + '"]');
+    if (card) card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+});
+
 /* ---- apply using start/end offsets (more reliable than excerpt search) ---- */
 function applyAssistByOffset(issue) {
   if (mfLastAssist?.editorScope === 'selection') {
     return applyAssistSelectionByOffset(issue);
+  }
+  const loc = mfAssistLocate(issue, buildEditorTextIndex());
+  if (loc && mfReplaceEditorRange(loc.start, loc.end, issue.replacement)) {
+    mfActiveIssueId = null;
+    refreshAll();
+    save();
+    return true;
   }
   if (replaceEditorTextMatch(issue.excerpt, issue.replacement)) {
     mfActiveIssueId = null;
@@ -2145,6 +2290,40 @@ document.getElementById('mfAssistRewritePanel')?.addEventListener('input', e => 
   mfAssistSetRewriteEditedState(el);
 });
 
+function mfAssistApplyIssueById(issueId) {
+  const issue = mfLastAssist?.issues.find(i => i.id === issueId);
+  if (!issue) return false;
+  const beforeHtml = editorEl.innerHTML;
+  let applied = false;
+  mfAssistApplyingFix = true;
+  try {
+    applied = applyAssistByOffset(issue);
+  } finally {
+    mfAssistApplyingFix = false;
+  }
+  if (applied) {
+    mfAssistSetUndoState({
+      beforeHtml,
+      afterHtml: editorEl.innerHTML,
+      issueId: issue.id,
+      ruleId: issue.ruleId,
+      label: issue.label,
+      appliedAt: Date.now()
+    });
+    mfActiveIssueId = null;
+    toast('Fix applied - Undo available');
+  }
+  return applied;
+}
+
+function mfAssistLearnWord(word) {
+  if (window.MirrorFlowSpell && window.MirrorFlowSpell.learn(word)) {
+    toast('Added "' + word + '" to your dictionary');
+    renderPingAssist();
+    save();
+  }
+}
+
 /* card actions + click-to-focus */
 document.getElementById('mfAssistCardList').addEventListener('click', e => {
   const btn  = e.target.closest('[data-action]');
@@ -2152,29 +2331,9 @@ document.getElementById('mfAssistCardList').addEventListener('click', e => {
 
   if (btn) {
     if (btn.dataset.action === 'apply') {
-      const issue = mfLastAssist?.issues.find(i => i.id === btn.dataset.issueId);
-      if (issue) {
-        const beforeHtml = editorEl.innerHTML;
-        let applied = false;
-        mfAssistApplyingFix = true;
-        try {
-          applied = applyAssistByOffset(issue);
-        } finally {
-          mfAssistApplyingFix = false;
-        }
-        if (applied) {
-          mfAssistSetUndoState({
-            beforeHtml,
-            afterHtml: editorEl.innerHTML,
-            issueId: issue.id,
-            ruleId: issue.ruleId,
-            label: issue.label,
-            appliedAt: Date.now()
-          });
-          mfActiveIssueId = null;
-          toast('Fix applied - Undo available');
-        }
-      }
+      mfAssistApplyIssueById(btn.dataset.issueId);
+    } else if (btn.dataset.action === 'learn') {
+      mfAssistLearnWord(btn.dataset.word);
     } else if (btn.dataset.action === 'ignore') {
       mfAssistIgnore.add(btn.dataset.ruleId + ':' + btn.dataset.excerpt);
       if (mfActiveIssueId === card?.dataset.issueId) mfActiveIssueId = null;
@@ -2279,6 +2438,7 @@ function normalizeSavedState(raw) {
     sideNotes: Array.isArray(source.sideNotes) ? normalizeSideNotes(source.sideNotes) : sideNotes,
     assistDiagnosticsOpen: source.assistDiagnosticsOpen === true,
     assistIgnore: Array.isArray(source.assistIgnore) ? source.assistIgnore : [],
+    assistLearnedWords: Array.isArray(source.assistLearnedWords) ? source.assistLearnedWords : [],
     assistRuleProfile: source.assistRuleProfile && typeof source.assistRuleProfile === 'object' ? source.assistRuleProfile : null,
     assistDisabledRules: Array.isArray(source.assistDisabledRules) ? source.assistDisabledRules : []
   });
@@ -2313,6 +2473,7 @@ function save() {
       customer: customerEl.value,
       chatHTML: getPersistablePhoneHTML(),
       assistIgnore: Array.from(mfAssistIgnore),
+      assistLearnedWords: window.MirrorFlowSpell ? window.MirrorFlowSpell.learnedWords() : [],
       assistRuleProfile: typeof window.MirrorFlowAssistEngine !== 'undefined'
         ? window.MirrorFlowAssistEngine.exportProfile() : null,
       assistDisabledRules: typeof window.MirrorFlowAssistEngine !== 'undefined'
@@ -2333,6 +2494,7 @@ function load() {
     applyPhoneSettings(s.phoneSettings);
     shell.dataset.rightPanel = s.rightPanel;
     if (Array.isArray(s.assistIgnore)) mfAssistIgnore = new Set(s.assistIgnore);
+    if (window.MirrorFlowSpell && Array.isArray(s.assistLearnedWords)) s.assistLearnedWords.forEach(w => window.MirrorFlowSpell.learn(w));
     if (typeof window.MirrorFlowAssistEngine !== 'undefined') {
       if (s.assistRuleProfile && typeof window.MirrorFlowAssistEngine.importProfile === 'function') {
         const v = window.MirrorFlowAssistEngine.importProfile(s.assistRuleProfile);
