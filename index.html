@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MirrorFlow Ping — Shell v6</title>
+<title>MirrorFlow Ping</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23000000'/%3E%3Cpath d='M6 16c4-5 7-5 10 0 3 5 6 5 10 0' fill='none' stroke='%23bf00ff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style id="mf-internal-token-layer">
 /* =========================================================
@@ -343,7 +343,7 @@ html[data-theme="paper"] .mf-atmosphere::after {
 </style>
 <style>
 /* =========================================================
-   Ping Shell v6 — Pulse rebuild + rail fixes + deeper accent
+   Ping shell
    4 themes (2 dark | 2 light) × 5 variants
    ========================================================= */
 * { box-sizing: border-box; }
@@ -864,15 +864,6 @@ body {
   text-transform: uppercase; color: var(--mf-ink-3);
   margin-bottom: 6px;
 }
-.mf-insight-value {
-  font: 600 22px var(--mf-font-brand); font-style: italic;
-  color: var(--mf-ink); letter-spacing: -0.01em;
-}
-.mf-insight-meta {
-  font: 500 11px var(--mf-font-mono); color: var(--mf-accent);
-  margin-top: 4px;
-  text-shadow: 0 0 8px var(--mf-glow-1);
-}
 .mf-insight-bar {
   height: 4px; background: var(--mf-bg-input);
   border-radius: var(--mf-r-pill); overflow: hidden; margin-top: 8px;
@@ -931,20 +922,14 @@ body {
 .mf-editor > * { position: relative; z-index: 1; }
 
 .mf-tb {
-  height: var(--mf-toolbar-h); flex-shrink: 0;
-  display: flex; align-items: center; gap: 4px;
-  padding: 0 14px;
+  min-height: var(--mf-toolbar-h); flex-shrink: 0;
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 7px 14px;
   background: var(--mf-bg-rail);
   border-bottom: 1px solid var(--mf-border);
   backdrop-filter: blur(var(--mf-glass-blur));
   -webkit-backdrop-filter: blur(var(--mf-glass-blur));
-  overflow-x: auto; overflow-y: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--mf-border-strong) transparent;
   position: relative;
-  /* edge fade — hints at scroll affordance */
-  -webkit-mask-image: linear-gradient(to right, transparent 0, black 14px, black calc(100% - 14px), transparent 100%);
-          mask-image: linear-gradient(to right, transparent 0, black 14px, black calc(100% - 14px), transparent 100%);
 }
 .mf-tb::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
@@ -952,12 +937,9 @@ body {
   opacity: 0.30;
   pointer-events: none;
 }
-.mf-tb::-webkit-scrollbar { height: 4px; }
-.mf-tb::-webkit-scrollbar-track { background: transparent; }
-.mf-tb::-webkit-scrollbar-thumb {
-  background: var(--mf-border-strong); border-radius: 2px;
-}
-.mf-tb::-webkit-scrollbar-thumb:hover { background: var(--mf-accent); }
+/* tools wrap onto a second row when narrow; actions (Send) stay pinned right and never scroll away */
+.mf-tb-tools { flex: 1 1 auto; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 2px; }
+.mf-tb-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .mf-tb-group { display: flex; gap: 2px; align-items: center; }
 .mf-tb-sep { width: 1px; height: 22px; background: var(--mf-border); margin: 0 6px; flex-shrink: 0; }
 .mf-tb-btn {
@@ -980,7 +962,6 @@ body {
   color: var(--mf-accent); box-shadow: 0 0 12px var(--mf-glow-1);
 }
 .mf-tb-btn.icon { padding: 0; width: 30px; justify-content: center; font-weight: 600; }
-.mf-tb-btn.icon.wide { width: 38px; }
 .mf-tb-btn.dropdown::after {
   content: '▾'; font-size: 9px; color: var(--mf-ink-3);
   margin-left: 2px;
@@ -1015,7 +996,6 @@ body {
   padding: 0 8px;
   flex: 0 0 auto;
 }
-.mf-tb-spacer { margin-left: auto; flex: 0 0 auto; width: 0; }
 
 .mf-editor-surface {
   flex: 1; overflow-y: auto;
@@ -1118,13 +1098,6 @@ body {
   border-radius: 4px; border: 1px solid var(--mf-border);
   color: var(--mf-accent);
 }
-.mf-editor-surface .mf-callout {
-  border-left: 3px solid var(--mf-accent);
-  padding: 12px 16px; background: var(--mf-accent-soft);
-  border-radius: 0 var(--mf-r-md) var(--mf-r-md) 0;
-  margin: 16px 0; color: var(--mf-ink); max-width: 680px;
-  box-shadow: -1px 0 16px var(--mf-glow-2);
-}
 .mf-editor-surface .mark {
   background: var(--mf-accent-soft); color: var(--mf-accent);
   padding: 0 4px; border-radius: 3px; font-weight: 500;
@@ -1145,26 +1118,13 @@ body {
 }
 .mf-rail-phone .mf-phone-stage,
 .mf-rail-phone .mf-notes-stage,
-.mf-rail-phone .mf-assist-stage,
-.mf-rail-phone .mf-rail-phone-head { overflow: hidden; }
-.mf-rail-phone-head {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-  transition: justify-content var(--mf-dur-base) var(--mf-ease);
-}
-.mf-rail-phone-title {
-  font: 600 12px var(--mf-font-ui); letter-spacing: 0.08em;
-  text-transform: uppercase; color: var(--mf-ink-3);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  min-width: 0; flex: 1;
-}
+.mf-rail-phone .mf-assist-stage { overflow: hidden; }
 .mf-shell[data-phone="collapsed"] .mf-phone-stage,
 .mf-shell[data-phone="collapsed"] .mf-notes-stage,
-.mf-shell[data-phone="collapsed"] .mf-assist-stage,
-.mf-shell[data-phone="collapsed"] .mf-rail-phone-title {
+.mf-shell[data-phone="collapsed"] .mf-assist-stage {
   opacity: 0; pointer-events: none;
 }
-.mf-phone-stage, .mf-notes-stage, .mf-assist-stage, .mf-rail-phone-title {
+.mf-phone-stage, .mf-notes-stage, .mf-assist-stage {
   transition: opacity var(--mf-dur-base) var(--mf-ease);
 }
 
@@ -2307,6 +2267,27 @@ html[data-theme="paper"] .phone-wrap {
   }
   .mf-rail-phone { display: none; }
 }
+/* editor empty state */
+.mf-editor-surface { position: relative; }
+.mf-editor-surface:has(> p:only-child > br:only-child)::before {
+  content: attr(data-placeholder);
+  position: absolute; left: 62px; right: 62px; top: 38px;
+  color: var(--mf-ink-3); pointer-events: none;
+}
+
+/* review rail */
+.mf-insight-card[hidden] { display: none; }
+.mf-review-why { margin: 8px 0 0; font: 500 12px/1.45 var(--mf-font-ui); color: var(--mf-ink-2); }
+.mf-review-issues { width: 100%; margin-top: 10px; justify-content: center; }
+.mf-rail-insights .mf-assist-section { margin-top: 4px; }
+.mf-rail-insights .mf-assist-section-body { padding-top: 8px; }
+.mf-rail-insights .mf-assist-section-body .mf-insight-label { margin: 10px 0 6px; }
+.mf-dock-btn[data-readiness="ready"] .mf-dock-state { background: var(--mf-ok); box-shadow: 0 0 9px var(--mf-ok); }
+.mf-dock-btn[data-readiness="needs_polish"] .mf-dock-state { background: var(--mf-warn); box-shadow: 0 0 9px var(--mf-warn); }
+.mf-dock-btn[data-readiness="risky"] .mf-dock-state,
+.mf-dock-btn[data-readiness="blocked"] .mf-dock-state { background: #ff5c7a; box-shadow: 0 0 9px #ff5c7a; }
+.mf-dock-btn[data-readiness="idle"] .mf-dock-state { background: var(--mf-border-strong); box-shadow: none; }
+
 /* mobile: editor only */
 @media (max-width: 720px) {
   .mf-shell {
@@ -2317,7 +2298,10 @@ html[data-theme="paper"] .phone-wrap {
   .mf-rail-phone { display: none; }
   .mf-bubbles, .mf-shuffle, .mf-brand .mf-suffix { display: none; }
   .mf-editor-surface { padding: 20px 18px; }
-  .mf-tb { padding: 0 8px; }
+  .mf-tb { padding: 6px 8px; }
+  .mf-tb-sep { display: none; }
+  .mf-tb-group { margin-right: 6px; }
+  .mf-editor-live { display: none; }
 }
 
 /* scrollbars */
@@ -2340,7 +2324,7 @@ html[data-theme="paper"] .phone-wrap {
 .mf-notes-list::-webkit-scrollbar-thumb:hover { background: var(--mf-accent); }
 
 /* ============================================================
-   v6.2 — snippets, thread switcher, drill-down, phone resize
+   shell features
    ============================================================ */
 
 /* === POPOVER (shared by snippets + thread switcher) === */
@@ -2412,57 +2396,15 @@ html[data-theme="paper"] .phone-wrap {
   white-space: normal; line-height: 1.35;
   padding: 8px 12px; gap: 2px; width: 100%;
 }
-.mf-chip.is-thread .mf-thread-meta {
-  font: 500 10px var(--mf-font-mono);
-  color: var(--mf-ink-3);
-  letter-spacing: 0.04em;
-}
 .mf-chip.is-thread.is-current {
   border-color: var(--mf-accent);
   background: var(--mf-accent-soft);
 }
 
 /* === THREAD SWITCHER button === */
-.mf-thread-switcher {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: transparent; border: 0; padding: 0;
-  cursor: pointer;
-  color: inherit;
-  font: 600 12px var(--mf-font-ui);
-  letter-spacing: 0.08em; text-transform: uppercase;
-  min-width: 0; flex: 1;
-  transition: color var(--mf-dur-fast) var(--mf-ease);
-}
-.mf-thread-switcher:hover { color: var(--mf-accent); }
-.mf-thread-label { color: var(--mf-ink-3); }
-.mf-thread-name { color: var(--mf-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mf-thread-switcher svg { color: var(--mf-ink-3); flex-shrink: 0; }
 
 /* === INSIGHT CARD DRILL-DOWN === */
 .mf-insight-card { cursor: pointer; }
-.mf-insight-detail {
-  display: none;
-  margin-top: 10px; padding-top: 10px;
-  border-top: 1px dashed var(--mf-border);
-  font: 500 12px var(--mf-font-ui);
-}
-.mf-insight-card.is-expanded .mf-insight-detail { display: block; }
-.mf-detail-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 3px 0;
-  color: var(--mf-ink-2);
-}
-.mf-detail-row b {
-  color: var(--mf-ink); font-weight: 600;
-  font-family: var(--mf-font-mono);
-  font-size: 11px;
-}
-.mf-detail-tip {
-  font: 500 12px var(--mf-font-ui);
-  line-height: 1.45;
-  color: var(--mf-ink-2);
-  font-style: italic;
-}
 
 /* Universal insights engine */
 .mf-insight-engine {
@@ -2470,35 +2412,6 @@ html[data-theme="paper"] .phone-wrap {
   flex-direction: column;
   gap: 10px;
   min-width: 0;
-}
-.mf-detect-strip {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  border: 1px solid var(--mf-border);
-  border-radius: var(--mf-r-md);
-  background: var(--mf-bg-surface);
-  padding: 10px 12px;
-}
-.mf-detect-label {
-  color: var(--mf-ink-3);
-  font: 700 9px var(--mf-font-mono);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-.mf-detect-value {
-  display: block;
-  color: var(--mf-ink);
-  font: 700 13px var(--mf-font-ui);
-  line-height: 1.25;
-  margin-top: 3px;
-}
-.mf-detect-meta {
-  color: var(--mf-ink-3);
-  font: 600 10px var(--mf-font-ui);
-  line-height: 1.35;
-  text-align: right;
 }
 .mf-insert-btn {
   border: 1px solid var(--mf-border);
@@ -2520,12 +2433,6 @@ html[data-theme="paper"] .phone-wrap {
   color: var(--mf-ink);
   border-color: var(--mf-accent-soft);
 }
-.mf-engine-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
 .mf-engine-title {
   min-width: 0;
 }
@@ -2536,7 +2443,6 @@ html[data-theme="paper"] .phone-wrap {
   line-height: 1.25;
 }
 .mf-engine-title span,
-.mf-engine-meta,
 .mf-engine-row span,
 .mf-gap-row span,
 .mf-suggestion-row span {
@@ -2544,31 +2450,14 @@ html[data-theme="paper"] .phone-wrap {
   font: 500 11px var(--mf-font-ui);
   line-height: 1.35;
 }
-.mf-engine-pill {
-  flex: 0 0 auto;
-  border: 1px solid var(--mf-accent-soft);
-  border-radius: var(--mf-r-pill);
-  color: var(--mf-accent);
-  background: var(--mf-bg-input);
-  padding: 4px 8px;
-  font: 700 9px var(--mf-font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.mf-insight-card[data-response-state],
-.mf-brief-stat[data-response-state] {
+.mf-insight-card[data-response-state] {
   --mf-state-color: var(--mf-accent);
 }
-.mf-insight-card[data-response-state="ready"],
-.mf-brief-stat[data-response-state="ready"] { --mf-state-color: var(--mf-ok); }
-.mf-insight-card[data-response-state="needs_polish"],
-.mf-brief-stat[data-response-state="needs_polish"] { --mf-state-color: var(--mf-warn); }
-.mf-insight-card[data-response-state="risky"],
-.mf-brief-stat[data-response-state="risky"] { --mf-state-color: #ff5c7a; }
-.mf-insight-card[data-response-state="blocked"],
-.mf-brief-stat[data-response-state="blocked"] { --mf-state-color: var(--mf-err); }
-.mf-insight-card[data-response-state] .mf-score-row strong,
-.mf-brief-stat[data-response-state] b {
+.mf-insight-card[data-response-state="ready"] { --mf-state-color: var(--mf-ok); }
+.mf-insight-card[data-response-state="needs_polish"] { --mf-state-color: var(--mf-warn); }
+.mf-insight-card[data-response-state="risky"] { --mf-state-color: #ff5c7a; }
+.mf-insight-card[data-response-state="blocked"] { --mf-state-color: var(--mf-err); }
+.mf-insight-card[data-response-state] .mf-score-row strong {
   color: var(--mf-state-color);
 }
 .mf-insight-card[data-response-state] .mf-insight-bar > span {
@@ -2592,69 +2481,6 @@ html[data-theme="paper"] .phone-wrap {
   font: 600 10px var(--mf-font-mono);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-.mf-brief-grid {
-  display: grid;
-  gap: 9px;
-  margin-top: 10px;
-}
-.mf-brief-line {
-  border-top: 1px solid var(--mf-divider);
-  padding-top: 9px;
-}
-.mf-brief-line:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.mf-brief-line span {
-  display: block;
-  color: var(--mf-ink-3);
-  font: 800 9px var(--mf-font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.mf-brief-line b {
-  display: block;
-  color: var(--mf-ink);
-  font: 800 13px/1.3 var(--mf-font-ui);
-}
-.mf-brief-line p {
-  color: var(--mf-ink-3);
-  font: 600 11px/1.45 var(--mf-font-ui);
-  margin-top: 3px;
-}
-.mf-brief-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 10px;
-}
-.mf-brief-stat {
-  border: 1px solid var(--mf-border);
-  border-radius: var(--mf-r-md);
-  background: var(--mf-bg-input);
-  padding: 8px;
-}
-.mf-brief-stat span {
-  display: block;
-  color: var(--mf-ink-3);
-  font: 800 9px var(--mf-font-mono);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.mf-brief-stat b {
-  display: block;
-  color: var(--mf-accent);
-  font: 900 14px/1.25 var(--mf-font-ui);
-  margin-top: 3px;
-}
-.mf-engine-section-title {
-  color: var(--mf-ink-3);
-  font: 700 10px var(--mf-font-mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin: 6px 0 7px;
 }
 .mf-pass-grid {
   display: grid;
@@ -2692,12 +2518,7 @@ html[data-theme="paper"] .phone-wrap {
   flex-direction: column;
   gap: 7px;
 }
-.mf-mode-panel { display: none; }
-.mf-shell[data-workspace-mode="insights"] [data-panel-mode="insights"],
-.mf-shell[data-workspace-mode="drivers"] [data-panel-mode="drivers"],
-.mf-shell[data-workspace-mode="assist"] [data-panel-mode="assist"] {
-  display: block;
-}
+
 .mf-driver-kv {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -2814,68 +2635,6 @@ html[data-theme="paper"] .phone-wrap {
   font: 600 11px/1.45 var(--mf-font-ui);
   padding: 8px 0;
 }
-.mf-coach-read {
-  position: relative;
-  overflow: hidden;
-}
-.mf-coach-read::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle at 90% 0%, var(--mf-glow-1), transparent 58%),
-    linear-gradient(135deg, var(--mf-accent-soft), transparent 62%);
-  opacity: .72;
-  pointer-events: none;
-}
-.mf-coach-read > * {
-  position: relative;
-  z-index: 1;
-}
-.mf-coach-title {
-  color: var(--mf-ink);
-  font: 800 15px/1.24 var(--mf-font-ui);
-  margin: 8px 0 6px;
-}
-.mf-coach-why {
-  color: var(--mf-ink-2);
-  font: 600 12px/1.45 var(--mf-font-ui);
-  margin: 0;
-}
-.mf-coach-stack {
-  display: grid;
-}
-.mf-coach-row {
-  display: grid;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: start;
-  padding: 10px 0;
-  border-top: 1px solid var(--mf-divider);
-}
-.mf-coach-row:first-child { border-top: 0; }
-.mf-coach-row .mf-engine-dot { margin-top: 5px; }
-.mf-coach-row b {
-  display: block;
-  color: var(--mf-ink);
-  font: 800 12px/1.25 var(--mf-font-ui);
-}
-.mf-coach-row span {
-  display: block;
-  color: var(--mf-ink-3);
-  font: 600 11px/1.35 var(--mf-font-ui);
-  margin-top: 3px;
-}
-.mf-coach-kicker {
-  display: block;
-  color: var(--mf-accent);
-  font: 800 9px var(--mf-font-mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 3px;
-}
-.mf-coach-mini-btn,
 .mf-coach-main-btn {
   border: 1px solid var(--mf-border);
   border-radius: var(--mf-r-pill);
@@ -2884,13 +2643,6 @@ html[data-theme="paper"] .phone-wrap {
   cursor: pointer;
   transition: border-color var(--mf-dur-fast) var(--mf-ease), color var(--mf-dur-fast) var(--mf-ease), background var(--mf-dur-fast) var(--mf-ease);
 }
-.mf-coach-mini-btn {
-  padding: 4px 8px;
-  font: 800 9px var(--mf-font-mono);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-}
-.mf-coach-mini-btn:hover,
 .mf-coach-main-btn:hover {
   border-color: var(--mf-accent);
   color: var(--mf-accent);
@@ -2934,17 +2686,6 @@ html[data-theme="paper"] .phone-wrap {
   cursor: default;
   opacity: .48;
   filter: grayscale(.25);
-}
-.mf-coach-state-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-  align-items: center;
-  color: var(--mf-ink-3);
-  font: 800 9px var(--mf-font-mono);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-top: 10px;
 }
 .mf-engine-row,
 .mf-gap-row,
@@ -3143,14 +2884,6 @@ html[data-theme="paper"] .phone-wrap {
 .mf-assist-kpi-sub {
   font: 600 11px var(--mf-font-mono); color: var(--mf-accent); margin-top: 3px;
 }
-.mf-assist-tone-chip {
-  display: inline-block; padding: 3px 9px; border-radius: var(--mf-r-pill);
-  font: 700 10px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase;
-  margin-bottom: 10px; border: 1px solid transparent;
-}
-.mf-assist-tone-chip[data-risk="Low"]    { background: var(--mf-accent-soft); color: var(--mf-accent); border-color: color-mix(in srgb, var(--mf-accent) 28%, transparent); }
-.mf-assist-tone-chip[data-risk="Medium"] { background: rgba(243,164,59,.14); color: #f3a43b; border-color: rgba(243,164,59,.28); }
-.mf-assist-tone-chip[data-risk="High"]   { background: rgba(255,92,122,.14); color: #ff5c7a; border-color: rgba(255,92,122,.28); }
 .mf-assist-bar-row { margin-bottom: 9px; }
 .mf-assist-bar-label {
   display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;
@@ -3369,7 +3102,6 @@ html[data-theme="paper"] .phone-wrap {
 .mf-assist-act-btn:not(.apply):hover { border-color: var(--mf-accent-soft); color: var(--mf-ink); }
 
 /* === ASSIST SUMMARY ROWS === */
-.mf-assist-rows { margin-top: 14px; flex: 0 0 auto; }
 .mf-assist-row {
   padding: 6px 0; border-bottom: 1px solid var(--mf-border);
 }
@@ -3742,398 +3474,142 @@ html[data-theme="paper"] .phone-wrap {
 </header>
 
 <!-- ========= SHELL ========= -->
-<main class="mf-shell" id="shell" data-insights="open" data-phone="open" data-right-panel="assist" data-workspace-mode="assist">
+<main class="mf-shell" id="shell" data-insights="collapsed" data-phone="open" data-right-panel="assist">
 
-  <!-- ===== LEFT MODE DOCK ===== -->
-  <aside class="mf-side-dock mf-left-dock" aria-label="Workspace mode dock">
+  <!-- ===== LEFT DOCK ===== -->
+  <aside class="mf-side-dock mf-left-dock" aria-label="Review dock">
     <div class="mf-dock-group">
-      <button class="mf-dock-btn" id="tabInsights" type="button" data-panel-toggle="insights" aria-pressed="true" title="Toggle insights panel">
+      <button class="mf-dock-btn" id="tabInsights" type="button" data-panel-toggle="insights" aria-pressed="false" title="Open review panel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-          <path d="M8 5v14"></path>
-          <path d="M5.5 9h1"></path>
-          <path d="M5.5 12h1"></path>
+          <path d="M9 11l3 3L22 4"></path>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
         </svg>
         <span class="mf-dock-state" aria-hidden="true"></span>
-        <span class="mf-dock-label">Toggle left panel</span>
-      </button>
-    </div>
-
-    <div class="mf-dock-rule"></div>
-
-    <div class="mf-dock-group" role="radiogroup" aria-label="MirrorFlow mode">
-      <button class="mf-dock-btn is-active" type="button" data-mode-toggle="assist" aria-pressed="true" title="Assist mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 20h9"></path>
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-        </svg>
-        <span class="mf-dock-label">Assist</span>
-      </button>
-      <button class="mf-dock-btn" type="button" data-mode-toggle="insights" aria-pressed="false" title="Insights mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M4 5h16"></path>
-          <path d="M4 12h10"></path>
-          <path d="M4 19h7"></path>
-        </svg>
-        <span class="mf-dock-label">Insights</span>
-      </button>
-      <button class="mf-dock-btn" type="button" data-mode-toggle="drivers" aria-pressed="false" title="Drivers mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 3l8 4-8 4-8-4 8-4z"></path>
-          <path d="M4 11l8 4 8-4"></path>
-          <path d="M4 16l8 4 8-4"></path>
-        </svg>
-        <span class="mf-dock-label">Drivers</span>
+        <span class="mf-dock-label">Review</span>
       </button>
     </div>
   </aside>
 
-  <!-- ===== INSIGHTS RAIL ===== -->
-  <aside class="mf-rail-insights" id="railInsights">
+  <!-- ===== REVIEW RAIL (QA: send-readiness + writing quality; adapts to the message automatically) ===== -->
+  <aside class="mf-rail-insights" id="railInsights" aria-label="Review">
     <div class="mf-rail-head">
-      <span class="mf-rail-title" id="mfRailTitle">Assist</span>
+      <span class="mf-rail-title" id="mfRailTitle">Review</span>
     </div>
 
     <div class="mf-rail-body">
-      <div class="mf-insight-engine mf-mode-panel" id="pingInsightEngine" data-panel-mode="insights">
-        <div class="mf-detect-strip" aria-label="Detected engine mode">
-          <div>
-            <span class="mf-detect-label">Detected mode</span>
-            <strong class="mf-detect-value" id="mfDetectedMode">Auto</strong>
-          </div>
-          <span class="mf-detect-meta" id="mfDetectedMeta">Local</span>
-        </div>
-
+      <div class="mf-insight-engine" id="pingInsightEngine">
         <article class="mf-insight-card" id="mfResponseStateCard" data-response-state="blocked">
-          <div class="mf-engine-head">
-            <div class="mf-engine-title">
-              <strong id="mfDomainLabel">Universal service</strong>
-              <span id="mfDomainMeta">Local classification awaiting input.</span>
-            </div>
-            <span class="mf-engine-pill" id="mfModeBadge">Auto</span>
-          </div>
           <div class="mf-score-row">
             <strong id="mfReadyScore">--</strong>
             <span id="mfReadyLabel">Readiness</span>
           </div>
           <div class="mf-insight-bar"><span id="mfReadyBar" style="width:0%"></span></div>
+          <p class="mf-review-why" id="mfBriefWhy">Write or paste text to see if it's ready to send.</p>
         </article>
 
         <article class="mf-insight-card">
-          <div class="mf-insight-label">Operator brief</div>
-          <div class="mf-brief-grid">
-            <div class="mf-brief-line">
-              <span>Priority</span>
-              <b id="mfBriefPriority">Awaiting input</b>
-              <p id="mfBriefWhy">Write or paste text to generate a useful brief.</p>
+          <div class="mf-insight-label">Writing quality</div>
+          <div id="mfAssistBars">
+            <div class="mf-assist-bar-row">
+              <div class="mf-assist-bar-label">
+                <span class="mf-assist-bar-name">Grammar</span>
+                <span class="mf-assist-bar-val" id="mfBarValGrammar">—</span>
+              </div>
+              <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarGrammar" style="width:0%"></span></div>
             </div>
-            <div class="mf-brief-line">
-              <span>Recommended move</span>
-              <b id="mfBriefMove">Classify first</b>
-              <p id="mfBriefProof">Drivers will show what pushed the advice.</p>
+            <div class="mf-assist-bar-row">
+              <div class="mf-assist-bar-label">
+                <span class="mf-assist-bar-name">Clarity</span>
+                <span class="mf-assist-bar-val" id="mfBarValClarity">—</span>
+              </div>
+              <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarClarity" style="width:0%"></span></div>
+            </div>
+            <div class="mf-assist-bar-row">
+              <div class="mf-assist-bar-label">
+                <span class="mf-assist-bar-name">Tone</span>
+                <span class="mf-assist-bar-val" id="mfBarValTone">—</span>
+              </div>
+              <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarTone" style="width:0%"></span></div>
             </div>
           </div>
-          <div class="mf-brief-footer">
-            <div class="mf-brief-stat">
-              <span>Confidence</span>
-              <b id="mfBriefConfidence">--</b>
-            </div>
-            <div class="mf-brief-stat" id="mfBriefStateCard" data-response-state="blocked">
-              <span>Send state</span>
-              <b id="mfBriefSendState">--</b>
-            </div>
-          </div>
+          <div class="mf-assist-rec" id="mfAssistRec" aria-live="polite"></div>
+          <button class="mf-assist-action-btn mf-review-issues" id="mfReviewIssuesBtn" type="button" data-open-assist="">
+            <span id="mfAssistIssues">0</span> issues · open suggestions
+          </button>
         </article>
 
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Guidance cue</div>
+        <article class="mf-insight-card" id="mfNextMoveCard">
+          <div class="mf-insight-label">Next move</div>
           <div class="mf-engine-title">
             <strong id="mfInsightCueTitle">Awaiting read</strong>
-            <span id="mfInsightCueWhy">Insights will surface one next move when the draft has enough signal.</span>
+            <span id="mfInsightCueWhy">One suggested move appears once there's enough to read.</span>
           </div>
           <div class="mf-coach-try" style="margin-top:10px">
             <b id="mfInsightCueMove">No move yet</b>
-            <p id="mfInsightCueText">Write or paste text to generate a situation-aware cue.</p>
+            <p id="mfInsightCueText">Write or paste text to get a suggestion.</p>
             <div class="mf-coach-actions">
               <button class="mf-coach-main-btn primary" id="mfInsightCueInsert" type="button" data-insight-insert="">Insert move</button>
-              <button class="mf-coach-main-btn" type="button" data-mode-jump="drivers">Show drivers</button>
             </div>
           </div>
         </article>
 
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Query type</div>
-          <div class="mf-engine-title">
-            <strong id="mfQueryType">No context yet</strong>
-            <span id="mfQueryMeta">Customer context is optional.</span>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Insight drivers</div>
-          <div class="mf-pass-grid">
-            <div class="mf-pass-row">
-              <span class="mf-engine-dot"></span>
-              <div><b>Read</b><span id="mfPassRead">Context, tone, and pressure.</span></div>
-              <span class="mf-pass-state" id="mfPassReadState">--</span>
-            </div>
-            <div class="mf-pass-row">
-              <span class="mf-engine-dot"></span>
-              <div><b>Write</b><span id="mfPassWrite">Draft fit and next move.</span></div>
-              <span class="mf-pass-state" id="mfPassWriteState">--</span>
-            </div>
-            <div class="mf-pass-row">
-              <span class="mf-engine-dot"></span>
-              <div><b>Audit</b><span id="mfPassAudit">Risk, gaps, and send state.</span></div>
-              <span class="mf-pass-state" id="mfPassAuditState">--</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Context signals</div>
-          <div class="mf-engine-list" id="mfSignalList"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Reply checks</div>
-          <div class="mf-engine-list" id="mfCheckList"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Gaps</div>
-          <div class="mf-engine-list" id="mfGapList"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Next moves</div>
-          <div class="mf-engine-list" id="mfSuggestionList"></div>
-        </article>
-      </div>
-
-      <div class="mf-insight-engine mf-mode-panel" id="pingDriversPanel" data-panel-mode="drivers">
-        <div class="mf-detect-strip" aria-label="Driver state">
-          <div>
-            <span class="mf-detect-label">Evidence layer</span>
-            <strong class="mf-detect-value" id="mfDriverMode">Drivers</strong>
-          </div>
-          <span class="mf-detect-meta" id="mfDriverMeta">Local</span>
-        </div>
-
-        <div class="mf-driver-summary" aria-label="Driver proof summary">
-          <div class="mf-driver-summary-item">
-            <span>Assist</span>
-            <b id="mfDriverAssistCount">0</b>
-          </div>
-          <div class="mf-driver-summary-item">
-            <span>Insights</span>
-            <b id="mfDriverInsightCount">0</b>
-          </div>
-          <div class="mf-driver-summary-item is-proof">
-            <span>Backend</span>
-            <b id="mfDriverBackendCount">0</b>
-          </div>
-          <div class="mf-driver-summary-item">
-            <span>Source</span>
-            <b id="mfDriverSourceMode">Blank</b>
-          </div>
-        </div>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Decision state</div>
-          <div class="mf-driver-kv">
-            <span>State</span>
-            <b id="mfDriverStateCode">--</b>
-          </div>
-          <div class="mf-driver-kv">
-            <span>Domain</span>
-            <b id="mfDriverDomain">--</b>
-          </div>
-          <div class="mf-driver-kv">
-            <span>Intent</span>
-            <b id="mfDriverIntent">--</b>
-          </div>
-          <div class="mf-driver-kv">
-            <span>Send state</span>
-            <b id="mfDriverSendState">--</b>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Classification drivers</div>
-          <div class="mf-engine-list" id="mfDomainDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Assist evidence</div>
-          <div class="mf-engine-list" id="mfAssistDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Backend proof</div>
-          <div class="mf-engine-list" id="mfBackendDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Assist diagnostics</div>
-          <div class="mf-assist-diagnostics" id="mfAssistDiagnostics" data-open="false">
-            <button class="mf-assist-diagnostics-toggle" id="mfAssistDiagnosticsToggle" type="button" aria-expanded="false">
-              <span>
-                <span class="mf-assist-diag-eyebrow">Diagnostics</span>
-                <strong id="mfAssistDiagStatus">Tests pending</strong>
-              </span>
-              <span class="mf-assist-diag-pill" id="mfAssistDiagPill" data-state="warn">--</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
-            </button>
-            <div class="mf-assist-diagnostics-body">
-              <div class="mf-assist-diag-grid">
-                <div class="mf-assist-diag-stat">
-                  <span>Tests</span>
-                  <strong id="mfAssistDiagTests">--</strong>
-                </div>
-                <div class="mf-assist-diag-stat">
-                  <span>Rules</span>
-                  <strong id="mfAssistDiagRules">--</strong>
-                </div>
-                <div class="mf-assist-diag-stat">
-                  <span>Disabled</span>
-                  <strong id="mfAssistDiagDisabled">--</strong>
-                </div>
-                <div class="mf-assist-diag-stat">
-                  <span>Profile</span>
-                  <strong id="mfAssistDiagProfile">--</strong>
-                </div>
-              </div>
-              <div class="mf-assist-diag-note" id="mfAssistDiagNote">Run tests to verify Assist rule health.</div>
-              <div class="mf-assist-diag-failures" id="mfAssistDiagFailures"></div>
-              <div class="mf-assist-diag-actions">
-                <button class="mf-assist-action-btn" id="mfAssistRunTests" type="button">Run tests</button>
-                <button class="mf-assist-action-btn" id="mfAssistCopyReport" type="button">Copy report</button>
-                <button class="mf-assist-action-btn" id="mfAssistDownloadReport" type="button">Download report</button>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Intent evidence</div>
-          <div class="mf-engine-list" id="mfIntentDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Signal weights</div>
-          <div class="mf-engine-list" id="mfSignalDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Coverage map</div>
-          <div class="mf-engine-list" id="mfCoverageDrivers"></div>
-        </article>
-
-        <article class="mf-insight-card">
-          <div class="mf-insight-label">Advice causes</div>
-          <div class="mf-engine-list" id="mfAdviceDrivers"></div>
-        </article>
-      </div>
-
-      <!-- ===== ASSIST MODE PANEL ===== -->
-      <div class="mf-insight-engine mf-mode-panel" id="pingAssistPanel" data-panel-mode="assist">
-        <div class="mf-detect-strip" aria-label="Assist state">
-          <div>
-            <span class="mf-detect-label">Writing check</span>
-            <strong class="mf-detect-value" id="mfAssistModeLabel">Assist</strong>
-          </div>
-          <span class="mf-detect-meta" id="mfAssistMetaLabel">Local · offline</span>
-        </div>
-
-        <span class="mf-assist-tone-chip" id="mfAssistToneChip" data-risk="Low">—</span>
-
-        <div class="mf-assist-kpis">
-          <div class="mf-assist-kpi">
-            <div class="mf-assist-kpi-label">Issues</div>
-            <div class="mf-assist-kpi-value" id="mfAssistIssues">--</div>
-          </div>
-          <div class="mf-assist-kpi">
-            <div class="mf-assist-kpi-label">Protected</div>
-            <div class="mf-assist-kpi-value" id="mfAssistProtected">--</div>
-          </div>
-          <div class="mf-assist-kpi">
-            <div class="mf-assist-kpi-label">Words</div>
-            <div class="mf-assist-kpi-value" id="mfAssistWords">--</div>
-          </div>
-          <div class="mf-assist-kpi">
-            <div class="mf-assist-kpi-label">Grade</div>
-            <div class="mf-assist-kpi-value" id="mfAssistGrade">--</div>
-          </div>
-        </div>
-
-        <div id="mfAssistBars">
-          <div class="mf-assist-bar-row">
-            <div class="mf-assist-bar-label">
-              <span class="mf-assist-bar-name">Grammar</span>
-              <span class="mf-assist-bar-val" id="mfBarValGrammar">—</span>
-            </div>
-            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarGrammar" style="width:0%"></span></div>
-          </div>
-          <div class="mf-assist-bar-row">
-            <div class="mf-assist-bar-label">
-              <span class="mf-assist-bar-name">Clarity</span>
-              <span class="mf-assist-bar-val" id="mfBarValClarity">—</span>
-            </div>
-            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarClarity" style="width:0%"></span></div>
-          </div>
-          <div class="mf-assist-bar-row">
-            <div class="mf-assist-bar-label">
-              <span class="mf-assist-bar-name">Tone</span>
-              <span class="mf-assist-bar-val" id="mfBarValTone">—</span>
-            </div>
-            <div class="mf-assist-bar-track"><span class="mf-assist-bar-fill" id="mfBarTone" style="width:0%"></span></div>
-          </div>
-        </div>
-
-        <div class="mf-assist-rec" id="mfAssistRec" aria-live="polite"></div>
-
-        <!-- Summary detail rows -->
-        <div class="mf-assist-rows" id="mfAssistRows"></div>
-
-        <!-- Protected tokens -->
-        <div class="mf-assist-section" id="mfAssistSpansSection" data-open="false">
-          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistSpansSection" type="button">
-            <span id="mfAssistSpansLabel">Protected tokens</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="mf-assist-section-body" id="mfAssistSpansList"></div>
-        </div>
-
-        <!-- Profile presets -->
-        <div class="mf-assist-section" id="mfAssistProfileSection" data-open="true">
-          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistProfileSection" type="button">
-            <span id="mfAssistProfileLabel">Profiles</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="mf-assist-section" id="mfReviewChecksSection" data-open="false">
+          <button class="mf-assist-section-toggle" data-section-toggle="mfReviewChecksSection" type="button">
+            <span>Before you send</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="mf-assist-section-body">
-            <div class="mf-assist-profile-presets" id="mfAssistProfilePresets"></div>
+            <div class="mf-engine-list" id="mfCheckList"></div>
+            <div class="mf-engine-list" id="mfGapList"></div>
+            <div class="mf-engine-list" id="mfSuggestionList"></div>
           </div>
         </div>
 
-        <!-- Rule controls -->
-        <div class="mf-assist-section" id="mfAssistRulesSection" data-open="false">
-          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistRulesSection" type="button">
-            <span>Rule controls</span>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        <div class="mf-assist-section" id="mfAssistAdvancedSection" data-open="false">
+          <button class="mf-assist-section-toggle" data-section-toggle="mfAssistAdvancedSection" type="button">
+            <span>Advanced</span>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
-          <div class="mf-assist-section-body" id="mfAssistRuleList"></div>
-        </div>
-
-        <!-- Actions -->
-        <div class="mf-assist-actions">
-          <button class="mf-assist-action-btn" id="mfAssistExportJson" type="button">Export JSON</button>
-          <button class="mf-assist-action-btn" id="mfAssistExportProfile" type="button">Export profile</button>
-          <button class="mf-assist-action-btn" id="mfAssistImportProfile" type="button">Import profile</button>
-          <button class="mf-assist-action-btn" id="mfAssistResetProfile" type="button">Reset profile</button>
-          <input type="file" id="mfAssistProfileInput" accept=".json" style="display:none">
+          <div class="mf-assist-section-body">
+            <div class="mf-insight-label">Checker profile</div>
+            <div class="mf-assist-profile-presets" id="mfAssistProfilePresets"></div>
+            <div class="mf-insight-label">Rules</div>
+            <div id="mfAssistRuleList"></div>
+            <div class="mf-insight-label"><span id="mfAssistSpansLabel">Protected tokens</span></div>
+            <div id="mfAssistSpansList"></div>
+            <div class="mf-assist-diagnostics" id="mfAssistDiagnostics" data-open="false">
+              <button class="mf-assist-diagnostics-toggle" id="mfAssistDiagnosticsToggle" type="button" aria-expanded="false">
+                <span>
+                  <span class="mf-assist-diag-eyebrow">Diagnostics</span>
+                  <strong id="mfAssistDiagStatus">Tests pending</strong>
+                </span>
+                <span class="mf-assist-diag-pill" id="mfAssistDiagPill" data-state="warn">--</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>
+              </button>
+              <div class="mf-assist-diagnostics-body">
+                <div class="mf-assist-diag-grid">
+                  <div class="mf-assist-diag-stat"><span>Tests</span><strong id="mfAssistDiagTests">--</strong></div>
+                  <div class="mf-assist-diag-stat"><span>Rules</span><strong id="mfAssistDiagRules">--</strong></div>
+                  <div class="mf-assist-diag-stat"><span>Disabled</span><strong id="mfAssistDiagDisabled">--</strong></div>
+                  <div class="mf-assist-diag-stat"><span>Profile</span><strong id="mfAssistDiagProfile">--</strong></div>
+                </div>
+                <div class="mf-assist-diag-note" id="mfAssistDiagNote">Run tests to verify rule health.</div>
+                <div class="mf-assist-diag-failures" id="mfAssistDiagFailures"></div>
+                <div class="mf-assist-diag-actions">
+                  <button class="mf-assist-action-btn" id="mfAssistRunTests" type="button">Run tests</button>
+                  <button class="mf-assist-action-btn" id="mfAssistCopyReport" type="button">Copy report</button>
+                  <button class="mf-assist-action-btn" id="mfAssistDownloadReport" type="button">Download report</button>
+                </div>
+              </div>
+            </div>
+            <div class="mf-assist-actions">
+              <button class="mf-assist-action-btn" id="mfAssistExportJson" type="button">Export JSON</button>
+              <button class="mf-assist-action-btn" id="mfAssistExportProfile" type="button">Export profile</button>
+              <button class="mf-assist-action-btn" id="mfAssistImportProfile" type="button">Import profile</button>
+              <button class="mf-assist-action-btn" id="mfAssistResetProfile" type="button">Reset profile</button>
+              <input type="file" id="mfAssistProfileInput" accept=".json" style="display:none">
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -4143,71 +3619,53 @@ html[data-theme="paper"] .phone-wrap {
 
   <!-- ===== EDITOR ===== -->
   <section class="mf-editor">
-    <div class="mf-tb" role="toolbar">
-      <div class="mf-tb-group">
-        <button class="mf-tb-btn icon" data-cmd="undo" title="Undo">↶</button>
-        <button class="mf-tb-btn icon" data-cmd="redo" title="Redo">↷</button>
+    <div class="mf-tb" role="toolbar" aria-label="Editor tools">
+      <div class="mf-tb-tools">
+        <div class="mf-tb-group">
+          <button class="mf-tb-btn icon" data-cmd="undo" title="Undo (Ctrl+Z)" aria-label="Undo">↶</button>
+          <button class="mf-tb-btn icon" data-cmd="redo" title="Redo (Ctrl+Shift+Z)" aria-label="Redo">↷</button>
+        </div>
+        <div class="mf-tb-sep"></div>
+        <div class="mf-tb-group">
+          <button class="mf-tb-btn icon" data-cmd="bold" title="Bold (Ctrl+B)" aria-label="Bold"><b>B</b></button>
+          <button class="mf-tb-btn icon" data-cmd="italic" title="Italic (Ctrl+I)" aria-label="Italic"><i>I</i></button>
+          <button class="mf-tb-btn icon" data-cmd="underline" title="Underline (Ctrl+U)" aria-label="Underline"><u>U</u></button>
+        </div>
+        <div class="mf-tb-sep"></div>
+        <div class="mf-tb-group">
+          <button class="mf-tb-btn icon" data-cmd="insertUnorderedList" title="Bullets" aria-label="Bullet list">•</button>
+          <button class="mf-tb-btn icon" data-cmd="insertOrderedList" title="Numbered list" aria-label="Numbered list">1.</button>
+          <button class="mf-tb-btn icon" data-cmd="createLink" title="Link (Ctrl+K)" aria-label="Insert link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          </button>
+        </div>
+        <div class="mf-tb-sep"></div>
+        <div class="mf-tb-group">
+          <button class="mf-tb-btn dropdown" data-snippet="replies">Replies</button>
+          <button class="mf-tb-btn dropdown" data-snippet="phrases">Phrases</button>
+        </div>
       </div>
-      <div class="mf-tb-sep"></div>
-      <div class="mf-tb-group">
-        <button class="mf-tb-btn icon" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>
-        <button class="mf-tb-btn icon" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>
-        <button class="mf-tb-btn icon" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
-        <button class="mf-tb-btn icon" data-cmd="strikeThrough" title="Strike"><s>S</s></button>
-      </div>
-      <div class="mf-tb-sep"></div>
-      <div class="mf-tb-group">
-        <button class="mf-tb-btn icon wide" data-cmd="formatBlock" data-arg="p" title="Paragraph">¶</button>
-        <button class="mf-tb-btn icon wide" data-cmd="formatBlock" data-arg="h2" title="Heading">H2</button>
-        <button class="mf-tb-btn icon" data-cmd="insertUnorderedList" title="Bullets">•</button>
-        <button class="mf-tb-btn icon" data-cmd="insertOrderedList" title="Numbered">1.</button>
-        <button class="mf-tb-btn icon" data-cmd="formatBlock" data-arg="blockquote" title="Quote">"</button>
-        <button class="mf-tb-btn icon" data-cmd="createLink" title="Link (Ctrl+K)">🔗</button>
-        <button class="mf-tb-btn icon" data-action="softbreak" title="Line break (Shift+Enter)">↵</button>
-      </div>
-      <div class="mf-tb-sep"></div>
-      <div class="mf-tb-group">
-        <button class="mf-tb-btn dropdown" data-snippet="replies">Replies</button>
-        <button class="mf-tb-btn dropdown" data-snippet="phrases">Phrases</button>
-      </div>
-      <div class="mf-tb-sep"></div>
-      <div class="mf-tb-group">
-        <button class="mf-tb-btn" data-action="clean" title="Strip formatting">Clean</button>
-        <button class="mf-tb-btn" data-action="clear" title="Clear draft">Clear</button>
-        <button class="mf-tb-btn" data-action="copy" title="Copy to clipboard">Copy</button>
-        <button class="mf-tb-btn" data-action="paste" title="Paste from clipboard">Paste</button>
-      </div>
-      <div class="mf-tb-sep"></div>
-      <button class="mf-tb-btn icon" data-action="more" title="More">⋯</button>
 
-      <div class="mf-tb-spacer"></div>
-      <span class="mf-editor-live" id="editorLiveStatus">Ready</span>
-
-      <button class="mf-tb-btn icon mf-newsession-btn" id="newSessionBtn" title="New session — clear all">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="23 4 23 10 17 10"/>
-          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-        </svg>
-      </button>
-      <button class="mf-tb-btn send" title="Send (Ctrl+Enter)">
-        Send
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="5" y1="12" x2="19" y2="12"/>
-          <polyline points="12 5 19 12 12 19"/>
-        </svg>
-      </button>
+      <div class="mf-tb-actions">
+        <span class="mf-editor-live" id="editorLiveStatus">Ready</span>
+        <button class="mf-tb-btn icon" data-action="more" title="More" aria-label="More actions">⋯</button>
+        <button class="mf-tb-btn icon mf-newsession-btn" id="newSessionBtn" title="New session — clear all" aria-label="New session">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+        <button class="mf-tb-btn send" title="Send (Ctrl+Enter)">
+          Send
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
-    <div class="mf-editor-surface" id="editorSurface" contenteditable="true" spellcheck="false">
-      <h1>Re: Booking confusion — Friday slot</h1>
-      <p>Hi Marcus,</p>
-      <p>You're right — that double-booking was on us, and I'm sorry it caught you out before the long weekend. The good news is the slot is yours: <code>Fri 14:30–15:45</code> with Riley is locked in.</p>
-      <div class="mf-callout">
-        <strong>What changed:</strong> we tightened the auto-confirm rule so two requests can't share a window any more. Yours was the one that triggered the fix.
-      </div>
-      <h2>If you need to shift it</h2>
-      <p>Reply with a window and I'll move it without the form runaround. We've also bumped you to priority <span class="mark">confirmation</span> for the next two bookings.</p>
-      <p>— Sel</p>
+    <div class="mf-editor-surface" id="editorSurface" contenteditable="true" spellcheck="false" data-placeholder="Write your reply here. Grammar, clarity and tone are checked as you type."><p><br></p>
     </div>
   </section>
 
@@ -4305,7 +3763,7 @@ html[data-theme="paper"] .phone-wrap {
         <input class="mf-note-search" id="sideNotesSearch" type="search" autocomplete="off" placeholder="Search notes...">
         <button class="mf-note-action" id="sideNotesClearSearch" type="button">Clear</button>
       </div>
-      <div class="mf-notes-status" id="sideNotesStatus">1 note</div>
+      <div class="mf-notes-status" id="sideNotesStatus">No notes</div>
       <div class="mf-notes-list" id="sideNotesList"></div>
     </section>
 
@@ -4406,7 +3864,7 @@ html[data-theme="paper"] .phone-wrap {
 
 <script>
 /* =========================================================
-   Ping Shell v6 — interaction (theme + variant + rails)
+   Ping shell
    ========================================================= */
 
 const VARIANTS = {
@@ -4516,29 +3974,6 @@ function syncRailControls() {
   });
 }
 
-function normalizeWorkspaceMode(mode) {
-  if (mode === 'ping') return 'insights';
-  if (mode === 'engine') return 'drivers';
-  if (mode === 'coach' || mode === 'review') return 'insights';
-  return ['assist', 'insights', 'drivers'].includes(mode) ? mode : 'assist';
-}
-
-function syncModeControls() {
-  const mode = normalizeWorkspaceMode(shell.dataset.workspaceMode);
-  shell.dataset.workspaceMode = mode;
-  const titleMap = {
-    insights: 'Insights',
-    drivers: 'Drivers',
-    assist: 'Assist'
-  };
-  mfSetText('mfRailTitle', titleMap[mode] || 'Insights');
-  document.querySelectorAll('[data-mode-toggle]').forEach(btn => {
-    const isActive = btn.dataset.modeToggle === mode;
-    btn.classList.toggle('is-active', isActive);
-    btn.setAttribute('aria-pressed', String(isActive));
-  });
-}
-
 /* INSIGHTS — left dock toggle */
 document.getElementById('tabInsights').addEventListener('click', (e) => {
   e.stopPropagation();
@@ -4586,19 +4021,6 @@ document.getElementById('tabAssist').addEventListener('click', (e) => {
   schedulePhoneScale();
 });
 
-document.querySelectorAll('[data-mode-toggle]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    shell.dataset.workspaceMode = btn.dataset.modeToggle;
-    shell.dataset.insights = 'open';
-    syncModeControls();
-    syncRailControls();
-    renderPingInsights();
-    if (btn.dataset.modeToggle === 'assist') renderPingAssist();
-    save();
-    toast(`${btn.title.replace(' mode', '')} mode`);
-  });
-});
-
 /* drag-resize insights */
 const handle = document.getElementById('resizeHandle');
 let dragging = false;
@@ -4644,9 +4066,6 @@ const sideNotesStatus = document.getElementById('sideNotesStatus');
 const addNoteBtn = document.getElementById('addNoteBtn');
 const addNoteFromDraftBtn = document.getElementById('addNoteFromDraftBtn');
 /* counterEl removed */
-const toneEl     = document.getElementById('toneValue');
-const toneMetaEl = document.getElementById('toneMeta');
-const moveEl     = document.getElementById('moveValue');
 /* metaEl removed — auto-save status now lives in More popover */
 
 /* persistent draft bubbles (Lite-style) */
@@ -4658,17 +4077,11 @@ draftIn.className  = 'bubble preview';
 draftIn.dataset.role = 'cust';
 
 const PHONE_IDLE_MSGS = [
-  { role: 'idle-cust',  text: 'Hi, I need help with my claim.' },
+  { role: 'idle-cust',  text: 'Hi, I could do with some help.' },
   { role: 'idle-agent', text: 'Hi,\nThanks for reaching out, how can I help?' }
 ];
 
-let sideNotes = [
-  {
-    id: 'note-' + Date.now().toString(36),
-    text: 'Reusable copy, customer refs, policy lines, or reminders can live here.',
-    pinned: false
-  }
-];
+let sideNotes = [];
 let sideNotesQuery = '';
 
 const PHONE_TEXT_SCALES = Object.freeze({
@@ -4966,9 +4379,6 @@ function getDraftPlain() {
 }
 
 /* collapsed text (used for counter/tone calcs) */
-function getDraftText() {
-  return getDraftPlain().replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
-}
 
 function getDraftStats() {
   const text = getDraftPlain();
@@ -5289,8 +4699,6 @@ const MF_PING_DRAFT_SIGNALS = [
   { id:'hesitation', label:'Hesitation', weight:12, phrases:['might be able to','possibly','perhaps','maybe','i think we could'], coach:'Use more confident language if the action is confirmed.' },
   { id:'ownership_visible', label:'Ownership visible', weight:-8, phrases:['i will','i can','we will','we can','i have','we have'], coach:'Keep the owner and action visible.' }
 ];
-
-let activeInsightMode = 'auto';
 
 function getCustomerContextText() {
   const live = customerEl.value.trim();
@@ -5637,7 +5045,7 @@ function mfBuildResponseState(reply, gaps, signals, query, sourceMode) {
     return state(
       'risky',
       'Risky',
-      riskGap ? riskGap.note : 'Risk language is active.',
+      riskGap ? 'Risky wording: ' + riskGap.note + '.' : 'Risk language is active.',
       'Remove defensive, vague, or over-promising wording.',
       reply.riskHits.length ? reply.riskHits : [riskGap && riskGap.label],
       'high'
@@ -6127,12 +5535,6 @@ function MF_runPingUniversalEngine(customer, draft, mode) {
 window.MF_runPingUniversalEngine = MF_runPingUniversalEngine;
 
 /* ========== INSIGHTS RENDER + DOM WIRING ========== */
-function mfReadinessLabel(score) {
-  if (score >= 84) return 'Ready';
-  if (score >= 68) return 'Needs polish';
-  if (score >= 45) return 'Needs work';
-  return 'Hold';
-}
 
 function mfSetText(id, text) {
   const el = document.getElementById(id);
@@ -6177,168 +5579,8 @@ function mfRenderRows(containerId, rows, options) {
   });
 }
 
-function mfRenderDriverRows(containerId, rows, emptyText) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = '';
-  if (!rows || !rows.length) {
-    const empty = document.createElement('div');
-    empty.className = 'mf-driver-empty';
-    empty.textContent = emptyText || 'No driver evidence yet.';
-    container.appendChild(empty);
-    return;
-  }
-  rows.forEach(row => {
-    const wrap = document.createElement('div');
-    wrap.className = 'mf-driver-row';
 
-    const body = document.createElement('div');
-    const title = document.createElement('b');
-    title.textContent = row.label;
-    const note = document.createElement('small');
-    note.textContent = row.note || '';
-    body.appendChild(title);
-    body.appendChild(note);
 
-    if (row.tags && row.tags.length) {
-      const tags = document.createElement('div');
-      tags.className = 'mf-driver-tags';
-      row.tags.slice(0, 6).forEach(tag => {
-        const chip = document.createElement('span');
-        chip.className = 'mf-driver-tag';
-        chip.textContent = tag;
-        tags.appendChild(chip);
-      });
-      body.appendChild(tags);
-    }
-
-    const score = document.createElement('span');
-    score.className = 'mf-driver-score';
-    score.textContent = Math.round(row.score || 0) + '%';
-
-    const bar = document.createElement('div');
-    bar.className = 'mf-driver-bar';
-    bar.style.setProperty('--driver-w', Math.max(0, Math.min(100, row.score || 0)) + '%');
-    const fill = document.createElement('span');
-    bar.appendChild(fill);
-
-    wrap.appendChild(body);
-    wrap.appendChild(score);
-    wrap.appendChild(bar);
-    container.appendChild(wrap);
-  });
-}
-
-function mfBuildAssistDriverRows() {
-  const text = getDraftPlain().trim();
-  if (!text || !window.MirrorFlowAssistEngine || typeof window.MirrorFlowAssistEngine.analyzeText !== 'function') return [];
-  try {
-    const analysis = window.MirrorFlowAssistEngine.analyzeText(text, { surface: 'ping_drivers', mode: 'writing_only' });
-    const issues = analysis.issues || [];
-    const grammar = issues.filter(issue => issue.category === 'grammar').length;
-    const clarity = issues.filter(issue => issue.category === 'clarity').length;
-    const tone = issues.filter(issue => issue.category === 'tone').length;
-    const rows = [
-      {
-        label: 'Writing health',
-        note: `${issues.length} active writing issue${issues.length === 1 ? '' : 's'}`,
-        score: Math.max(0, 100 - issues.length * 12),
-        tags: ['Assist', 'grammar', 'clarity', 'tone']
-      },
-      {
-        label: 'Readability',
-        note: `${analysis.clarity.readability} · grade ${analysis.clarity.grade} · ${analysis.clarity.avgSentenceLength} words/sentence`,
-        score: analysis.clarity.quality,
-        tags: ['Assist', 'clarity']
-      },
-      {
-        label: 'Tone load',
-        note: `${analysis.tone.primary} · ${analysis.tone.risk} · ${tone} tone signal${tone === 1 ? '' : 's'}`,
-        score: Math.max(0, 100 - analysis.tone.score),
-        tags: ['Assist', 'tone']
-      },
-      {
-        label: 'Grammar rules',
-        note: `${grammar} grammar match${grammar === 1 ? '' : 'es'} · ${analysis.rules.active.filter(rule => rule.category === 'grammar').length} active rules`,
-        score: Math.max(0, 100 - grammar * 20),
-        tags: ['Assist', 'grammar']
-      }
-    ];
-    issues.slice(0, 4).forEach(issue => {
-      rows.push({
-        label: issue.label,
-        note: issue.message,
-        score: issue.severity === 'high' ? 30 : issue.severity === 'medium' ? 55 : 76,
-        tags: ['Assist', issue.category, issue.severity]
-      });
-    });
-    return rows;
-  } catch (_) {
-    return [];
-  }
-}
-
-function mfBuildBackendDriverRows(result) {
-  const text = getDraftPlain().trim();
-  const assistReady = Boolean(window.MirrorFlowAssistEngine?.analyzeText);
-  const insightsReady = typeof window.MF_runPingUniversalEngine === 'function';
-  const assistIssues = mfLastAssist?.issues?.length ?? 0;
-  const rewriteCount = mfLastAssist?.rewrites?.length ?? 0;
-  const sourceMode = result?.sourceMode || (text ? 'draft_only' : 'blank');
-  const state = result?.responseState?.code || 'pending';
-  const failedDomainChecks = result?.domainChecks?.failed?.length ?? 0;
-  const rows = [
-    {
-      label: '/health adapter',
-      note: assistReady && insightsReady ? 'Assist, Insights, rule health, and offline readiness can be checked locally.' : 'One or more local engines are not ready.',
-      score: assistReady && insightsReady ? 92 : 40,
-      tags: ['API', 'health', 'readiness']
-    },
-    {
-      label: '/check adapter',
-      note: assistReady ? `${assistIssues} issue${assistIssues === 1 ? '' : 's'} · ${rewriteCount} rewrite${rewriteCount === 1 ? '' : 's'} ready for API shape.` : 'Assist engine not ready.',
-      score: assistReady ? 92 : 0,
-      tags: ['API', 'Assist', 'writing']
-    },
-    {
-      label: '/insights adapter',
-      note: insightsReady ? `${sourceMode} · response ${state}.` : 'Insights engine not ready.',
-      score: insightsReady ? 88 : 0,
-      tags: ['API', 'Insights', sourceMode]
-    },
-    {
-      label: '/drivers adapter',
-      note: 'Assist evidence, Insights proof, backend proof, and diagnostics are separated for API handoff.',
-      score: assistReady && insightsReady ? 88 : 40,
-      tags: ['API', 'Drivers', 'proof']
-    },
-    {
-      label: '/policy adapter',
-      note: failedDomainChecks ? `${failedDomainChecks} domain policy warning${failedDomainChecks === 1 ? '' : 's'} can be surfaced before send.` : 'Domain, risk language, and tenant phrase checks can run before send.',
-      score: assistReady && insightsReady ? (failedDomainChecks ? 76 : 86) : 40,
-      tags: ['API', 'Policy', 'pre-send']
-    },
-    {
-      label: '/feedback adapter',
-      note: 'Apply, ignore, copy, send, undo, profile, and note events have a normalized learning-signal shape.',
-      score: 84,
-      tags: ['API', 'Feedback', 'learning']
-    },
-    {
-      label: '/session adapter',
-      note: 'Assist, Insights, Drivers, optional Policy, and optional Feedback can be composed into one session envelope.',
-      score: assistReady && insightsReady ? 86 : 40,
-      tags: ['API', 'Session', 'integration']
-    },
-    {
-      label: 'Offline shell',
-      note: 'Runtime stays local: no stylesheet links, script sources, imports, fetches, or token requests.',
-      score: 96,
-      tags: ['offline', 'portable', 'self-contained']
-    }
-  ];
-  return rows;
-}
 
 function renderInsightGuidanceCue(result) {
   if (!result) return;
@@ -6355,99 +5597,29 @@ function renderInsightGuidanceCue(result) {
   }
 }
 
-function renderPingDrivers(result) {
-  if (!result || !result.drivers) return;
-  const d = result.drivers;
-  const assistRows = mfBuildAssistDriverRows();
-  const backendRows = mfBuildBackendDriverRows(result);
-  const insightRowCount = [
-    d.domainRows,
-    d.intentRows,
-    d.signalRows,
-    d.coverageRows,
-    d.adviceRows
-  ].reduce((sum, rows) => sum + ((rows || []).length), 0);
-  mfSetText('mfDriverMode', result.domain.label);
-  mfSetText('mfDriverMeta', d.metrics.highGapCount
-    ? d.metrics.highGapCount + ' high-priority driver' + (d.metrics.highGapCount === 1 ? '' : 's')
-    : d.state.source + ' · ' + d.metrics.gapCount + ' active driver' + (d.metrics.gapCount === 1 ? '' : 's'));
-  mfSetText('mfDriverAssistCount', assistRows.length + ' row' + (assistRows.length === 1 ? '' : 's'));
-  mfSetText('mfDriverInsightCount', insightRowCount + ' row' + (insightRowCount === 1 ? '' : 's'));
-  mfSetText('mfDriverBackendCount', backendRows.length + ' row' + (backendRows.length === 1 ? '' : 's'));
-  mfSetText('mfDriverSourceMode', (result.sourceMode || d.state.source || 'blank').replace(/_/g, ' '));
-  mfSetText('mfDriverStateCode', d.state.response);
-  mfSetText('mfDriverDomain', d.state.domain);
-  mfSetText('mfDriverIntent', d.state.intent);
-  mfSetText('mfDriverSendState', d.state.send);
-  mfRenderDriverRows('mfDomainDrivers', d.domainRows, 'No classification evidence yet.');
-  mfRenderDriverRows('mfAssistDrivers', assistRows, 'No Assist evidence yet.');
-  mfRenderDriverRows('mfBackendDrivers', backendRows, 'No backend proof yet.');
-  mfRenderDriverRows('mfIntentDrivers', d.intentRows, 'No intent evidence yet.');
-  mfRenderDriverRows('mfSignalDrivers', d.signalRows, 'No pressure signals found.');
-  mfRenderDriverRows('mfCoverageDrivers', d.coverageRows, 'No coverage map yet.');
-  mfRenderDriverRows('mfAdviceDrivers', d.adviceRows, 'No advice causes found.');
-}
 
 function renderPingInsights() {
-  activeInsightMode = 'auto';
-  const customerContext = getCustomerContextText();
-  const result = MF_runPingUniversalEngine(customerContext, getDraftPlain(), activeInsightMode);
-  const draftOnly = result.sourceMode === 'draft_only';
+  const result = MF_runPingUniversalEngine(getCustomerContextText(), getDraftPlain(), 'auto');
   const responseState = result.responseState || { code: 'blocked', label: 'Blocked', score: 0, reason: 'No response state available.', severity: 'high' };
   window.MF_PING_LAST_ENGINE = result;
-  renderPingDrivers(result);
   renderInsightGuidanceCue(result);
 
-  mfSetText('mfDetectedMode', result.domain.label);
-  mfSetText('mfDetectedMeta', (draftOnly ? 'Draft-only · ' : '') + result.domain.confidence + '% · ' + result.query.label);
-  mfSetText('mfModeBadge', draftOnly ? 'Draft' : 'Detected');
-  mfSetText('mfDomainLabel', result.domain.label);
-  mfSetText('mfDomainMeta', result.domain.forced
-    ? 'Forced mode. ' + result.domain.summary
-    : result.domain.confidence + '% confidence. ' + (result.domain.hits.length ? 'Signals: ' + result.domain.hits.join(', ') : result.domain.summary));
   const stateCard = document.getElementById('mfResponseStateCard');
   if (stateCard) stateCard.dataset.responseState = responseState.code;
-  const briefStateCard = document.getElementById('mfBriefStateCard');
-  if (briefStateCard) briefStateCard.dataset.responseState = responseState.code;
+  const dockBtn = document.getElementById('tabInsights');
+  if (dockBtn) dockBtn.dataset.readiness = result.reply.hasDraft ? responseState.code : 'idle';
   mfSetText('mfReadyScore', result.reply.hasDraft ? responseState.score + '%' : '--');
-  mfSetText('mfReadyLabel', responseState.label);
+  mfSetText('mfReadyLabel', result.reply.hasDraft ? responseState.label : 'Idle');
+  const nextCard = document.getElementById('mfNextMoveCard');
+  if (nextCard) nextCard.hidden = !result.reply.hasDraft;
+  if (stateCard && !result.reply.hasDraft) stateCard.dataset.responseState = 'idle';
+  mfSetText('mfBriefWhy', result.reply.hasDraft
+    ? [responseState.reason, responseState.next].filter(Boolean).join(' ')
+    : 'Write or paste text to see if it’s ready to send.');
   const readyBar = document.getElementById('mfReadyBar');
   if (readyBar) readyBar.style.width = responseState.score + '%';
-  mfSetText('mfBriefPriority', result.brief.priority);
-  mfSetText('mfBriefWhy', result.brief.why);
-  mfSetText('mfBriefMove', result.brief.move);
-  mfSetText('mfBriefProof', result.brief.proof);
-  mfSetText('mfBriefConfidence', result.brief.confidence + '%');
-  mfSetText('mfBriefSendState', result.brief.sendState);
-  mfSetText('mfQueryType', result.query.label);
-  mfSetText('mfQueryMeta', result.query.need);
-  mfSetText('mfPassRead', result.signals.rows.length
-    ? result.signals.rows.slice(0, 2).map(s => s.label).join(', ') + ' detected.'
-    : draftOnly ? 'Draft is being read directly.' : result.query.label + ' in ' + result.domain.label.toLowerCase() + '.');
-  mfSetText('mfPassReadState', result.signals.load >= 30 ? 'Loaded' : 'Stable');
-  mfSetText('mfPassWrite', result.reply.hasDraft
-    ? draftOnly
-      ? responseState.label + ' · writing read.'
-      : responseState.label + ' · coverage ' + result.reply.coverage.score + '%.'
-    : 'No draft to evaluate.');
-  mfSetText('mfPassWriteState', result.reply.hasDraft ? responseState.score + '%' : '--');
-  const highGapCount = result.gaps.filter(g => g.severity === 'high').length;
-  mfSetText('mfPassAudit', highGapCount
-    ? highGapCount + ' high-priority issue' + (highGapCount === 1 ? '' : 's') + ' before send.'
-    : (responseState.reason || (result.gaps.length ? result.gaps.length + ' polish item' + (result.gaps.length === 1 ? '' : 's') + '.' : 'No blocking gaps.')));
-  mfSetText('mfPassAuditState', responseState.label);
 
-  const signalRows = result.signals.rows.slice(0, 4).map(signal => ({
-    label: signal.label,
-    note: signal.coach + (signal.hits.length ? ' Hits: ' + signal.hits.slice(0, 3).join(', ') : '')
-  }));
-  mfRenderRows('mfSignalList', signalRows, { empty: draftOnly ? 'No strong writing signal detected.' : 'No strong customer signal detected.', kind: 'mf-engine-row' });
-
-  const stateRow = {
-    label: 'State: ' + responseState.label,
-    note: responseState.reason + (responseState.next ? ' Next: ' + responseState.next : ''),
-    severity: responseState.severity || 'medium'
-  };
+  /* Checks adapt to the message: the engine only emits pack/coverage rows that apply. */
   const domainCheckRows = result.domainChecks && result.domainChecks.active
     ? result.domainChecks.checks.map(check => ({
         label: check.label,
@@ -6456,34 +5628,32 @@ function renderPingInsights() {
         severity: check.passed ? 'low' : check.severity
       }))
     : [];
+  const riskRow = { label:'Risk', value: result.reply.riskHits.length ? 'Flagged' : 'Clear', note: result.reply.riskHits.length ? result.reply.riskHits.slice(0, 4).join(', ') : 'No hard risk phrase found.', severity: result.reply.riskHits.length ? 'high' : 'low' };
+  const draftOnly = result.sourceMode === 'draft_only';
   const checkRows = draftOnly ? [
-    stateRow,
     ...domainCheckRows,
-    { label:'Source', value:'Draft', note:'No customer message required. Writing help is reading this text directly.', severity:'low' },
     { label:'Plain language', value: result.reply.plain ? 'Clear' : 'Heavy', note: result.reply.plain ? 'Sentence load and jargon are under control.' : 'Split long sentences or translate internal terms.', severity: result.reply.plain ? 'low' : 'medium' },
-    { label:'Action path', value: result.reply.supportLike ? (result.reply.nextStep ? 'Present' : 'Optional') : 'Universal', note: result.reply.supportLike ? (result.reply.nextStep ? 'Action path is visible.' : 'Add a next action if this is a support reply.') : 'General text mode; no customer reply action required.', severity: result.reply.supportLike && !result.reply.nextStep ? 'medium' : 'low' },
-    { label:'Risk', value: result.reply.riskHits.length ? 'Flagged' : 'Clear', note: result.reply.riskHits.length ? result.reply.riskHits.slice(0, 4).join(', ') : 'No hard risk phrase found.', severity: result.reply.riskHits.length ? 'high' : 'low' }
+    ...(result.reply.supportLike ? [{ label:'Action path', value: result.reply.nextStep ? 'Present' : 'Missing', note: result.reply.nextStep ? 'Action path is visible.' : 'Add the next concrete action.', severity: result.reply.nextStep ? 'low' : 'medium' }] : []),
+    riskRow
   ] : [
-    stateRow,
     ...domainCheckRows,
-    { label:'Coverage', value: result.reply.coverage.score + '%', note: result.reply.coverage.score >= 70 ? 'Customer ask is represented.' : 'Missing: ' + (result.reply.coverage.missing.join(', ') || 'customer detail'), severity: result.reply.coverage.score >= 70 ? 'low' : 'medium' },
-    { label:'Ownership', value: result.reply.ownership ? 'Present' : 'Missing', note: result.reply.ownership ? 'Sender action is visible.' : 'Add who will do what.', severity: result.reply.ownership ? 'low' : 'high' },
+    { label:'Coverage', value: result.reply.coverage.score + '%', note: result.reply.coverage.score >= 70 ? 'Customer ask is represented.' : 'Missing: ' + (result.reply.coverage.missing.join(', ') || 'customer details'), severity: result.reply.coverage.score >= 70 ? 'low' : 'medium' },
+    { label:'Ownership', value: result.reply.ownership ? 'Present' : 'Missing', note: result.reply.ownership ? 'Sender action is visible.' : 'Add who will do what.', severity: result.reply.ownership ? 'low' : 'medium' },
     { label:'Next step', value: result.reply.nextStep ? 'Present' : 'Missing', note: result.reply.nextStep ? 'Action path is visible.' : 'Add the next concrete action.', severity: result.reply.nextStep ? 'low' : 'medium' },
-    { label:'Risk', value: result.reply.riskHits.length ? 'Flagged' : 'Clear', note: result.reply.riskHits.length ? result.reply.riskHits.slice(0, 4).join(', ') : 'No hard risk phrase found.', severity: result.reply.riskHits.length ? 'high' : 'low' }
+    riskRow
   ];
-  mfRenderRows('mfCheckList', checkRows, { kind: 'mf-gap-row' });
-  mfRenderRows('mfGapList', result.gaps, { empty: 'No blocking gaps found.', kind: 'mf-gap-row' });
-  mfRenderRows('mfSuggestionList', result.suggestions.map(s => ({ label: s.label, note: s.note, insert: s.insert })), { kind: 'mf-suggestion-row' });
+  mfRenderRows('mfCheckList', result.reply.hasDraft ? checkRows : [], { empty: 'Checks appear once there is a draft.', kind: 'mf-gap-row' });
+  mfRenderRows('mfGapList', result.gaps, { empty: '', kind: 'mf-gap-row' });
+  mfRenderRows('mfSuggestionList', result.suggestions.map(s => ({ label: s.label, note: s.note, insert: s.insert })), { empty: '', kind: 'mf-suggestion-row' });
 }
 
 document.getElementById('pingInsightEngine').addEventListener('click', (e) => {
-  const jump = e.target.closest('[data-mode-jump]');
-  if (jump && jump.dataset.modeJump) {
-    shell.dataset.workspaceMode = normalizeWorkspaceMode(jump.dataset.modeJump);
-    shell.dataset.insights = 'open';
-    syncModeControls();
+  if (e.target.closest('[data-open-assist]')) {
+    shell.dataset.rightPanel = 'assist';
+    shell.dataset.phone = 'open';
+    renderPingAssist();
     syncRailControls();
-    save();
+    schedulePhoneScale();
     return;
   }
   const btn = e.target.closest('[data-insight-insert]');
@@ -6664,7 +5834,7 @@ function mfBuildTheGuideExchangePacket() {
     ? window.MirrorFlowAssistEngine.analyzeText(insightsDraft, { surface: 'ping_exchange', mode: 'writing_only' })
     : null;
   const insights = typeof window.MF_runPingUniversalEngine === 'function'
-    ? window.MF_runPingUniversalEngine(customerText, insightsDraft, activeInsightMode || 'auto')
+    ? window.MF_runPingUniversalEngine(customerText, insightsDraft, 'auto')
     : null;
   const title = mfBuildExchangeTitle(insights, analysisText);
   const assistPacket = mfCompactAssistForExchange(assist);
@@ -6756,10 +5926,11 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
 
   const REGEX_RULES = [
     { id:"grammar.agreement.we_has", category:"grammar", subtype:"agreement", label:"Subject-verb agreement", severity:"high", confidence:0.96, pattern:/\bwe has\b/gi, replacement:"we have", message:"Subject and verb disagree." },
-    { id:"grammar.article.an_update", category:"grammar", subtype:"article", label:"Article before vowel sound", severity:"high", confidence:0.94, pattern:/\bthere is a update\b/gi, replacement:"there is an update", message:"Use 'an' before a vowel sound." },
+    { id:"grammar.article.a_to_an", category:"grammar", subtype:"article", label:"Article before vowel sound", severity:"high", confidence:0.90, pattern:/\ba(?= (?:(?!(?:user|users|use|used|useful|usual|unit|units|university|union|unique|uniform|universal|one|once|european|and)\b)[aeiou][a-z]{2,}|(?:hour|honest|honou?r|heir)[a-z]*\b))/g, replacement:"an", message:"Use 'an' before a vowel sound." },
+    { id:"grammar.article.an_to_a", category:"grammar", subtype:"article", label:"Article before consonant sound", severity:"high", confidence:0.90, pattern:/\ban(?= (?:(?!(?:hour|honest|honou?r|heir|histor)[a-z]*\b)[bcdfghjklmnpqrstvwxz][a-z]+|(?:user|users|use|used|useful|usual|unit|units|university|union|unique|uniform|universal|one|once|european)\b))/g, replacement:"a", message:"Use 'a' before a consonant sound." },
     { id:"grammar.agreement.team_responds", category:"grammar", subtype:"agreement", label:"Collective noun agreement", severity:"medium", confidence:0.78, pattern:/\bteam respond\b/gi, replacement:"team responds", message:"Singular collective noun needs a matching verb here." },
-    { id:"grammar.capitalization.first_person_i", category:"grammar", subtype:"capitalization", label:"First-person pronoun", severity:"medium", confidence:0.92, pattern:/\bi\b/g, replacement:"I", message:"Capitalize the first-person pronoun." },
-    { id:"grammar.duplicate.repeated_word", category:"grammar", subtype:"duplicate", label:"Repeated word", severity:"high", confidence:0.96, pattern:/\b([A-Za-z]+)\s+\1\b/gi, replacement:"$1", message:"Repeated word." },
+    { id:"grammar.capitalization.first_person_i", category:"grammar", subtype:"capitalization", label:"First-person pronoun", severity:"medium", confidence:0.92, pattern:/\bi\b(?!\.e\.)/g, replacement:"I", message:"Capitalize the first-person pronoun." },
+    { id:"grammar.duplicate.repeated_word", category:"grammar", subtype:"duplicate", label:"Repeated word", severity:"high", confidence:0.96, pattern:/\b(?!(?:had\s+had|that\s+that)\b)([A-Za-z]+)\s+\1\b/gi, replacement:"$1", message:"Repeated word." },
     { id:"grammar.spacing.double_space", category:"grammar", subtype:"spacing", label:"Extra spacing", severity:"low", confidence:0.99, pattern:/ {2,}/g, replacement:" ", message:"Extra spacing." },
     { id:"grammar.verb_modal.of_have", category:"grammar", subtype:"verb_form", label:"Modal verb form", severity:"high", confidence:0.96, pattern:/\b(should|could|would|must) of\b/gi, replacement:"$1 have", message:"Use 'have' after this modal verb." },
     { id:"grammar.confusion.your_welcome", category:"grammar", subtype:"confusion", label:"Your / you're", severity:"high", confidence:0.92, pattern:/\byour welcome\b/gi, replacement:"you're welcome", message:"Use the contraction for 'you are' here." },
@@ -6770,11 +5941,11 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id:"grammar.confusion.less_than", category:"grammar", subtype:"confusion", label:"Then / than", severity:"medium", confidence:0.78, pattern:/\bless then\b/gi, replacement:"less than", message:"Use 'than' for comparison." },
     { id:"grammar.contraction.cant", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.90, pattern:/\bcant\b/gi, replacement:"can't", message:"Use the apostrophe in this contraction." },
     { id:"grammar.contraction.dont", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.90, pattern:/\bdont\b/gi, replacement:"don't", message:"Use the apostrophe in this contraction." },
-    { id:"grammar.contraction.im", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.90, pattern:/\bim\b/gi, replacement:"I'm", message:"Use the apostrophe and capital letter in this contraction." },
+    { id:"grammar.contraction.im", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.90, pattern:/\b[Ii]m\b/g, replacement:"I'm", message:"Use the apostrophe and capital letter in this contraction." },
     { id:"grammar.contraction.youre", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.90, pattern:/\byoure\b/gi, replacement:"you're", message:"Use the contraction for 'you are'." },
     { id:"grammar.contraction.ive", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.88, pattern:/\bive\b/gi, replacement:"I've", message:"Use the apostrophe and capital letter in this contraction." },
     { id:"grammar.punctuation.space_before_mark", category:"grammar", subtype:"punctuation", label:"Space before punctuation", severity:"low", confidence:0.96, pattern:/\s+([,.!?])/g, replacement:"$1", message:"Remove the space before punctuation." },
-    { id:"grammar.punctuation.comma_spacing", category:"grammar", subtype:"punctuation", label:"Comma spacing", severity:"low", confidence:0.94, pattern:/,([A-Za-z])/g, replacement:", $1", message:"Add a space after the comma." },
+    { id:"grammar.punctuation.comma_spacing", category:"grammar", subtype:"punctuation", label:"Comma spacing", severity:"low", confidence:0.94, pattern:/(?<=[A-Za-z]{2}),([A-Za-z])(?![\w-]*[@\/.]\w)/g, replacement:", $1", message:"Add a space after the comma." },
     { id:"grammar.confusion.its_been", category:"grammar", subtype:"confusion", label:"Its / it's", severity:"medium", confidence:0.82, pattern:/\bits been\b/gi, replacement:"it's been", message:"Use 'it's' for 'it has'." },
     { id:"grammar.agreement.there_are_multiple", category:"grammar", subtype:"agreement", label:"There is / there are", severity:"medium", confidence:0.86, pattern:/\bthere is (several|many|multiple)\b/gi, replacement:"there are $1", message:"Use plural agreement for several, many, or multiple items." },
     { id:"grammar.spelling.alot", category:"grammar", subtype:"spelling", label:"Spelling", severity:"medium", confidence:0.94, pattern:/\balot\b/gi, replacement:"a lot", message:"Use the two-word form." },
@@ -6788,7 +5959,7 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id:"grammar.contraction.shouldnt", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.88, pattern:/\bshouldnt\b/gi, replacement:"shouldn't", message:"Use the apostrophe in this contraction." },
     { id:"grammar.contraction.wont", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.88, pattern:/\bwont\b/gi, replacement:"won't", message:"Use the apostrophe in this contraction." },
     { id:"grammar.contraction.doesnt", category:"grammar", subtype:"contraction", label:"Missing apostrophe", severity:"medium", confidence:0.88, pattern:/\bdoesnt\b/gi, replacement:"doesn't", message:"Use the apostrophe in this contraction." },
-    { id:"grammar.punctuation.sentence_spacing", category:"grammar", subtype:"punctuation", label:"Sentence spacing", severity:"low", confidence:0.90, pattern:/([.!?])([A-Za-z])/g, replacement:"$1 $2", message:"Add a space after the punctuation mark." },
+    { id:"grammar.punctuation.sentence_spacing", category:"grammar", subtype:"punctuation", label:"Sentence spacing", severity:"low", confidence:0.90, pattern:/(?<=[a-z]{3})([.!?])([A-Z])/g, replacement:"$1 $2", message:"Add a space after the punctuation mark." },
     { id:"grammar.punctuation.repeated_marks", category:"grammar", subtype:"punctuation", label:"Repeated punctuation", severity:"low", confidence:0.86, pattern:/([!?]){2,}/g, replacement:"$1", message:"Use one punctuation mark unless emphasis is intentional." },
     { id:"tone.robotic.as_per", category:"tone", subtype:"robotic", label:"Procedural wording", severity:"medium", confidence:0.74, pattern:/\bas per\b/gi, replacement:"following", message:"This sounds procedural. Use plainer wording." },
     { id:"tone.defensive.as_you_know", category:"tone", subtype:"defensive", label:"Defensive opener", severity:"medium", confidence:0.78, pattern:/\bas you know\b/gi, replacement:"to confirm", message:"This can sound defensive. Use a neutral opener." },
@@ -6800,7 +5971,7 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id:"tone.dismissive.not_my_problem", category:"tone", subtype:"dismissive", label:"Dismissive wording", severity:"high", confidence:0.94, pattern:/\b(that'?s not my problem|not my problem)\b/gi, replacement:null, message:"This dismisses the reader's issue. Rewrite manually." },
     { id:"tone.accusatory.you_are_wrong", category:"tone", subtype:"accusatory", label:"Accusatory wording", severity:"high", confidence:0.90, pattern:/\byou are wrong\b/gi, replacement:"I can clarify this", message:"Avoid telling the reader they are wrong." },
     { id:"tone.robotic.kindly", category:"tone", subtype:"robotic", label:"Over-formal wording", severity:"low", confidence:0.64, pattern:/\bkindly\b/gi, replacement:"please", message:"This can sound stiff in chat." },
-    { id:"tone.absolute.no_way", category:"tone", subtype:"absolute", label:"Absolute refusal", severity:"high", confidence:0.86, pattern:/\b(no way|impossible)\b/gi, replacement:null, message:"This refusal may feel abrupt. Offer a clear alternative." },
+    { id:"tone.absolute.no_way", category:"tone", subtype:"absolute", label:"Absolute refusal", severity:"high", confidence:0.86, pattern:/\b(no way|(?:it'?s|it is|that'?s|that is) impossible)\b/gi, replacement:null, message:"This refusal may feel abrupt. Offer a clear alternative." },
     { id:"tone.command.you_must", category:"tone", subtype:"imperative", label:"Hard instruction", severity:"medium", confidence:0.76, pattern:/(^|[.!?]\s+)you must\b/gi, replacement:"$1please", message:"This can sound forceful. Use a softer instruction." },
     { id:"tone.command.you_have_to", category:"tone", subtype:"imperative", label:"Hard instruction", severity:"medium", confidence:0.74, pattern:/(^|[.!?]\s+)you have to\b/gi, replacement:"$1please", message:"This can sound like pressure. Use a softer instruction." },
     { id:"tone.defensive.i_told_you", category:"tone", subtype:"defensive", label:"Defensive phrasing", severity:"medium", confidence:0.82, pattern:/\bi told you\b/gi, replacement:"I mentioned", message:"This can sound defensive. Use a calmer reminder." },
@@ -6819,8 +5990,8 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id:"clarity.wordiness.with_regards_to", category:"clarity", subtype:"wordiness", label:"Wordy topic phrase", severity:"low", confidence:0.84, pattern:/\bwith regards to\b/gi, replacement:"about", message:"Use a shorter topic phrase." },
     { id:"clarity.wordiness.prior_to", category:"clarity", subtype:"wordiness", label:"Wordy time phrase", severity:"low", confidence:0.90, pattern:/\bprior to\b/gi, replacement:"before", message:"Use the shorter time phrase." },
     { id:"clarity.wordiness.at_later_date", category:"clarity", subtype:"wordiness", label:"Wordy date phrase", severity:"low", confidence:0.82, pattern:/\bat a later date\b/gi, replacement:"later", message:"Use the shorter time phrase." },
-    { id:"clarity.jargon.backend", category:"clarity", subtype:"jargon", label:"Internal jargon", severity:"medium", confidence:0.76, pattern:/\bbackend\b/gi, replacement:"system", message:"Use plain wording instead of internal jargon." },
-    { id:"clarity.hedging.just", category:"clarity", subtype:"hedging", label:"Removable softener", severity:"low", confidence:0.62, pattern:/\bjust\b/gi, replacement:"", message:"This softener is usually removable." },
+    { id:"clarity.jargon.backend", category:"clarity", subtype:"jargon", label:"Internal jargon", severity:"medium", confidence:0.76, pattern:/\bbackend\b/gi, replacement:null, message:"Internal jargon. Use plain wording such as 'system'." },
+    { id:"clarity.hedging.just", category:"clarity", subtype:"hedging", label:"Removable softener", severity:"low", confidence:0.62, pattern:/\bjust\b/gi, replacement:null, message:"This softener is often removable. Check the meaning first." },
     { id:"clarity.wordiness.i_wanted_to_let_you_know", category:"clarity", subtype:"wordiness", label:"Wordy update opener", severity:"low", confidence:0.82, pattern:/\bi wanted to let you know that\b/gi, replacement:"to update you,", message:"Open the update more directly." },
     { id:"clarity.wordiness.in_regards_to", category:"clarity", subtype:"wordiness", label:"Wordy topic phrase", severity:"low", confidence:0.84, pattern:/\bin regards to\b/gi, replacement:"about", message:"Use a shorter topic phrase." },
     { id:"clarity.wordiness.in_relation_to", category:"clarity", subtype:"wordiness", label:"Wordy topic phrase", severity:"low", confidence:0.84, pattern:/\bin relation to\b/gi, replacement:"about", message:"Use a shorter topic phrase." },
@@ -6850,9 +6021,8 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     {
       id:"clarity.length.long_sentence", category:"clarity", subtype:"long_sentence", label:"Long sentence", severity:"medium", confidence:0.70,
       run({ text, protectedSpans, push }) {
-        sentenceList(text).forEach(sentence => {
+        sentenceSpans(text).forEach(({ sentence, start }) => {
           if (wordsOf(sentence).length <= 26) return;
-          const start = text.indexOf(sentence);
           push({ ruleId:this.id, category:this.category, subtype:this.subtype, label:this.label, start, end:start+sentence.length, message:"Long sentence. Split it for readability.", replacement:null, severity:this.severity, confidence:this.confidence, excerpt:sentence.slice(0,70)+(sentence.length>70?"...":"") }, protectedSpans);
         });
       }
@@ -6869,10 +6039,9 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     {
       id:"clarity.structure.overloaded_commas", category:"clarity", subtype:"sentence_flow", label:"Overloaded sentence", severity:"medium", confidence:0.70,
       run({ text, protectedSpans, push }) {
-        sentenceList(text).forEach(sentence => {
+        sentenceSpans(text).forEach(({ sentence, start }) => {
           const commaCount = (sentence.match(/,/g) || []).length;
           if (commaCount < 3 || wordsOf(sentence).length < 18) return;
-          const start = text.indexOf(sentence);
           push({ ruleId:this.id, category:this.category, subtype:this.subtype, label:this.label, start, end:start+sentence.length, message:"This sentence carries too many linked ideas. Split it into shorter steps.", replacement:null, severity:this.severity, confidence:this.confidence, excerpt:sentence.slice(0,70)+(sentence.length>70?"...":"") }, protectedSpans);
         });
       }
@@ -6880,11 +6049,11 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     {
       id:"clarity.structure.repeated_sentence_start", category:"clarity", subtype:"sentence_flow", label:"Repeated sentence start", severity:"low", confidence:0.68,
       run({ text, protectedSpans, push }) {
-        const sentences = sentenceList(text);
+        const spans = sentenceSpans(text), sentences = spans.map(sp => sp.sentence);
         const starts = sentences.map(sentence => wordsOf(sentence).slice(0, 2).join(" ").toLowerCase());
         for (let i = 1; i < sentences.length; i++) {
           if (!starts[i] || starts[i].length < 4 || starts[i] !== starts[i - 1]) continue;
-          const start = text.indexOf(sentences[i]);
+          const start = spans[i].start;
           push({ ruleId:this.id, category:this.category, subtype:this.subtype, label:this.label, start, end:start+Math.min(sentences[i].length, 70), message:"Several sentences start the same way. Vary the opening to improve flow.", replacement:null, severity:this.severity, confidence:this.confidence, excerpt:sentences[i].slice(0,70)+(sentences[i].length>70?"...":"") }, protectedSpans);
           break;
         }
@@ -6902,7 +6071,9 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
   ];
   const RULE_TESTS = [
     { id: "G-001", ruleId: "grammar.agreement.we_has", input: "We has checked the booking.", expectedReplacement: "we have" },
-    { id: "G-002", ruleId: "grammar.article.an_update", input: "There is a update on your account.", expectedReplacement: "there is an update" },
+    { id: "G-002", ruleId: "grammar.article.a_to_an", input: "There is a update on your account.", expectedReplacement: "an" },
+    { id: "G-038", ruleId: "grammar.article.a_to_an", input: "I sent a email and a hour ago.", expectedReplacement: "an" },
+    { id: "G-039", ruleId: "grammar.article.an_to_a", input: "This is an user guide.", expectedReplacement: "a" },
     { id: "G-003", ruleId: "grammar.agreement.team_responds", input: "The team respond today.", expectedReplacement: "team responds" },
     { id: "G-004", ruleId: "grammar.capitalization.first_person_i", input: "i can check this now.", expectedReplacement: "I" },
     { id: "G-005", ruleId: "grammar.duplicate.repeated_word", input: "I am sorry sorry for the delay.", expectedReplacement: "sorry" },
@@ -6942,13 +6113,13 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id: "C-004", ruleId: "clarity.wordiness.moment_in_time", input: "At this moment in time, I do not have the file.", expectedReplacement: "now" },
     { id: "C-005", ruleId: "clarity.wordiness.please_note_that", input: "Please note that the booking is confirmed.", expectedReplacement: "" },
     { id: "C-006", ruleId: "clarity.phrase.provide_me_with", input: "Please provide me with the reference.", expectedReplacement: "send me" },
-    { id: "C-007", ruleId: "clarity.hedging.just", input: "I just need the reference number.", expectedReplacement: "" },
+    { id: "C-007", ruleId: "clarity.hedging.just", input: "I just need the reference number.", expectedReplacement: null },
     { id: "C-008", ruleId: "clarity.length.long_sentence", input: "I can check the booking now and confirm the slot because the previous appointment was changed by the team and the new time needs to be verified before I send it to you.", expectedReplacement: null },
     { id: "C-009", ruleId: "clarity.wordiness.in_the_event_that", input: "In the event that this changes, I will update you.", expectedReplacement: "if" },
     { id: "C-010", ruleId: "clarity.wordiness.with_regards_to", input: "With regards to your booking, I can help.", expectedReplacement: "about" },
     { id: "C-011", ruleId: "clarity.wordiness.prior_to", input: "Please send this prior to the appointment.", expectedReplacement: "before" },
     { id: "C-012", ruleId: "clarity.wordiness.at_later_date", input: "We can check this at a later date.", expectedReplacement: "later" },
-    { id: "C-013", ruleId: "clarity.jargon.backend", input: "The backend is still updating.", expectedReplacement: "system" },
+    { id: "C-013", ruleId: "clarity.jargon.backend", input: "The backend is still updating.", expectedReplacement: null },
     { id: "C-014", ruleId: "clarity.wordiness.i_wanted_to_let_you_know", input: "I wanted to let you know that the file is ready.", expectedReplacement: "to update you," },
     { id: "C-015", ruleId: "clarity.wordiness.in_regards_to", input: "In regards to your message, I can help.", expectedReplacement: "about" },
     { id: "C-016", ruleId: "clarity.wordiness.in_relation_to", input: "In relation to the update, I can confirm it.", expectedReplacement: "about" },
@@ -6994,6 +6165,17 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     { id: "T-022", ruleId: "tone.filler.to_be_honest", input: "To be honest, I am not sure.", expectedReplacement: "" },
     { id: "T-023", ruleId: "tone.minimizing.just_checking", input: "I am just checking the status.", expectedReplacement: "checking" },
     { id: "T-024", ruleId: "tone.robotic.please_be_advised_that", input: "Please be advised that the slot is closed.", expectedReplacement: "" }
+  ];
+  /* Negative cases: valid text that must NOT trigger the rule (guards against false positives). */
+  const RULE_NEGATIVE_TESTS = [
+    { id: "N-001", ruleId: "grammar.punctuation.sentence_spacing", input: "Open file.txt at 9 a.m., e.g. index.html, in Washington D.C." },
+    { id: "N-002", ruleId: "grammar.duplicate.repeated_word", input: "We knew that that was fine and she had had enough." },
+    { id: "N-003", ruleId: "grammar.article.a_to_an", input: "Option a or b. Send a user a unit, a one-off fee, a European quote." },
+    { id: "N-004", ruleId: "grammar.article.an_to_a", input: "Wait an hour for an honest answer and an update." },
+    { id: "N-005", ruleId: "grammar.punctuation.comma_spacing", input: "Email a.b@x.com,c.d@y.com or use x,y coordinates." },
+    { id: "N-006", ruleId: "tone.absolute.no_way", input: "It is not impossible to fix, so let us try." },
+    { id: "N-007", ruleId: "grammar.capitalization.first_person_i", input: "Use the i.e. form here." },
+    { id: "N-008", ruleId: "grammar.contraction.im", input: "The IM feature is enabled." }
   ];
 
   function isPlainObject(v) { return Boolean(v) && typeof v==="object" && !Array.isArray(v); }
@@ -7194,13 +6376,21 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
     if (issue.start!=null&&issue.end!=null&&isProtected(issue.start,issue.end,protectedSpans)) return;
     issues.push(Object.assign({ id:"iss_"+(issues.length+1), severity:"medium", confidence:0.8, replacement:null, applySafe:issue.replacement!==null&&issue.replacement!==undefined, status:"active" }, issue));
   }
-  function applyReplacement(value, rule) {
+  function applyReplacement(match, rule) {
     if (rule.replacement===null||rule.replacement===undefined) return null;
-    const flags=rule.pattern.flags.replace("g","");
-    return String(value).replace(new RegExp(rule.pattern.source,flags),rule.replacement);
+    /* expand $1..$9 / $& from the live match so lookaround rules work on the original text */
+    return rule.replacement.replace(/\$(\d|&|\$)/g,(_,k)=>k==="$"?"$":k==="&"?match[0]:(match[+k]||""));
+  }
+  function sentenceSpans(text) {
+    const spans=[], re=/[^.!?]+(?:[.!?]+|$)/g; let m;
+    while ((m=re.exec(text))) {
+      const raw=m[0], lead=raw.length-raw.trimStart().length, sentence=raw.trim();
+      if (sentence) spans.push({ sentence, start:m.index+lead, end:m.index+lead+sentence.length });
+    }
+    return spans;
   }
   function issueFromRegexRule(rule, match) {
-    return { ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:rule.message, replacement:applyReplacement(match[0],rule), severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
+    return { ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:rule.message, replacement:applyReplacement(match,rule), severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
   }
   function normalizeRewriteText(value) {
     return String(value || "")
@@ -7379,6 +6569,12 @@ window.MF_exportTheGuideExchangePacket = mfExportTheGuideExchangePacket;
         expectedReplacement: test.expectedReplacement,
         actualReplacements: matches.map(issue => issue.replacement)
       };
+    });
+    RULE_NEGATIVE_TESTS.forEach(test => {
+      if (disabledRuleIds.has(test.ruleId)) { results.push({ id:test.id, ruleId:test.ruleId, passed:false, skipped:true, matched:0 }); return; }
+      const hits = analyzeText(test.input, { source:"rule_test" }).issues.filter(issue => issue.ruleId === test.ruleId);
+      results.push({ id:test.id, ruleId:test.ruleId, passed:hits.length === 0, skipped:false, negative:true, matched:hits.length,
+        detail:hits.length ? "false positive on: " + hits.map(h => JSON.stringify(h.excerpt)).join(", ") : "" });
     });
     const activeResults = results.filter(result => !result.skipped);
     return {
@@ -7570,28 +6766,16 @@ function mfAssistClearDraftState() {
 }
 
 function renderPingAssistSummary(result) {
-  const chip       = document.getElementById('mfAssistToneChip');
   const issuesEl   = document.getElementById('mfAssistIssues');
-  const protectedEl= document.getElementById('mfAssistProtected');
-  const wordsEl    = document.getElementById('mfAssistWords');
-  const gradeEl    = document.getElementById('mfAssistGrade');
   const recEl      = document.getElementById('mfAssistRec');
-  const modeEl     = document.getElementById('mfAssistModeLabel');
-  const metaEl     = document.getElementById('mfAssistMetaLabel');
 
   if (!result) {
     renderAssistRightStatus(null);
-    if (modeEl) modeEl.textContent = 'Idle';
-    if (metaEl) metaEl.textContent = '0 words · local offline';
-    if (chip) { chip.textContent = 'No draft'; chip.dataset.risk = 'Low'; }
     if (issuesEl) issuesEl.textContent = '0';
-    if (protectedEl) protectedEl.textContent = '0';
-    if (wordsEl) wordsEl.textContent = '0';
-    if (gradeEl) gradeEl.textContent = '--';
     [
-      ['mfBarValGrammar', 'Grammar'],
-      ['mfBarValClarity', 'Clarity'],
-      ['mfBarValTone', 'Tone']
+      ['mfBarValGrammar', '—'],
+      ['mfBarValClarity', '—'],
+      ['mfBarValTone', '—']
     ].forEach(([id, label]) => {
       const el = document.getElementById(id); if (el) el.textContent = label;
     });
@@ -7604,28 +6788,13 @@ function renderPingAssistSummary(result) {
     return;
   }
 
-  const { issues = [], tone = {}, clarity = {}, protectedSpans = [], quality = {} } = result;
+  const { issues = [], tone = {}, clarity = {} } = result;
   const scoped = result.editorScope === 'selection';
   const counts = mfAssistIssueCounts(issues);
   const total  = counts.all;
   renderAssistRightStatus(result);
-  if (modeEl) modeEl.textContent = scoped ? 'Selection' : (quality.state || 'Assist');
-  if (metaEl) {
-    const score = quality.score != null ? quality.score + '%' : 'local';
-    const words = clarity.words != null ? clarity.words : 0;
-    metaEl.textContent = `${scoped ? 'Fragment' : 'Draft'} · ${score} · ${words} word${words === 1 ? '' : 's'} · ${quality.nextAction || 'writing check'}`;
-  }
-
-  /* tone chip */
-  const risk    = tone.risk    || 'Low';
-  const primary = tone.primary || 'Neutral';
-  if (chip) { chip.textContent = `${primary} · ${risk} risk`; chip.dataset.risk = risk; }
-
   /* KPIs */
   if (issuesEl)    issuesEl.textContent    = total;
-  if (protectedEl) protectedEl.textContent = protectedSpans.length;
-  if (wordsEl)     wordsEl.textContent     = clarity.words != null ? clarity.words : '--';
-  if (gradeEl)     gradeEl.textContent     = clarity.grade != null ? `G${clarity.grade}` : '--';
 
   /* bars — all show HEALTH (higher = cleaner/safer) */
   const grammarHealth = Math.max(0, 100 - counts.grammar * 20);
@@ -7799,7 +6968,6 @@ function renderPingAssist() {
     renderPingAssistSummary(null);
     renderPingAssistRewrites(null);
     renderPingAssistCards(null);
-    renderPingAssistRows(null);
     renderPingAssistSpans(null);
     renderPingAssistRules();
     renderPingAssistProfilePresets();
@@ -7812,7 +6980,6 @@ function renderPingAssist() {
     renderPingAssistSummary(mfLastAssist);
     renderPingAssistRewrites(mfLastAssist);
     renderPingAssistCards(mfLastAssist);
-    renderPingAssistRows(mfLastAssist);
     renderPingAssistSpans(mfLastAssist);
     renderPingAssistRules();
     renderPingAssistProfilePresets();
@@ -7860,21 +7027,6 @@ function replaceSavedEditorSelectionWithPlainText(value) {
   return true;
 }
 
-function applyAssistReplacement(excerpt, replacement) {
-  if (replaceEditorTextMatch(excerpt, replacement)) {
-    refreshAll();
-    save();
-    return true;
-  }
-  const plain = getDraftPlain();
-  const idx = plain.indexOf(excerpt);
-  if (idx === -1) return false;
-  const newPlain = plain.slice(0, idx) + replacement + plain.slice(idx + excerpt.length);
-  editorEl.innerHTML = plainToEditorHtml(newPlain);
-  refreshAll();
-  save();
-  return true;
-}
 
 /* ---- focus issue: highlight excerpt in editor ---- */
 function buildEditorTextIndex() {
@@ -8095,48 +7247,7 @@ function mfAssistUseRewrite(rewrite) {
 }
 
 /* ---- summary detail rows ---- */
-function mfAssistRowHtml(title, note, pct) {
-  return `<div class="mf-assist-row">
-    <div class="mf-assist-row-head">
-      <span class="mf-assist-row-title">${escHtml(title)}</span>
-    </div>
-    <div class="mf-assist-row-note">${escHtml(note)}</div>
-    ${pct != null ? `<div class="mf-assist-row-meter"><span class="mf-assist-row-fill" style="width:${Math.max(0,Math.min(100,Math.round(pct)))}%"></span></div>` : ''}
-  </div>`;
-}
 
-function renderPingAssistRows(result) {
-  const el = document.getElementById('mfAssistRows');
-  if (!el) return;
-  if (!result) { el.innerHTML = ''; return; }
-  const { issues = [], tone = {}, clarity = {}, quality = {} } = result;
-  const comps = Object.values(clarity.components || {}).sort((a, b) => b.score - a.score);
-  const topComp = comps.find(c => c.score > 0);
-  const grammarCount = issues.filter(i => i.category === 'grammar').length;
-  const toneCount    = issues.filter(i => i.category === 'tone').length;
-  const rows = [];
-  rows.push(
-    mfAssistRowHtml('Writing score',
-      `${quality.state || 'Pending'} · ${quality.score ?? 0}% · ${quality.nextAction || 'Review draft'}`,
-      quality.score ?? 0),
-    mfAssistRowHtml('Reading load',
-      `${clarity.readability || 'Good'} · grade ${clarity.grade ?? '--'} · ${clarity.avgSentenceLength ?? '--'} words/sentence`,
-      Math.min(100, (clarity.grade || 0) * 7)),
-    mfAssistRowHtml('Clarity priority',
-      topComp ? topComp.recommendation : 'No clarity pressure detected.',
-      topComp ? topComp.impact : 0),
-    mfAssistRowHtml('Voice pressure',
-      `${tone.primary || 'Neutral'} · ${tone.risk || 'Low'} tone load · ${tone.apologyCount ?? 0} apolog${tone.apologyCount !== 1 ? 'ies' : 'y'}, ${tone.roboticCount ?? 0} robotic phrase${tone.roboticCount !== 1 ? 's' : ''}`,
-      tone.score ?? 0),
-    mfAssistRowHtml('Grammar signals',
-      `${grammarCount} phrase-level match${grammarCount !== 1 ? 'es' : ''} from ${result.rules?.active?.filter(r => r.category === 'grammar').length ?? 0} active grammar rules`,
-      Math.min(100, grammarCount * 24)),
-    mfAssistRowHtml('Tone signals',
-      `${toneCount} voice signal${toneCount !== 1 ? 's' : ''} detected`,
-      tone.score ?? 0)
-  );
-  el.innerHTML = rows.join('');
-}
 
 /* ---- protected spans list ---- */
 function renderPingAssistSpans(result) {
@@ -8277,10 +7388,6 @@ function renderPingAssistDiagnostics(report) {
   }
 }
 
-function mfAssistInvalidateDiagnostics() {
-  mfAssistLastTestReport = null;
-  renderPingAssistDiagnostics();
-}
 
 function mfAssistRunTests() {
   if (typeof window.MirrorFlowAssistEngine === 'undefined') return;
@@ -8615,12 +7722,11 @@ document.getElementById('mfAssistClearIgnored').addEventListener('click', () => 
 
 /* ========== PERSISTENCE ========== */
 const KEY = 'mf-ping-state';
-const STATE_VERSION = 3;
+const STATE_VERSION = 4;
 const DEFAULT_LAYOUT_STATE = Object.freeze({
-  insights: 'open',
+  insights: 'collapsed',
   phone: 'open',
-  rightPanel: 'assist',
-  workspaceMode: 'assist'
+  rightPanel: 'assist'
 });
 const VALID_PANEL_STATES = new Set(['open', 'collapsed']);
 const VALID_RIGHT_PANELS = new Set(['assist', 'phone', 'notes']);
@@ -8673,10 +7779,9 @@ function normalizeSavedState(raw) {
     version: STATE_VERSION,
     theme,
     cursor: normalizeCursorState(source.cursor),
-    insights: normalizePanelState(source.insights, DEFAULT_LAYOUT_STATE.insights),
+    insights: source.version >= 4 ? normalizePanelState(source.insights, DEFAULT_LAYOUT_STATE.insights) : DEFAULT_LAYOUT_STATE.insights,
     phone: normalizePanelState(source.phone, DEFAULT_LAYOUT_STATE.phone),
     rightPanel: normalizeRightPanel(source.rightPanel),
-    workspaceMode: normalizeWorkspaceMode(source.workspaceMode),
     phoneSettings: normalizePhoneSettings(source.phoneSettings),
     insightsWidth: railWidthValue(source.insightsWidth, 180, 520),
     phoneWidth: railWidthValue(source.phoneWidth, 220, 560),
@@ -8692,10 +7797,8 @@ function resetPingLayout() {
   shell.dataset.insights = DEFAULT_LAYOUT_STATE.insights;
   shell.dataset.phone = DEFAULT_LAYOUT_STATE.phone;
   shell.dataset.rightPanel = DEFAULT_LAYOUT_STATE.rightPanel;
-  shell.dataset.workspaceMode = DEFAULT_LAYOUT_STATE.workspaceMode;
   shell.style.removeProperty('--mf-rail-insights-w');
   shell.style.removeProperty('--mf-rail-phone-w');
-  syncModeControls();
   syncRailControls();
   renderPingInsights();
   renderPingAssist();
@@ -8713,7 +7816,6 @@ function save() {
       phoneWidth: getRailWidth('--mf-rail-phone-w'),
       phoneSettings,
       rightPanel: shell.dataset.rightPanel,
-      workspaceMode: shell.dataset.workspaceMode,
       sideNotes,
       assistDiagnosticsOpen: document.getElementById('mfAssistDiagnostics')?.dataset.open === 'true',
       draft: editorEl.innerHTML,
@@ -8751,7 +7853,6 @@ function load() {
       }
     }
     setAssistDiagnosticsOpen(s.assistDiagnosticsOpen);
-    shell.dataset.workspaceMode = normalizeWorkspaceMode(s.workspaceMode);
     if (Array.isArray(s.sideNotes)) sideNotes = s.sideNotes;
     if (s.draft) editorEl.innerHTML = s.draft;
     if (s.customer) customerEl.value = s.customer;
@@ -8844,7 +7945,7 @@ const observer = new MutationObserver(() => {
   syncRailControls();
   save();
 });
-observer.observe(shell, { attributes: true, attributeFilter: ['data-insights', 'data-phone', 'data-right-panel', 'data-workspace-mode'] });
+observer.observe(shell, { attributes: true, attributeFilter: ['data-insights', 'data-phone', 'data-right-panel'] });
 
 /* ========== FOCUS MODE — ⌘. ========== */
 document.addEventListener('keydown', (e) => {
@@ -8881,7 +7982,7 @@ document.addEventListener('keydown', (e) => {
 document.querySelector('.mf-tb-btn.send').addEventListener('click', doSend);
 
 /* =========================================================
-   v6.2 — snippets · thread switcher · drill-down · phone resize
+   shell features
    ========================================================= */
 
 /* platform-aware modifier key for shortcut hints */
@@ -8897,7 +7998,7 @@ const SNIPPETS = {
         'Hi {name}, sorry for the hassle. We\'ve fixed {issue} and you\'re sorted.'
       ]},
       { title: 'Status update', items: [
-        'Hi {name} — this is in motion. Riley\'s on it. I\'ll update you by EOD.',
+        'Hi {name} — this is in motion. I\'ll update you by {time}.',
         'Hi {name}, quick update: {progress}. Next step: {next}.'
       ]},
       { title: 'Confirmation', items: [
@@ -8921,14 +8022,6 @@ const SNIPPETS = {
     ]
   },
 };
-
-/* ---------- SAMPLE CHAT (placeholder, cleared on New Session) ---------- */
-const SAMPLE_MSGS = [
-  { who:'time', t:'Today · 14:02' },
-  { who:'in',   t:"Hey, I just got two confirmations for the same slot. Which one's actually mine?" },
-  { who:'out',  t:"That was on us — your booking is the locked one. Tightening the rule so it can't double again." },
-  { who:'in',   t:"Appreciate it." }
-];
 
 /* ---------- POPOVER ENGINE ---------- */
 const popoverEl = document.getElementById('popover');
@@ -9088,7 +8181,7 @@ popoverEl.addEventListener('click', (e) => {
   }
 });
 
-/* ---------- PHONE BODY RENDER (sample placeholder, no threads) ---------- */
+/* ---------- PHONE BODY RENDER ---------- */
 function appendBubble(m) {
   clearPhoneIdle();
   let el;
@@ -9112,17 +8205,11 @@ function appendBubble(m) {
   return el;
 }
 
-function renderSample() {
-  phoneBody.innerHTML = '';
-  SAMPLE_MSGS.forEach(appendBubble);
-  refreshAll();
-  phoneBody.scrollTop = phoneBody.scrollHeight;
-}
 
 /* (insight cards + tone detail removed — placeholder until rebuild) */
 
 /* =========================================================
-   v6.3 — toolbar exec, per-thread drafts, send-to-thread, inject
+   shell features
    ========================================================= */
 
 /* ---------- TOOLBAR EXEC ---------- */
@@ -9200,16 +8287,10 @@ editorEl.addEventListener('keydown', (e) => {
 });
 
 /* ---------- TOOLBAR ACTIONS (clean / clear / copy / paste / more) ---------- */
-document.querySelectorAll('.mf-tb-btn[data-action]').forEach(btn => {
+document.querySelectorAll('.mf-tb-btn[data-action="more"]').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    const a = btn.dataset.action;
-    if (a === 'clean')  cleanFormatting();
-    else if (a === 'clear') clearDraft();
-    else if (a === 'copy')  copyDraft();
-    else if (a === 'paste') pasteDraft();
-    else if (a === 'softbreak') insertSoftBreak();
-    else if (a === 'more')  openMore(btn);
+    openMore(btn);
   });
 });
 
@@ -9229,14 +8310,6 @@ function cleanFormatting() {
   toast('Formatting cleaned');
 }
 
-function clearDraft() {
-  if (!confirm('Clear the current draft?')) return;
-  editorEl.innerHTML = '<p><br></p>';
-  lastEdit = Date.now();
-  mfAssistClearDraftState();
-  refreshAll(); save();
-  toast('Draft cleared');
-}
 
 async function copyDraft() {
   const text = getDraftPlain();
@@ -9270,11 +8343,13 @@ function openMore(anchor) {
       <span>Agent draft · <span id="moreSavedTag">${savedAgo}</span></span>
     </div>
     <div class="mf-chipwrap" style="flex-direction:column;">
-      <button class="mf-chip" data-more="reset">Reset draft to blank</button>
-      <button class="mf-chip" data-more="layout">Reset panels and layout</button>
       <button class="mf-chip" data-more="export">Copy as plain text</button>
-      <button class="mf-chip" data-more="coach-export">Export Coach packet</button>
+      <button class="mf-chip" data-more="paste">Paste from clipboard</button>
+      <button class="mf-chip" data-more="clean">Clear formatting</button>
       <button class="mf-chip" data-more="linebreak">Insert line break</button>
+      <button class="mf-chip" data-more="reset">Clear draft</button>
+      <button class="mf-chip" data-more="layout">Reset panels and layout</button>
+      <button class="mf-chip" data-more="coach-export">Export Coach packet</button>
       <button class="mf-chip" data-more="help">Keyboard shortcuts</button>
     </div>`;
   openPopoverAt(anchor, html);
@@ -9296,6 +8371,10 @@ popoverEl.addEventListener('click', (e) => {
     toast('Panels reset');
   } else if (a === 'export') {
     copyDraft();
+  } else if (a === 'paste') {
+    pasteDraft();
+  } else if (a === 'clean') {
+    cleanFormatting();
   } else if (a === 'coach-export') {
     mfExportTheGuideExchangePacket();
   } else if (a === 'linebreak') {
@@ -9395,17 +8474,6 @@ customerEl.addEventListener('keydown', (e) => {
 /* auto-grow textarea + live preview already wired via input listener */
 customerEl.addEventListener('input', autosizeCustomer);
 
-/* ---------- TOOLBAR HORIZONTAL SCROLL (wheel → horizontal) ---------- */
-const toolbarEl = document.querySelector('.mf-tb');
-if (toolbarEl) {
-  toolbarEl.addEventListener('wheel', (e) => {
-    if (e.deltaY === 0 || e.shiftKey) return;
-    if (toolbarEl.scrollWidth <= toolbarEl.clientWidth) return;
-    e.preventDefault();
-    toolbarEl.scrollLeft += e.deltaY;
-  }, { passive: false });
-}
-
 /* ---------- LIVE PHONE CLOCK ---------- */
 function updatePhoneClock() {
   const el = document.getElementById('phoneTime');
@@ -9501,903 +8569,12 @@ new ResizeObserver(schedulePhoneScale).observe(document.querySelector('.mf-phone
 
 
 
-/* ========== OFFLINE SHOWCASE: BUNDLED BACKEND ENGINES ========== */
-/* This shareable HTML embeds Drivers and API contract adapters in addition to the inlined UI, Assist, and Insights engines. */
-/* ========== MIRRORFLOW DRIVERS ENGINE (local) ========== */
-(function (root) {
-  "use strict";
-
-  const ENGINE_ID = "mirrorflow-drivers-local-v1";
-  const CONTRACT_VERSION = "drivers-engine-contract-v0.2";
-
-  function asText(value) {
-    return String(value || "").trim();
-  }
-
-  function normalizeMode(value) {
-    const mode = asText(value || "auto");
-    return ["auto", "general", "claims", "retail"].includes(mode) ? mode : "auto";
-  }
-
-  function compactIssue(issue) {
-    return {
-      id: issue.id,
-      ruleId: issue.ruleId,
-      category: issue.category,
-      severity: issue.severity,
-      label: issue.label,
-      message: issue.message,
-      excerpt: issue.excerpt,
-      replacement: issue.replacement,
-      applySafe: Boolean(issue.applySafe)
-    };
-  }
-
-  function compactRows(rows) {
-    return (rows || []).map(row => ({
-      label: row.label,
-      note: row.note,
-      score: Math.round(row.score || 0),
-      tags: (row.tags || []).slice(0, 8)
-    }));
-  }
-
-  function buildAssistRows(analysis) {
-    if (!analysis) return [];
-    const issues = analysis.issues || [];
-    const grammar = issues.filter(issue => issue.category === "grammar").length;
-    const clarity = issues.filter(issue => issue.category === "clarity").length;
-    const tone = issues.filter(issue => issue.category === "tone").length;
-    const rows = [
-      {
-        label: "Writing health",
-        note: `${issues.length} active writing issue${issues.length === 1 ? "" : "s"}`,
-        score: Math.max(0, 100 - issues.length * 12),
-        tags: ["Assist", "grammar", "clarity", "tone"]
-      },
-      {
-        label: "Readability",
-        note: `${analysis.clarity.readability} · grade ${analysis.clarity.grade} · ${analysis.clarity.avgSentenceLength} words/sentence`,
-        score: analysis.clarity.quality,
-        tags: ["Assist", "clarity"]
-      },
-      {
-        label: "Tone load",
-        note: `${analysis.tone.primary} · ${analysis.tone.risk} · ${tone} tone signal${tone === 1 ? "" : "s"}`,
-        score: Math.max(0, 100 - analysis.tone.score),
-        tags: ["Assist", "tone"]
-      },
-      {
-        label: "Grammar rules",
-        note: `${grammar} grammar match${grammar === 1 ? "" : "es"} · ${analysis.rules.active.filter(rule => rule.category === "grammar").length} active rules`,
-        score: Math.max(0, 100 - grammar * 20),
-        tags: ["Assist", "grammar"]
-      }
-    ];
-    if (clarity) {
-      rows.push({
-        label: "Clarity pressure",
-        note: `${clarity} clarity issue${clarity === 1 ? "" : "s"} active.`,
-        score: Math.max(0, 100 - clarity * 18),
-        tags: ["Assist", "clarity", "pressure"]
-      });
-    }
-    issues.slice(0, 4).forEach(issue => {
-      rows.push({
-        label: issue.label,
-        note: issue.message,
-        score: issue.severity === "high" ? 30 : issue.severity === "medium" ? 55 : 76,
-        tags: ["Assist", issue.category, issue.severity]
-      });
-    });
-    return rows;
-  }
-
-  function ensureAssistEngine(deps) {
-    const engine = deps && deps.assistEngine;
-    if (!engine || typeof engine.analyzeText !== "function") {
-      throw new Error("Assist engine dependency missing");
-    }
-    return engine;
-  }
-
-  function ensureInsightsEngine(deps) {
-    const engine = deps && deps.insightsEngine;
-    if (typeof engine !== "function") {
-      throw new Error("Insights engine dependency missing");
-    }
-    return engine;
-  }
-
-  function sourceMode(customer, draft) {
-    if (asText(customer)) return "customer_context";
-    if (asText(draft)) return "draft_only";
-    return "blank";
-  }
-
-  function buildDrivers(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const customer = asText(input.customer);
-    const draft = asText(input.draft);
-    const mode = normalizeMode(input.mode);
-    const assistEngine = ensureAssistEngine(deps || {});
-    const insightsEngine = ensureInsightsEngine(deps || {});
-    const assist = assistEngine.analyzeText(draft, {
-      surface: "drivers_engine",
-      mode: "writing_only",
-      ruleProfile: request && request.ruleProfile
-    });
-    const insights = insightsEngine(customer, draft, mode);
-    const drivers = insights.drivers || {};
-    const assistRows = buildAssistRows(assist);
-    const insightsRowCount = [
-      drivers.domainRows,
-      drivers.intentRows,
-      drivers.signalRows,
-      drivers.coverageRows,
-      drivers.adviceRows
-    ].reduce((sum, rows) => sum + ((rows || []).length), 0);
-
-    return {
-      engine: ENGINE_ID,
-      contractVersion: CONTRACT_VERSION,
-      offline: true,
-      sourceMode: insights.sourceMode || sourceMode(customer, draft),
-      input: {
-        customerChars: customer.length,
-        draftChars: draft.length,
-        mode
-      },
-      state: {
-        response: insights.responseState,
-        domain: insights.domain,
-        query: insights.query
-      },
-      assist: {
-        quality: assist.quality,
-        tone: assist.tone,
-        clarity: assist.clarity,
-        issues: (assist.issues || []).map(compactIssue),
-        rows: compactRows(assistRows)
-      },
-      insights: {
-        metrics: drivers.metrics || {},
-        state: drivers.state || {},
-        domainRows: compactRows(drivers.domainRows),
-        intentRows: compactRows(drivers.intentRows),
-        signalRows: compactRows(drivers.signalRows),
-        coverageRows: compactRows(drivers.coverageRows),
-        adviceRows: compactRows(drivers.adviceRows)
-      },
-      backendRows: compactRows([
-        {
-          label: "/check adapter",
-          note: `${(assist.issues || []).length} issue${(assist.issues || []).length === 1 ? "" : "s"} and ${(assist.rewrites || []).length} rewrite${(assist.rewrites || []).length === 1 ? "" : "s"} available.`,
-          score: 92,
-          tags: ["API", "Assist"]
-        },
-        {
-          label: "/insights adapter",
-          note: `${insights.sourceMode} · ${insights.responseState && insights.responseState.code || "pending"}.`,
-          score: 88,
-          tags: ["API", "Insights"]
-        },
-        {
-          label: "/drivers adapter",
-          note: `${assistRows.length + insightsRowCount} combined proof rows available.`,
-          score: 88,
-          tags: ["API", "Drivers", "proof"]
-        },
-        {
-          label: "/policy adapter",
-          note: "Domain, risk language, and tenant phrase checks can run before send.",
-          score: 86,
-          tags: ["API", "Policy", "pre-send"]
-        },
-        {
-          label: "/feedback adapter",
-          note: "Operator actions can be captured as local learning signals.",
-          score: 84,
-          tags: ["API", "Feedback", "learning"]
-        },
-        {
-          label: "/session adapter",
-          note: "Assist, Insights, Drivers, and optional feedback can be composed into one backend-ready envelope.",
-          score: 82,
-          tags: ["API", "Session", "integration"]
-        }
-      ]),
-      proofSummary: {
-        assistRows: assistRows.length,
-        insightRows: insightsRowCount,
-        backendRows: 6,
-        totalRows: assistRows.length + insightsRowCount + 6,
-        sourceMode: insights.sourceMode || sourceMode(customer, draft)
-      },
-      diagnostics: {
-        assistIssueCount: (assist.issues || []).length,
-        assistRowCount: assistRows.length,
-        insightRowCount: insightsRowCount,
-        backendRowCount: 6,
-        backendReadiness: 86
-      }
-    };
-  }
-
-  root.MirrorFlowDriversEngine = {
-    engine: ENGINE_ID,
-    contractVersion: CONTRACT_VERSION,
-    buildDrivers
-  };
-})(typeof window !== "undefined" ? window : globalThis);
-
-
-/* ========== MIRRORFLOW API CONTRACT ADAPTERS (local) ========== */
-(function (root) {
-  "use strict";
-
-  const CONTRACT_VERSION = "mirrorflow-api-contract-v0.2";
-  const ENDPOINTS = Object.freeze(["/health", "/check", "/insights", "/drivers", "/policy", "/feedback", "/session"]);
-  const DEFAULT_CONTEXT = Object.freeze({
-    locale: "en-GB",
-    surface: "ping",
-    channel: "writing"
-  });
-  const FEEDBACK_TYPES = new Set([
-    "issue_apply",
-    "issue_ignore",
-    "safe_fix_batch",
-    "rewrite_use",
-    "rewrite_copy",
-    "rewrite_edit",
-    "rule_off",
-    "profile_change",
-    "note_save",
-    "copy",
-    "send",
-    "undo"
-  ]);
-  const FEEDBACK_OUTCOMES = new Set([
-    "accepted",
-    "ignored",
-    "applied",
-    "copied",
-    "edited",
-    "saved",
-    "changed",
-    "sent",
-    "undone",
-    "rejected"
-  ]);
-
-  function nowIso() {
-    return new Date().toISOString();
-  }
-
-  function asText(value) {
-    return String(value || "").trim();
-  }
-
-  function requestId(input, endpoint) {
-    return asText(input && input.requestId) || endpoint.slice(1) + "_" + Date.now().toString(36);
-  }
-
-  function normalizeContext(value) {
-    return Object.assign({}, DEFAULT_CONTEXT, value && typeof value === "object" ? value : {});
-  }
-
-  function normalizeMode(value, fallback) {
-    const mode = asText(value || fallback);
-    return ["auto", "general", "claims", "retail"].includes(mode) ? mode : fallback;
-  }
-
-  function sourceMode(customer, draft) {
-    if (asText(customer)) return "customer_context";
-    if (asText(draft)) return "draft_only";
-    return "blank";
-  }
-
-  function countsBy(items, key) {
-    return (items || []).reduce((acc, item) => {
-      const value = item && item[key] ? item[key] : "unknown";
-      acc[value] = (acc[value] || 0) + 1;
-      return acc;
-    }, {});
-  }
-
-  function compactTarget(target) {
-    const source = target && typeof target === "object" ? target : {};
-    const allowed = ["issueId", "ruleId", "rewriteId", "profileId", "noteId", "category", "severity"];
-    return allowed.reduce((acc, key) => {
-      if (source[key] !== undefined && source[key] !== null && asText(source[key])) {
-        acc[key] = asText(source[key]);
-      }
-      return acc;
-    }, {});
-  }
-
-  function normalizeFeedbackEvent(event, index, request) {
-    if (!event || typeof event !== "object") {
-      return { valid: false, reason: "event must be an object", index };
-    }
-    const type = asText(event.type);
-    if (!FEEDBACK_TYPES.has(type)) {
-      return { valid: false, reason: "unknown feedback type", index, type: type || "missing" };
-    }
-    const outcome = FEEDBACK_OUTCOMES.has(asText(event.outcome))
-      ? asText(event.outcome)
-      : defaultFeedbackOutcome(type);
-    const timestamp = asText(event.timestamp) || nowIso();
-    return {
-      valid: true,
-      event: {
-        id: asText(event.id) || `${requestId(request, "/feedback")}_${index + 1}`,
-        type,
-        outcome,
-        source: asText(event.source) || feedbackSource(type),
-        timestamp,
-        target: compactTarget(event.target),
-        note: asText(event.note).slice(0, 280)
-      }
-    };
-  }
-
-  function defaultFeedbackOutcome(type) {
-    if (type === "issue_ignore") return "ignored";
-    if (type === "rewrite_copy" || type === "copy") return "copied";
-    if (type === "rewrite_edit") return "edited";
-    if (type === "note_save") return "saved";
-    if (type === "profile_change") return "changed";
-    if (type === "send") return "sent";
-    if (type === "undo") return "undone";
-    return "accepted";
-  }
-
-  function feedbackSource(type) {
-    if (type.indexOf("rewrite_") === 0 || type === "issue_apply" || type === "issue_ignore" || type === "safe_fix_batch" || type === "rule_off") return "assist";
-    if (type === "note_save") return "notes";
-    if (type === "send" || type === "copy") return "editor";
-    if (type === "profile_change") return "profile";
-    return "system";
-  }
-
-  function normalizeFeedbackEvents(request) {
-    const source = request && Array.isArray(request.events)
-      ? request.events
-      : request && request.event
-        ? [request.event]
-        : [];
-    return source.reduce((acc, event, index) => {
-      const normalized = normalizeFeedbackEvent(event, index, request);
-      if (normalized.valid) acc.accepted.push(normalized.event);
-      else acc.rejected.push(normalized);
-      return acc;
-    }, { accepted: [], rejected: [] });
-  }
-
-  function buildFeedbackSignals(events) {
-    const byType = countsBy(events, "type");
-    const byOutcome = countsBy(events, "outcome");
-    const ruleIds = events
-      .map(event => event.target && event.target.ruleId)
-      .filter(Boolean);
-    return {
-      acceptedFixes: (byType.issue_apply || 0) + (byType.safe_fix_batch || 0),
-      ignoredIssues: byType.issue_ignore || 0,
-      rewritesUsed: byType.rewrite_use || 0,
-      rewritesCopied: byType.rewrite_copy || 0,
-      undoCount: byType.undo || 0,
-      sendCount: byType.send || 0,
-      copyCount: byType.copy || 0,
-      ruleOffCount: byType.rule_off || 0,
-      profileChanges: byType.profile_change || 0,
-      noteSaves: byType.note_save || 0,
-      hasSendOutcome: Boolean(byType.send),
-      acceptedCount: byOutcome.accepted || 0,
-      ignoredCount: byOutcome.ignored || 0,
-      changedRules: Array.from(new Set(ruleIds))
-    };
-  }
-
-  function compactIssue(issue) {
-    return {
-      id: issue.id,
-      ruleId: issue.ruleId,
-      category: issue.category,
-      subtype: issue.subtype,
-      severity: issue.severity,
-      label: issue.label,
-      message: issue.message,
-      excerpt: issue.excerpt,
-      replacement: issue.replacement,
-      applySafe: Boolean(issue.applySafe),
-      confidence: issue.confidence,
-      start: issue.start,
-      end: issue.end
-    };
-  }
-
-  function compactRewrite(rewrite) {
-    return {
-      id: rewrite.id,
-      title: rewrite.title,
-      intent: rewrite.intent,
-      source: rewrite.source,
-      changes: rewrite.changes || 0,
-      impact: rewrite.impact,
-      text: rewrite.text
-    };
-  }
-
-  function compactDriverRows(rows) {
-    return (rows || []).map(row => ({
-      label: row.label,
-      note: row.note,
-      score: Math.round(row.score || 0),
-      tags: (row.tags || []).slice(0, 8)
-    }));
-  }
-
-  function normalizeTextList(value) {
-    return Array.isArray(value)
-      ? value.map(item => asText(item)).filter(Boolean).slice(0, 40)
-      : [];
-  }
-
-  function includesText(haystack, needle) {
-    return asText(haystack).toLowerCase().includes(asText(needle).toLowerCase());
-  }
-
-  function compactPolicyWarning(warning) {
-    return {
-      id: warning.id,
-      label: warning.label,
-      note: warning.note,
-      severity: warning.severity || "medium",
-      source: warning.source || "policy",
-      fix: warning.fix || ""
-    };
-  }
-
-  function ensureAssistEngine(deps) {
-    const engine = (deps && deps.assistEngine) || root.MirrorFlowAssistEngine;
-    if (!engine || typeof engine.analyzeText !== "function") {
-      throw new Error("Assist engine dependency missing");
-    }
-    return engine;
-  }
-
-  function ensureInsightsEngine(deps) {
-    const engine = (deps && deps.insightsEngine) || root.MF_runPingUniversalEngine;
-    if (typeof engine !== "function") {
-      throw new Error("Insights engine dependency missing");
-    }
-    return engine;
-  }
-
-  function ensureDriversEngine(deps) {
-    const engine = (deps && deps.driversEngine) || root.MirrorFlowDriversEngine;
-    if (!engine || typeof engine.buildDrivers !== "function") {
-      throw new Error("Drivers engine dependency missing");
-    }
-    return engine;
-  }
-
-  function buildEnvelope(endpoint, request, extra) {
-    return Object.assign({
-      ok: true,
-      endpoint,
-      contractVersion: CONTRACT_VERSION,
-      requestId: requestId(request, endpoint),
-      generatedAt: nowIso(),
-      offline: true
-    }, extra || {});
-  }
-
-  function runCheck(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const draft = asText(input.draft);
-    const context = normalizeContext(request && request.context);
-    const assistEngine = ensureAssistEngine(deps);
-    const analysis = assistEngine.analyzeText(draft, Object.assign({}, context, {
-      surface: "api_check",
-      mode: "writing_only",
-      ruleProfile: request && request.ruleProfile
-    }));
-    const issues = (analysis.issues || []).map(compactIssue);
-    const rewrites = (analysis.rewrites || []).map(compactRewrite);
-
-    return buildEnvelope("/check", request, {
-      context,
-      sourceMode: draft ? "draft_only" : "blank",
-      input: {
-        draftChars: draft.length,
-        draftWords: analysis.clarity && analysis.clarity.words || 0
-      },
-      result: {
-        engine: analysis.engine,
-        quality: analysis.quality,
-        tone: analysis.tone,
-        clarity: analysis.clarity,
-        issues,
-        rewrites,
-        protectedSpans: analysis.protectedSpans || [],
-        rules: {
-          active: analysis.rules && analysis.rules.active || [],
-          disabled: analysis.rules && analysis.rules.disabled || [],
-          categories: analysis.rules && analysis.rules.categories || []
-        }
-      },
-      diagnostics: {
-        issueCount: issues.length,
-        rewriteCount: rewrites.length,
-        issueCounts: countsBy(issues, "category"),
-        safeFixCount: issues.filter(issue => issue.applySafe).length,
-        protectedCount: (analysis.protectedSpans || []).length
-      }
-    });
-  }
-
-  function runInsights(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const customer = asText(input.customer);
-    const draft = asText(input.draft);
-    const mode = normalizeMode(input.mode, "auto");
-    const context = normalizeContext(request && request.context);
-    const insightsEngine = ensureInsightsEngine(deps);
-    const analysis = insightsEngine(customer, draft, mode);
-    const drivers = analysis.drivers || {};
-
-    return buildEnvelope("/insights", request, {
-      context,
-      sourceMode: analysis.sourceMode || sourceMode(customer, draft),
-      input: {
-        customerChars: customer.length,
-        draftChars: draft.length,
-        mode
-      },
-      result: {
-        mode: analysis.mode,
-        hasCustomer: Boolean(analysis.hasCustomer),
-        hasDraft: Boolean(analysis.hasDraft),
-        domain: analysis.domain,
-        query: analysis.query,
-        responseState: analysis.responseState,
-        reply: analysis.reply,
-        brief: analysis.brief,
-        gaps: analysis.gaps || [],
-        suggestions: analysis.suggestions || [],
-        domainChecks: analysis.domainChecks,
-        signals: analysis.signals
-      },
-      drivers: {
-        state: drivers.state || {},
-        metrics: drivers.metrics || {},
-        domainRows: compactDriverRows(drivers.domainRows),
-        intentRows: compactDriverRows(drivers.intentRows),
-        signalRows: compactDriverRows(drivers.signalRows),
-        coverageRows: compactDriverRows(drivers.coverageRows),
-        adviceRows: compactDriverRows(drivers.adviceRows)
-      },
-      diagnostics: {
-        gapCount: (analysis.gaps || []).length,
-        suggestionCount: (analysis.suggestions || []).length,
-        domainCheckCount: analysis.domainChecks && analysis.domainChecks.active ? analysis.domainChecks.checks.length : 0,
-        signalCount: analysis.signals && analysis.signals.rows ? analysis.signals.rows.length : 0
-      }
-    });
-  }
-
-  function runDrivers(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const customer = asText(input.customer);
-    const draft = asText(input.draft);
-    const mode = normalizeMode(input.mode, "auto");
-    const context = normalizeContext(request && request.context);
-    const driversEngine = ensureDriversEngine(deps);
-    const result = driversEngine.buildDrivers({
-      input: { customer, draft, mode },
-      context,
-      ruleProfile: request && request.ruleProfile
-    }, deps || {});
-
-    return buildEnvelope("/drivers", request, {
-      context,
-      sourceMode: result.sourceMode || sourceMode(customer, draft),
-      input: result.input,
-      result,
-      diagnostics: result.diagnostics || {}
-    });
-  }
-
-  function runHealth(request, deps) {
-    const assistEngine = (deps && deps.assistEngine) || root.MirrorFlowAssistEngine;
-    const insightsEngine = (deps && deps.insightsEngine) || root.MF_runPingUniversalEngine;
-    const driversEngine = (deps && deps.driversEngine) || root.MirrorFlowDriversEngine;
-    const assistReady = Boolean(assistEngine && typeof assistEngine.analyzeText === "function");
-    const insightsReady = typeof insightsEngine === "function";
-    const driversReady = Boolean(driversEngine && typeof driversEngine.buildDrivers === "function");
-    const ruleReport = assistReady && typeof assistEngine.runRuleTests === "function"
-      ? assistEngine.runRuleTests()
-      : null;
-    const checks = [
-      { id: "assist_engine", label: "Assist engine", passed: assistReady },
-      { id: "insights_engine", label: "Insights engine", passed: insightsReady },
-      { id: "drivers_engine", label: "Drivers engine", passed: driversReady },
-      { id: "assist_rules", label: "Assist rule suite", passed: Boolean(ruleReport && ruleReport.failed === 0), detail: ruleReport ? `${ruleReport.passed}/${ruleReport.total}` : "not run" },
-      { id: "policy_contract", label: "Policy contract", passed: typeof runPolicy === "function" },
-      { id: "feedback_contract", label: "Feedback contract", passed: typeof runFeedback === "function" },
-      { id: "session_contract", label: "Session contract", passed: typeof runSession === "function" },
-      { id: "offline_contract", label: "Offline contract", passed: true, detail: "no network dependency" }
-    ];
-    const passed = checks.filter(check => check.passed).length;
-    return buildEnvelope("/health", request || {}, {
-      status: passed === checks.length ? "ready" : "degraded",
-      checks,
-      diagnostics: {
-        passed,
-        total: checks.length,
-        assistRuleCount: ruleReport ? ruleReport.total : 0,
-        assistRuleFailures: ruleReport ? ruleReport.failed : null,
-        endpoints: ENDPOINTS.slice(),
-        endpointCount: ENDPOINTS.length
-      }
-    });
-  }
-
-  function runFeedback(request) {
-    const input = request && request.input ? request.input : {};
-    const draft = asText(input.draft);
-    const customer = asText(input.customer);
-    const context = normalizeContext(request && request.context);
-    const sessionId = asText(request && request.sessionId) || "local";
-    const normalized = normalizeFeedbackEvents(request || {});
-    const events = normalized.accepted;
-    const signals = buildFeedbackSignals(events);
-
-    return buildEnvelope("/feedback", request || {}, {
-      context,
-      sessionId,
-      sourceMode: sourceMode(customer, draft),
-      input: {
-        customerChars: customer.length,
-        draftChars: draft.length
-      },
-      result: {
-        acceptedEvents: events,
-        rejectedEvents: normalized.rejected,
-        summary: {
-          totalEvents: events.length + normalized.rejected.length,
-          acceptedEvents: events.length,
-          rejectedEvents: normalized.rejected.length,
-          byType: countsBy(events, "type"),
-          byOutcome: countsBy(events, "outcome"),
-          signals
-        }
-      },
-      diagnostics: {
-        eventCount: events.length + normalized.rejected.length,
-        acceptedCount: events.length,
-        rejectedCount: normalized.rejected.length,
-        trackedTypes: Array.from(FEEDBACK_TYPES),
-        hasSendOutcome: signals.hasSendOutcome
-      }
-    });
-  }
-
-  function runPolicy(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const customer = asText(input.customer);
-    const draft = asText(input.draft);
-    const mode = normalizeMode(input.mode, "auto");
-    const context = normalizeContext(request && request.context);
-    const policyPack = request && request.policyPack && typeof request.policyPack === "object" ? request.policyPack : {};
-    const assistEngine = ensureAssistEngine(deps);
-    const insightsEngine = ensureInsightsEngine(deps);
-    const assist = assistEngine.analyzeText(draft, Object.assign({}, context, {
-      surface: "api_policy",
-      mode: "policy_check",
-      ruleProfile: request && request.ruleProfile
-    }));
-    const insights = insightsEngine(customer, draft, mode);
-    const failedDomainChecks = insights.domainChecks && Array.isArray(insights.domainChecks.failed)
-      ? insights.domainChecks.failed
-      : [];
-    const highGaps = (insights.gaps || []).filter(gap => gap.severity === "high");
-    const toneWarnings = (assist.issues || []).filter(issue => issue.category === "tone" && (issue.severity === "high" || issue.severity === "medium"));
-    const requiredPhrases = normalizeTextList(policyPack.requiredPhrases);
-    const bannedPhrases = normalizeTextList(policyPack.bannedPhrases);
-    const requiredWarnings = requiredPhrases
-      .filter(phrase => !includesText(draft, phrase))
-      .map(phrase => compactPolicyWarning({
-        id: "required_phrase_missing",
-        label: "Required phrase missing",
-        note: `Missing required wording: ${phrase}`,
-        severity: "high",
-        source: "tenant_policy",
-        fix: `Add or cover: ${phrase}`
-      }));
-    const bannedWarnings = bannedPhrases
-      .filter(phrase => includesText(draft, phrase))
-      .map(phrase => compactPolicyWarning({
-        id: "banned_phrase_found",
-        label: "Banned phrase found",
-        note: `Avoid restricted wording: ${phrase}`,
-        severity: "high",
-        source: "tenant_policy",
-        fix: "Replace with verified, conditional wording."
-      }));
-    const domainWarnings = failedDomainChecks.map(check => compactPolicyWarning({
-      id: check.id,
-      label: check.label,
-      note: check.note,
-      severity: check.severity,
-      source: "domain_policy",
-      fix: check.fix
-    }));
-    const riskWarnings = highGaps.map(gap => compactPolicyWarning({
-      id: gap.id,
-      label: gap.label,
-      note: gap.note,
-      severity: gap.severity,
-      source: "insights_policy"
-    }));
-    const tonePolicyWarnings = toneWarnings.map(issue => compactPolicyWarning({
-      id: issue.ruleId,
-      label: issue.label,
-      note: issue.message,
-      severity: issue.severity,
-      source: "assist_policy",
-      fix: issue.replacement || ""
-    }));
-    const warnings = []
-      .concat(requiredWarnings, bannedWarnings, domainWarnings, riskWarnings, tonePolicyWarnings)
-      .filter((warning, index, list) => list.findIndex(item =>
-        item.id === warning.id &&
-        item.source === warning.source &&
-        item.note === warning.note
-      ) === index);
-    const highCount = warnings.filter(warning => warning.severity === "high").length;
-    const status = highCount ? "blocked" : warnings.length ? "review" : "clear";
-
-    return buildEnvelope("/policy", request || {}, {
-      context,
-      sourceMode: sourceMode(customer, draft),
-      input: {
-        customerChars: customer.length,
-        draftChars: draft.length,
-        mode
-      },
-      result: {
-        status,
-        domain: insights.domain,
-        query: insights.query,
-        responseState: insights.responseState,
-        warnings,
-        checks: {
-          requiredPhrases: requiredPhrases.length,
-          bannedPhrases: bannedPhrases.length,
-          failedDomainChecks: failedDomainChecks.length,
-          highRiskGaps: highGaps.length,
-          toneWarnings: toneWarnings.length
-        }
-      },
-      diagnostics: {
-        warningCount: warnings.length,
-        highWarningCount: highCount,
-        requiredPhraseMisses: requiredWarnings.length,
-        bannedPhraseHits: bannedWarnings.length,
-        policyPackId: asText(policyPack.id) || "default"
-      }
-    });
-  }
-
-  function runSession(request, deps) {
-    const input = request && request.input ? request.input : request || {};
-    const customer = asText(input.customer);
-    const draft = asText(input.draft);
-    const mode = normalizeMode(input.mode, "auto");
-    const context = normalizeContext(request && request.context);
-    const sessionId = asText(request && request.sessionId) || "local";
-    const check = runCheck(Object.assign({}, request || {}, { input: { draft }, context }), deps);
-    const insights = runInsights(Object.assign({}, request || {}, { input: { customer, draft, mode }, context }), deps);
-    const drivers = runDrivers(Object.assign({}, request || {}, { input: { customer, draft, mode }, context }), deps);
-    const policy = request && request.policyPack
-      ? runPolicy(Object.assign({}, request || {}, { input: { customer, draft, mode }, context }), deps)
-      : null;
-    const feedbackPayload = request && (request.feedback || request.events || request.event);
-    const feedback = feedbackPayload ? runFeedback(Object.assign({},
-      request && request.feedback && typeof request.feedback === "object" ? request.feedback : {},
-      {
-        requestId: requestId(request, "/session") + "_feedback",
-        sessionId,
-        input: { customer, draft },
-        context,
-        events: request && request.feedback && Array.isArray(request.feedback.events)
-          ? request.feedback.events
-          : request && Array.isArray(request.events)
-            ? request.events
-            : request && request.event
-              ? [request.event]
-              : []
-      }
-    )) : null;
-    const highRiskIssues = (check.result.issues || []).filter(issue => issue.severity === "high").length;
-    const proofSummary = drivers.result && drivers.result.proofSummary || {};
-
-    return buildEnvelope("/session", request || {}, {
-      context,
-      sessionId,
-      sourceMode: sourceMode(customer, draft),
-      input: {
-        customerChars: customer.length,
-        draftChars: draft.length,
-        mode
-      },
-      result: {
-        assist: check.result,
-        insights: insights.result,
-        drivers: drivers.result,
-        policy: policy ? policy.result : null,
-        feedback: feedback ? feedback.result : null
-      },
-      summary: {
-        qualityScore: check.result.quality && check.result.quality.score || 0,
-        qualityState: check.result.quality && check.result.quality.state || "Blank",
-        responseState: insights.result.responseState && insights.result.responseState.code || "blank",
-        primaryDomain: insights.result.domain && insights.result.domain.id || "general",
-        queryType: insights.result.query && insights.result.query.id || "general",
-        issueCount: check.diagnostics.issueCount,
-        highRiskIssueCount: highRiskIssues,
-        safeFixCount: check.diagnostics.safeFixCount,
-        gapCount: insights.diagnostics.gapCount,
-        suggestionCount: insights.diagnostics.suggestionCount,
-        proofRows: proofSummary.totalRows || 0,
-        policyStatus: policy ? policy.result.status : "not_run",
-        policyWarnings: policy ? policy.diagnostics.warningCount : 0,
-        feedbackEvents: feedback ? feedback.diagnostics.acceptedCount : 0,
-        nextMove: insights.result.brief && insights.result.brief.nextMove || ""
-      },
-      diagnostics: {
-        checkOk: Boolean(check.ok),
-        insightsOk: Boolean(insights.ok),
-        driversOk: Boolean(drivers.ok),
-        policyOk: policy ? Boolean(policy.ok) : null,
-        feedbackOk: feedback ? Boolean(feedback.ok) : null,
-        backendReadiness: drivers.diagnostics && drivers.diagnostics.backendReadiness || 0
-      }
-    });
-  }
-
-  root.MirrorFlowApiContracts = {
-    contractVersion: CONTRACT_VERSION,
-    endpoints: ENDPOINTS.slice(),
-    runHealth,
-    runCheck,
-    runInsights,
-    runDrivers,
-    runPolicy,
-    runFeedback,
-    runSession
-  };
-})(typeof window !== "undefined" ? window : globalThis);
-
-
-window.MF_PING_OFFLINE_SHOWCASE = Object.freeze({
-  builtAt: "2026-05-19T22:47:54.561Z",
-  source: 'MirrorFlow_Ping_Shell_v6 - Codex.html',
-  bundled: ['ui', 'assist', 'insights', 'drivers', 'api-contracts'],
-  offline: true
-});
-
 /* ========== INIT ========== */
 const _loaded = load();
 applyPhoneSettings(_loaded?.phoneSettings || phoneSettings);
 applyTheme();            // sync: sets CSS vars on bubbles immediately
 syncRailControls();
-syncModeControls();
 renderSideNotes();
-if (!_loaded) renderSample();
 refreshAll();
 renderPingAssistRules();
 renderPingAssistProfilePresets();
