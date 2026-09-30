@@ -4,7 +4,12 @@ const MF_PING_STOP_WORDS = new Set([
   'about','again','also','because','been','being','before','between','could','does','doing','from','have','into',
   'just','know','like','more','need','needs','onto','over','really','same','should','still','that','their','them',
   'then','there','these','they','this','those','through','today','want','what','when','where','which','while',
-  'with','would','your','youre','youll','youve','thanks','thank'
+  'with','would','your','youre','youll','youve','thanks','thank',
+  'still','have','hasnt','havent','keeps','anyone','getting','tried','trying','going','make','making','thing','things',
+  'week','weeks','days','time','times','been','much','many','very','such','tell','told','said','says','sent','send',
+  'help','helps','please','something','anything','nothing','someone','because','cant','dont','didnt','wont','doesnt',
+  'can\'t','don\'t','didn\'t','won\'t','doesn\'t','hasn\'t','haven\'t','asked','asking','again','back','well','good',
+  'first','last','next','look','looks','looking','seem','seems','wasnt','isnt','arent','were','was','are','and','the','but'
 ]);
 
 const MF_PING_DOMAIN_PACKS = [
@@ -15,6 +20,7 @@ const MF_PING_DOMAIN_PACKS = [
     summary: 'Insurance, repairs, cover, liability, settlement, excess, or claim progress.',
     keywords: ['claim','claims','policy','insurance','insurer','settlement','payout','excess','garage','repair','engineer','liability','fault','non fault','third party','windscreen','valuation','total loss','written off','cover','covered','premium','no claims','ncd','ncb','accident','underwriter','salvage'],
     jargon: ['ncd','ncb','bacs','subrogation','liability','excess','endorsement','indemnity']
+    ,packType: 'coverage_eligibility'
   },
   {
     id: 'retail',
@@ -23,6 +29,7 @@ const MF_PING_DOMAIN_PACKS = [
     summary: 'Orders, delivery, refunds, returns, replacements, products, stores, or couriers.',
     keywords: ['order','delivery','delivered','parcel','courier','tracking','refund','return','replacement','exchange','item','product','store','checkout','purchase','receipt','damaged','missing','warehouse','stock','tracking number','consignment'],
     jargon: ['rma','sku','fulfilment','backorder','dispatch exception']
+    ,packType: 'delivery_replacement'
   },
   {
     id: 'booking',
@@ -51,6 +58,7 @@ const MF_PING_DOMAIN_PACKS = [
     summary: 'Login, password, verification, account access, app, or portal issues.',
     keywords: ['account','login','log in','password','verification','code','otp','app','portal','profile','access','locked','unlock','email address','username'],
     jargon: ['2fa','mfa','sso','oauth','tenant']
+    ,packType: 'access'
   },
   {
     id: 'technical',
@@ -59,6 +67,7 @@ const MF_PING_DOMAIN_PACKS = [
     summary: 'Errors, bugs, crashes, devices, setup, installation, or service failure.',
     keywords: ['error','bug','crash','broken','not working','device','install','installation','setup','website','screen','loading','failed','failure','sync','download','update','firmware','compatibility','latency'],
     jargon: ['cache','api','endpoint','payload','server error','client']
+    ,packType: 'technical_fault'
   },
   {
     id: 'general',
@@ -104,7 +113,12 @@ const MF_PING_DRAFT_SIGNALS = [
 
 
 function mfNorm(text) {
-  return String(text || '').toLowerCase().replace(/[’]/g, "'").replace(/\s+/g, ' ').trim();
+  return String(text || '').toLowerCase().replace(/[’]/g, "'")
+    .replace(/\b(i|we|you|they|he|she|it|that|there)'ll\b/g, '$1 will')
+    .replace(/\b(i|we|you|they)'ve\b/g, '$1 have')
+    .replace(/\bi'm\b/g, 'i am')
+    .replace(/\b(we|you|they)'re\b/g, '$1 are')
+    .replace(/\s+/g, ' ').trim();
 }
 
 function mfEscapeRegExp(text) {
@@ -215,10 +229,15 @@ function mfDetectSignals(text, sourceMode) {
   return { rows, load };
 }
 
+/* stem = first 5 letters, so "delivered"/"delivery" and "booking"/"booked" count as the same idea */
+function mfStem(word) { return String(word).slice(0, 5); }
+
 function mfKeyTerms(customer, domain) {
   const base = Array.from(new Set(mfWords(customer))).filter(w => w.length > 3);
   const domainHits = mfMatches(customer, domain.pack.keywords).map(h => mfNorm(h).split(' ')[0]);
-  return Array.from(new Set(domainHits.concat(base))).slice(0, 12);
+  const stems = new Set(), out = [];
+  domainHits.concat(base).forEach(w => { const k = mfStem(w); if (!stems.has(k)) { stems.add(k); out.push(w); } });
+  return out.slice(0, 8);
 }
 
 function mfCoverage(customer, draft, domain, sourceMode) {
@@ -229,9 +248,11 @@ function mfCoverage(customer, draft, domain, sourceMode) {
   if (!customer.trim()) return { score: 100, terms: [], missing: [], mode: 'none' };
   if (!draft.trim()) return { score: 0, terms, missing: terms.slice(0, 6) };
   const d = mfNorm(draft);
-  const hits = terms.filter(term => d.includes(term));
-  const score = terms.length ? Math.round((hits.length / terms.length) * 100) : 100;
-  return { score, terms, missing: terms.filter(term => !d.includes(term)).slice(0, 6), mode: 'customer' };
+  const covered = term => d.includes(mfStem(term));
+  const hits = terms.filter(covered);
+  /* the reply only needs to mirror the core of the ask: a 60% match is full marks */
+  const score = terms.length ? Math.min(100, Math.round((hits.length / Math.max(1, Math.ceil(terms.length * 0.6))) * 100)) : 100;
+  return { score, terms, missing: terms.filter(term => !covered(term)).slice(0, 6), mode: 'customer' };
 }
 
 function mfLooksSupportLike(draft, domain, query) {
@@ -285,84 +306,41 @@ function mfHasBookingTimeAnchor(text) {
   return /\b(today|tomorrow|tonight|within|by\s+\w+|before\s+\w+|after\s+\w+|end of day|eod|\d+\s+(working\s+)?days?|monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|tues|wed|thu|thur|fri|sat|sun|\d{1,2}[:.]\d{2}|\d{1,2}\s?(am|pm))\b/i.test(text);
 }
 
-function mfEvaluateDomainPack(domain, query, customer, draft, reply, sourceMode) {
-  const packType = domain && domain.pack && domain.pack.packType;
-  const isBookingPack = packType === 'booking_change' || query.id === 'booking_change';
-  const isMoneyPack = packType === 'refund_payment' || query.id === 'refund_payment';
-  const activePack = isMoneyPack ? 'refund_payment' : isBookingPack ? 'booking_change' : 'none';
-  const active = activePack !== 'none';
-  const packMeta = {
-    booking_change: {
-      label: 'Booking / change pack',
-      summary: 'Checks booking anchor, date/time, confirmation, fallback, reference handling, and promise risk.'
-    },
-    refund_payment: {
-      label: 'Refund / payment pack',
-      summary: 'Checks money anchor, amount or stage, ownership, movement timing, payment path, reference handling, and promise risk.'
-    }
-  };
-  const base = {
-    active,
-    id: activePack,
-    label: active ? packMeta[activePack].label : 'No domain pack',
-    summary: active ? (domain.pack.packSummary || packMeta[activePack].summary) : '',
-    score: 100,
-    checks: [],
-    failed: []
-  };
-  if (!active || !reply.hasDraft) return base;
+function mfSelectPack(domain, query) {
+  const packs = window.MF_PING_PACKS || [];
+  const byQuery = query && query.id ? packs.find(p => p.queryIds.includes(query.id)) : null;
+  if (byQuery) return byQuery;
+  const type = domain && domain.pack && domain.pack.packType;
+  return type ? packs.find(p => p.packTypes.includes(type)) || null : null;
+}
 
+/* Picks the check pack that fits the message automatically, then adds signal-driven extras. */
+function mfEvaluateDomainPack(domain, query, customer, draft, reply, sourceMode, signals) {
+  const pack = mfSelectPack(domain, query);
+  const base = { active: !!pack, id: pack ? pack.id : 'none', label: pack ? pack.label : 'General', summary: pack ? pack.summary : '', score: 100, checks: [], failed: [] };
+  if (!pack || !reply.hasDraft) return base;
   const combined = `${customer || ''} ${draft || ''}`;
-
-  function check(id, label, passed, note, fix, severity, required) {
-    const row = { id, label, passed, note: passed ? note : fix, fix, severity, required: required !== false };
+  const H = window.MF_PING_PACK_HELPERS;
+  const ctx = {
+    draft, customer, combined, reply, signals: signals || { rows: [], load: 0 },
+    has: list => H.has(draft, list),
+    rx: re => re.test(draft),
+    askedRef: mfMatches(combined, ['reference','ref','booking id','booking number','confirmation number','case number','ticket number','tracking','invoice','receipt','transaction','order number','claim number','policy number']).length > 0
+  };
+  const defs = pack.checks.slice();
+  (window.MF_PING_ADDONS || []).forEach(a => { if (!ctx.signals.rows.length ? false : a.when(ctx)) defs.push(a.check); });
+  defs.forEach(def => {
+    const passed = !!def.test(ctx);
+    const required = def.required === 'ifAsked' ? ctx.askedRef : def.required !== false;
+    const severity = def.required === 'ifAsked' && !ctx.askedRef ? 'low' : def.severity;
+    const row = { id: def.id, label: def.label, passed, note: passed ? def.note : def.fix, fix: def.fix, severity, required,
+      sugLabel: def.sugLabel, sugNote: def.sugNote, insert: def.insert };
     base.checks.push(row);
     if (!passed) base.failed.push(row);
-  }
-  function finalize() {
-    const required = base.checks.filter(row => row.required);
-    const passed = required.filter(row => row.passed).length;
-    base.score = required.length ? Math.round((passed / required.length) * 100) : 100;
-    return base;
-  }
-
-  if (isMoneyPack) {
-    const customerAskedReference = mfMatches(combined, ['reference','ref','invoice','receipt','transaction','payment id','refund id','order number','case number','ticket number']).length > 0;
-    const moneyAnchor = mfMatches(draft, ['refund','payment','invoice','charge','charged','fee','billing','bill','paid','money','payout','settlement','balance','direct debit','receipt']).length > 0;
-    const amountOrStage = /(?:£|\$|€)\s?\d|\b\d+(?:\.\d{2})?\b/i.test(draft) ||
-      mfMatches(draft, ['processed','processing','pending','approved','declined','reversed','credited','charged','submitted','raised','checking','being checked','under review','stage','status']).length > 0;
-    const owner = reply.ownership || mfMatches(draft, ['i will','i can','we will','we can','i have','we have','billing team','payments team','refund team','finance team']).length > 0;
-    const timeAnchor = reply.timeline || mfHasBookingTimeAnchor(draft) || mfMatches(draft, ['working days','business days','billing cycle','next statement','next update','bank processing']).length > 0;
-    const paymentPath = mfMatches(draft, ['original payment method','payment method','card','bank account','direct debit','account credit','statement','invoice','receipt','balance','manual payment','refund route','same card']).length > 0;
-    const reference = !customerAskedReference || /\b(ref|reference|invoice|receipt|transaction|payment id|refund id|order|case|ticket|[A-Z]{2,}-?\d{3,}|#\d{3,})\b/i.test(draft);
-    const promiseRisk = mfMatches(draft, ['guaranteed','guarantee','definitely refunded','definitely paid','definitely back','100% refunded','100% paid','will be resolved today','money will be in today','should be refunded','hopefully','probably']).length > 0;
-
-    check('money_anchor', 'Money anchor', moneyAnchor, 'Money topic is named.', 'Name the refund, payment, charge, invoice, fee, or balance.', 'medium');
-    check('money_stage', 'Amount or stage', amountOrStage, 'Amount or processing stage is visible.', 'Add the amount or current stage: pending, approved, processed, reversed, credited, or being checked.', 'high');
-    check('money_owner', 'Owner', owner, 'Owner is visible.', 'Say who is checking, correcting, refunding, or confirming the payment.', 'high');
-    check('money_timing', 'Movement timing', timeAnchor, 'Money movement timing is visible.', 'Add when the refund/payment update or movement should happen.', 'high');
-    check('money_path', 'Payment path', paymentPath, 'Payment route is clear.', 'Mention the payment method, original card, bank account, invoice, receipt, statement, or balance route.', 'medium');
-    check('money_reference', 'Reference handling', reference, 'Reference need is handled.', 'Include the invoice, receipt, transaction, payment, refund, order, case, or ticket reference.', customerAskedReference ? 'medium' : 'low', customerAskedReference);
-    check('money_promise', 'Promise control', !promiseRisk, 'No money movement overpromise found.', 'Avoid definite refund/payment promises until verified.', 'high');
-    return finalize();
-  }
-
-  const customerAskedReference = mfMatches(combined, ['reference','ref','booking id','booking number','confirmation number','case number','ticket number']).length > 0;
-  const bookingAnchor = mfMatches(draft, ['booking','appointment','reservation','slot','schedule','calendar','availability']).length > 0;
-  const timeAnchor = reply.timeline || mfHasBookingTimeAnchor(draft);
-  const confirmation = mfMatches(draft, ['confirmed','confirm','confirmation','booked','locked in','reserved','scheduled','rescheduled','cancelled','canceled','moved','changed']).length > 0;
-  const fallback = mfMatches(draft, ['if that does not work','if this does not work','if the time does not work','let me know','alternative','another slot','different time','move it','reschedule','available slot','fallback']).length > 0;
-  const reference = !customerAskedReference || /\b(ref|reference|booking id|booking number|confirmation number|case|ticket|[A-Z]{2,}-?\d{3,}|#\d{3,})\b/i.test(draft);
-  const promiseRisk = mfMatches(draft, ['guaranteed','guarantee','definitely confirmed','definitely booked','100% confirmed','will be resolved today','should be confirmed','should be booked','hopefully','probably']).length > 0;
-
-  check('booking_anchor', 'Booking anchor', bookingAnchor, 'Booking topic is named.', 'Name the booking, appointment, slot, or reservation.', 'medium');
-  check('booking_time', 'Time anchor', timeAnchor, 'Date, time, or update point is visible.', 'Add a date, time, slot, or clear update point.', 'high');
-  check('booking_confirmation', 'Confirmation state', confirmation, 'Booking status is explicit.', 'Say whether it is confirmed, changed, cancelled, moved, or still being checked.', 'high');
-  check('booking_reference', 'Reference handling', reference, 'Reference need is handled.', 'Include the booking reference or say where it will be confirmed.', customerAskedReference ? 'medium' : 'low', customerAskedReference);
-  check('booking_fallback', 'Fallback option', fallback, 'Fallback or reply path is visible.', 'Offer a fallback slot or ask them to send a better window.', 'low', false);
-  check('booking_promise', 'Promise control', !promiseRisk, 'No booking overpromise found.', 'Avoid definite booking promises unless verified.', 'high');
-
-  return finalize();
+  });
+  const required = base.checks.filter(row => row.required);
+  base.score = required.length ? Math.round((required.filter(row => row.passed).length / required.length) * 100) : 100;
+  return base;
 }
 
 function mfBuildGaps(reply, query, signals, domainChecks, sourceMode) {
@@ -503,78 +481,7 @@ function mfBuildResponseState(reply, gaps, signals, query, sourceMode) {
 }
 
 function mfDomainSuggestion(check) {
-  const map = {
-    booking_anchor: {
-      label: 'Name the booking',
-      note: 'Make the reply clearly about the appointment, reservation, or slot.',
-      insert: 'I can check the booking and confirm the slot details.'
-    },
-    booking_time: {
-      label: 'Add the booking time',
-      note: 'Booking replies need a date, time, or clear update point.',
-      insert: 'I will confirm the exact date and time before the next update.'
-    },
-    booking_confirmation: {
-      label: 'Confirm the booking state',
-      note: 'Say whether it is confirmed, changed, cancelled, moved, or still being checked.',
-      insert: 'I will confirm whether the booking is locked in or needs to be moved.'
-    },
-    booking_reference: {
-      label: 'Handle the reference',
-      note: 'Include the booking reference or say where it will be confirmed.',
-      insert: 'I will include the booking reference in the confirmation.'
-    },
-    booking_fallback: {
-      label: 'Offer a fallback slot',
-      note: 'Give the customer a path if the slot does not work.',
-      insert: 'If that slot does not work, send me a better window and I can move it.'
-    },
-    booking_promise: {
-      label: 'Control the promise',
-      note: 'Avoid firm booking promises until the slot is verified.',
-      insert: 'I will verify the booking first, then confirm the exact slot.'
-    },
-    money_anchor: {
-      label: 'Name the money issue',
-      note: 'Make the reply clearly about the refund, payment, invoice, charge, fee, or balance.',
-      insert: 'I can check the refund or payment details and confirm the current status.'
-    },
-    money_stage: {
-      label: 'Add amount or stage',
-      note: 'Money replies need either the amount or the current processing stage.',
-      insert: 'I will confirm whether the refund is pending, approved, processed, or still being checked.'
-    },
-    money_owner: {
-      label: 'Add ownership',
-      note: 'Say who is checking, correcting, refunding, or confirming the payment.',
-      insert: 'I will check this with the payments team and confirm the next step.'
-    },
-    money_timing: {
-      label: 'Add money timing',
-      note: 'Give a clear update point or movement window for the refund/payment.',
-      insert: 'I will send you an update today with the payment status and expected movement window.'
-    },
-    money_path: {
-      label: 'Clarify payment path',
-      note: 'Mention the card, bank account, invoice, receipt, statement, or balance route.',
-      insert: 'If the refund is approved, it will return through the original payment method unless we confirm a different route.'
-    },
-    money_reference: {
-      label: 'Handle money reference',
-      note: 'Include the invoice, receipt, transaction, payment, refund, order, case, or ticket reference.',
-      insert: 'I will include the invoice or transaction reference in the confirmation.'
-    },
-    money_promise: {
-      label: 'Control money promise',
-      note: 'Avoid firm refund/payment promises until verified.',
-      insert: 'I will verify the payment status first, then confirm the exact movement window.'
-    }
-  };
-  return map[check.id] || {
-    label: check.label,
-    note: check.fix || check.note,
-    insert: ''
-  };
+  return { label: check.sugLabel || check.label, note: check.sugNote || check.fix || check.note, insert: check.insert || '' };
 }
 
 function mfBuildSuggestions(customer, domain, query, signals, reply, gaps, domainChecks, sourceMode) {
@@ -916,7 +823,7 @@ function MF_runPingUniversalEngine(customer, draft, mode) {
   const query = mfDetectQueryType(analysisText || '', domain);
   const signals = mfDetectSignals(analysisText || '', sourceMode);
   const reply = mfDetectReply(customer || '', draft || '', domain, query, signals, sourceMode);
-  const domainChecks = mfEvaluateDomainPack(domain, query, customer || '', draft || '', reply, sourceMode);
+  const domainChecks = mfEvaluateDomainPack(domain, query, customer || '', draft || '', reply, sourceMode, signals);
   const gaps = mfBuildGaps(reply, query, signals, domainChecks, sourceMode);
   const responseState = mfBuildResponseState(reply, gaps, signals, query, sourceMode);
   const suggestions = mfBuildSuggestions(customer || '', domain, query, signals, reply, gaps, domainChecks, sourceMode);

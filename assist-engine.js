@@ -155,6 +155,11 @@
     }
   ];
 
+  /* extended rule pack (assist-rules.js) */
+  const EXT = window.MirrorFlowAssistRules || { regex:[], structural:[], tests:[], negatives:[] };
+  REGEX_RULES.push.apply(REGEX_RULES, EXT.regex);
+  STRUCTURAL_RULES.push.apply(STRUCTURAL_RULES, EXT.structural);
+
   const RULE_REGISTRY = REGEX_RULES.concat(STRUCTURAL_RULES);
   const RULE_ID_SET   = new Set(RULE_REGISTRY.map(r => r.id));
   const PROFILE_PRESET_DEFS = [
@@ -271,6 +276,8 @@
     { id: "N-007", ruleId: "grammar.capitalization.first_person_i", input: "Use the i.e. form here." },
     { id: "N-008", ruleId: "grammar.contraction.im", input: "The IM feature is enabled." }
   ];
+  RULE_TESTS.push.apply(RULE_TESTS, EXT.tests);
+  RULE_NEGATIVE_TESTS.push.apply(RULE_NEGATIVE_TESTS, EXT.negatives);
 
   function isPlainObject(v) { return Boolean(v) && typeof v==="object" && !Array.isArray(v); }
   function safeProfileText(v, fb) { const t=typeof v==="string"?v.trim():""; return t?t.slice(0,120):fb; }
@@ -460,7 +467,7 @@
   }
   function protectSpans(text) {
     const spans=[];
-    [{ type:"placeholder", re:/\{\{[^}]+\}\}/g },{ type:"url", re:/\b(?:https?:\/\/|www\.)[^\s]+/gi },{ type:"email", re:/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi },{ type:"ticket", re:/\b[A-Z]{2,}-\d{3,}\b/g }]
+    [{ type:"placeholder", re:/\{\{[^}]+\}\}/g },{ type:"url", re:/\b(?:https?:\/\/|www\.)[^\s]+/gi },{ type:"email", re:/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi },{ type:"ticket", re:/\b[A-Z]{2,}-\d{3,}\b/g },{ type:"code", re:/`[^`\n]+`/g },{ type:"file", re:/\b[\w-]+\.(?:pdf|png|jpe?g|gif|txt|csv|xlsx?|docx?|pptx?|html?|zip|json|mp4)\b/gi },{ type:"quote", re:/\u201c[^\u201d\n]{3,300}\u201d|"[^"\n]{3,300}"/g },{ type:"reference", re:/#\d{3,}\b/g }]
       .forEach(({type,re})=>{ let m; while((m=re.exec(text))) spans.push({type,start:m.index,end:m.index+m[0].length,text:m[0]}); });
     return spans.sort((a,b)=>a.start-b.start);
   }
@@ -471,9 +478,16 @@
     issues.push(Object.assign({ id:"iss_"+(issues.length+1), severity:"medium", confidence:0.8, replacement:null, applySafe:issue.replacement!==null&&issue.replacement!==undefined, status:"active" }, issue));
   }
   function applyReplacement(match, rule) {
-    if (rule.replacement===null||rule.replacement===undefined) return null;
-    /* expand $1..$9 / $& from the live match so lookaround rules work on the original text */
-    return rule.replacement.replace(/\$(\d|&|\$)/g,(_,k)=>k==="$"?"$":k==="&"?match[0]:(match[+k]||""));
+    let out = rule.replacement;
+    if (out===null||out===undefined) return null;
+    if (typeof out==="function") out = String(out(match));
+    else out = out.replace(/\$(\d|&|\$)/g,(_,k)=>k==="$"?"$":k==="&"?match[0]:(match[+k]||""));
+    if (rule.keepCase && out) {
+      const o=match[0];
+      if (o.length>1 && o===o.toUpperCase() && /[A-Z]/.test(o)) out=out.toUpperCase();
+      else if (/^[A-Z]/.test(o)) out=out.charAt(0).toUpperCase()+out.slice(1);
+    }
+    return out;
   }
   function sentenceSpans(text) {
     const spans=[], re=/[^.!?]+(?:[.!?]+|$)/g; let m;
@@ -484,7 +498,10 @@
     return spans;
   }
   function issueFromRegexRule(rule, match) {
-    return { ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:rule.message, replacement:applyReplacement(match,rule), severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
+    const replacement=applyReplacement(match, rule);
+    const issue={ ruleId:rule.id, category:rule.category, subtype:rule.subtype, label:rule.label, start:match.index, end:match.index+match[0].length, message:rule.message, replacement, severity:rule.severity, confidence:rule.confidence, excerpt:match[0] };
+    if (rule.safe===false) issue.applySafe=false;
+    return issue;
   }
   function normalizeRewriteText(value) {
     return String(value || "")
@@ -541,7 +558,7 @@
       safe:applied.every(issue => issue.applySafe)
     };
   }
-  function buildRewritePreviews(text, issues) {
+  function buildRewritePreviews(text, issues, ruleState) {
     const base = String(text || "").trim();
     const variants = [
       {
@@ -567,7 +584,13 @@
     ];
     const seen = new Set();
     return variants.map(variant => {
-      const applied = applyIssueSet(text, issues, variant.test);
+      let applied = applyIssueSet(text, issues, variant.test);
+      /* fixes can unlock further fixes ("thier is" -> "their is" -> "there is"), so re-check the result up to twice */
+      for (let pass = 0; pass < 2 && applied.appliedRuleIds.length; pass++) {
+        const next = applyIssueSet(applied.text, runRuleRegistry(applied.text, protectSpans(applied.text), ruleState), variant.test);
+        if (!next.appliedRuleIds.length || next.text === applied.text) break;
+        applied = { text:next.text, appliedRuleIds:applied.appliedRuleIds.concat(next.appliedRuleIds) };
+      }
       if (!applied.appliedRuleIds.length || applied.text === base || seen.has(applied.text)) return null;
       seen.add(applied.text);
       return {
@@ -586,12 +609,30 @@
     const issues=[], lower=text.toLowerCase();
     const push=(issue,spans)=>addIssue(issues,spans||protectedSpans,issue);
     getActiveRegexRules(ruleState).forEach(rule=>{
-      const flags=rule.pattern.flags.includes("g")?rule.pattern.flags:rule.pattern.flags+"g";
-      const pat=new RegExp(rule.pattern.source,flags);
-      let m; while((m=pat.exec(text))) push(issueFromRegexRule(rule,m),protectedSpans);
+      let pat=rule._re;
+      if (!pat) { const flags=rule.pattern.flags.includes("g")?rule.pattern.flags:rule.pattern.flags+"g"; pat=rule._re=new RegExp(rule.pattern.source,flags); }
+      pat.lastIndex=0;
+      let m; while((m=pat.exec(text))) {
+        if (m[0]==="") { pat.lastIndex++; continue; }
+        if (rule.guard && !rule.guard(m,text)) continue;
+        push(issueFromRegexRule(rule,m),protectedSpans);
+      }
     });
-    getActiveStructuralRules(ruleState).forEach(rule=>rule.run({text,lower,protectedSpans,push}));
-    return issues;
+    getActiveStructuralRules(ruleState).forEach(rule=>rule.run({text,lower,protectedSpans,issues,push}));
+    return dedupeIssues(issues);
+  }
+  /* drop exact duplicates and keep the stronger of two same-category issues that overlap */
+  function dedupeIssues(issues) {
+    const sevRank={high:3,medium:2,low:1};
+    const strength=i=>(sevRank[i.severity]||1)*10+(i.confidence||0);
+    const sorted=issues.slice().sort((a,b)=>a.start-b.start||strength(b)-strength(a));
+    const kept=[];
+    sorted.forEach(issue=>{
+      const clash=kept.findIndex(k=>k.category===issue.category&&k.start<issue.end&&issue.start<k.end&&(k.ruleId===issue.ruleId||(k.start===issue.start&&k.end===issue.end)));
+      if (clash<0) kept.push(issue);
+    });
+    kept.forEach((k,i)=>{ k.id="iss_"+(i+1); });
+    return kept;
   }
   function resolveEngineContext(context) {
     const safeCtx=isPlainObject(context)?context:{};
@@ -625,7 +666,7 @@
       contextBridge:{ ping:null, issues:0 },
       protectedSpans, issues:issues.sort((a,b)=>a.start-b.start),
       rules:{ profile:buildRuleProfile(es.disabledRuleIds,es.profileValidation,es.profileMeta), active:getActiveRules(es.disabledRuleIds).map(r=>({id:r.id,category:r.category,label:r.label,severity:r.severity})), disabled:Array.from(es.disabledRuleIds), categories:RULE_CATEGORIES.slice() },
-      rewrites:buildRewritePreviews(text,issues),
+      rewrites:buildRewritePreviews(text,issues,es.disabledRuleIds),
       quality,
       tone,
       clarity:{ model:clarityScore.model, score:clarityScore.score, quality:clarityScore.quality, level:clarityScore.level, risk:clarityScore.risk, grade, words:wordCount, sentences:sentences.length, avgSentenceLength, longSentences, readability:grade<=9?"Good":grade<=12?"Heavy":"Dense", weights:clarityScore.weights, components:clarityScore.components, recommendations:clarityScore.recommendations }

@@ -824,6 +824,12 @@ function renderPingInsights() {
   mfSetText('mfBriefWhy', result.reply.hasDraft
     ? [responseState.reason, responseState.next].filter(Boolean).join(' ')
     : 'Write or paste text to see if it’s ready to send.');
+  const packChip = document.getElementById('mfPackChip');
+  if (packChip) {
+    const packOn = result.reply.hasDraft && result.domainChecks && result.domainChecks.active;
+    packChip.hidden = !packOn;
+    if (packOn) packChip.textContent = 'Checking as: ' + result.domainChecks.label;
+  }
   const readyBar = document.getElementById('mfReadyBar');
   if (readyBar) readyBar.style.width = responseState.score + '%';
 
@@ -1387,7 +1393,7 @@ function renderPingAssistCards(result) {
       ? [`No ${mfAssistFilter} issues`, `Switch filters or keep writing. ${result.editorScope === 'selection' ? 'Selection' : 'Draft'} check is still active.`]
       : activeCount === 0 && mfAssistIgnore.size > 0
         ? ['Ignored issues hidden', 'Clear ignored to bring the hidden cards back.']
-        : ['No issues found', 'The current text is clean. Use rewrite previews if you want a different tone or length.'];
+        : ['All clear ✓', 'Grammar, clarity and tone look good. Use rewrite previews if you want a different tone or length.'];
     list.innerHTML = mfAssistEmptyHtml(empty[0], empty[1]);
     return;
   }
@@ -2426,7 +2432,15 @@ const _applyTheme = applyTheme;
 applyTheme = function() { _applyTheme(); save(); };
 
 /* persist rail state changes */
+const isMobile = () => window.matchMedia('(max-width: 720px)').matches;
+let _prevPanels = { insights: shell.dataset.insights, phone: shell.dataset.phone };
 const observer = new MutationObserver(() => {
+  /* on small screens the panels are sheets: opening one closes the other */
+  if (isMobile() && shell.dataset.insights === 'open' && shell.dataset.phone === 'open') {
+    if (_prevPanels.insights !== 'open') shell.dataset.phone = 'collapsed';
+    else shell.dataset.insights = 'collapsed';
+  }
+  _prevPanels = { insights: shell.dataset.insights, phone: shell.dataset.phone };
   syncRailControls();
   save();
 });
@@ -3056,6 +3070,7 @@ new ResizeObserver(schedulePhoneScale).observe(document.querySelector('.mf-phone
 
 /* ========== INIT ========== */
 const _loaded = load();
+if (!_loaded && isMobile()) shell.dataset.phone = 'collapsed';
 applyPhoneSettings(_loaded?.phoneSettings || phoneSettings);
 applyTheme();            // sync: sets CSS vars on bubbles immediately
 syncRailControls();

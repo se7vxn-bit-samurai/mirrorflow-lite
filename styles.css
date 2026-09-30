@@ -2260,6 +2260,16 @@ html[data-theme="paper"] .phone-wrap {
   }
   .mf-rail-phone { display: none; }
 }
+/* readable line length on wide screens */
+.mf-editor-surface { padding-inline: clamp(24px, calc((100% - 780px) / 2), 240px); }
+.mf-editor-surface:has(> p:only-child > br:only-child)::before { left: clamp(24px, calc((100% - 780px) / 2), 240px); right: clamp(24px, calc((100% - 780px) / 2), 240px); }
+
+/* keyboard focus */
+button:focus-visible, .mf-tb-btn:focus-visible, .mf-chip:focus-visible, .mf-assist-act-btn:focus-visible,
+.mf-assist-filter-btn:focus-visible, .mf-assist-action-btn:focus-visible, .mf-assist-section-toggle:focus-visible {
+  outline: 2px solid var(--mf-accent); outline-offset: 2px;
+}
+
 /* editor empty state */
 .mf-editor-surface { position: relative; }
 .mf-editor-surface:has(> p:only-child > br:only-child)::before {
@@ -2270,6 +2280,8 @@ html[data-theme="paper"] .phone-wrap {
 
 /* review rail */
 .mf-insight-card[hidden] { display: none; }
+.mf-review-pack { display: inline-block; margin-top: 8px; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--mf-border); color: var(--mf-ink-3); font: 600 10px var(--mf-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.mf-review-pack[hidden] { display: none; }
 .mf-review-why { margin: 8px 0 0; font: 500 12px/1.45 var(--mf-font-ui); color: var(--mf-ink-2); }
 .mf-review-issues { width: 100%; margin-top: 10px; justify-content: center; }
 .mf-rail-insights .mf-assist-section { margin-top: 4px; }
@@ -2281,14 +2293,25 @@ html[data-theme="paper"] .phone-wrap {
 .mf-dock-btn[data-readiness="blocked"] .mf-dock-state { background: #ff5c7a; box-shadow: 0 0 9px #ff5c7a; }
 .mf-dock-btn[data-readiness="idle"] .mf-dock-state { background: var(--mf-border-strong); box-shadow: none; }
 
-/* mobile: editor only */
+/* small screens: editor first, panels slide over */
 @media (max-width: 720px) {
   .mf-shell {
     grid-template-columns: var(--mf-dock-w) minmax(0, 1fr) var(--mf-dock-w);
     grid-template-rows: 1fr;
   }
+  /* panels become slide-over sheets on small screens */
   .mf-rail-insights,
   .mf-rail-phone { display: none; }
+  .mf-shell[data-insights="open"] .mf-rail-insights,
+  .mf-shell[data-phone="open"] .mf-rail-phone {
+    display: flex; position: absolute; top: 0; bottom: 0; z-index: 30;
+    width: min(340px, calc(100% - var(--mf-dock-w) * 2 - 12px));
+    background: var(--mf-bg-canvas);
+    box-shadow: 0 0 40px rgba(0,0,0,.5);
+  }
+  .mf-shell[data-insights="open"] .mf-rail-insights { left: var(--mf-dock-w); border-right: 1px solid var(--mf-border); }
+  .mf-shell[data-phone="open"] .mf-rail-phone { right: var(--mf-dock-w); border-left: 1px solid var(--mf-border); }
+  .mf-editor { grid-column: 2; }
   .mf-bubbles, .mf-shuffle, .mf-brand .mf-suffix { display: none; }
   .mf-editor-surface { padding: 20px 18px; }
   .mf-tb { padding: 6px 8px; }
