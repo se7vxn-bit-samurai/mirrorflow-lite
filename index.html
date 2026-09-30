@@ -53,7 +53,7 @@
 </header>
 
 <!-- ========= SHELL ========= -->
-<main class="mf-shell" id="shell" data-insights="collapsed" data-phone="open" data-right-panel="assist">
+<main class="mf-shell" id="shell" data-insights="collapsed" data-right="open" data-right-panel="assist">
 
   <!-- ===== LEFT DOCK ===== -->
   <aside class="mf-side-dock mf-left-dock" aria-label="Review dock">
@@ -235,11 +235,11 @@
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
         </button>
-        <button class="mf-tb-btn send" title="Send (Ctrl+Enter)">
-          Send
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="12 5 19 12 12 19"/>
+        <button class="mf-tb-btn primary" title="Copy reply (Ctrl+Enter)">
+          Copy reply
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
           </svg>
         </button>
       </div>
@@ -249,84 +249,23 @@
     </div>
   </section>
 
-  <!-- ===== PHONE RAIL ===== -->
-  <aside class="mf-rail-phone" id="railPhone">
-    <div class="mf-phone-resize" id="phoneResize" title="Drag to resize · double-click to cycle"></div>
-    <div class="mf-phone-stage">
-      <div class="phone-wrap" data-shell="clean" id="phoneWrap">
-        <div class="phone-inner">
-          <span class="phone-notch" aria-hidden="true"></span>
-
-          <div class="statusbar">
-            <div class="status-left">
-              <span class="phone-time" id="phoneTime">--:--</span>
-              <span class="status-online">
-                <span class="status-dot"></span>
-                <span class="status-text">Online</span>
-              </span>
-            </div>
-            <div class="status-right">
-              <div class="signal-bars"><span></span><span></span><span></span><span></span></div>
-              <div class="battery"><div class="battery-level"></div></div>
-            </div>
-          </div>
-
-          <div class="chathead" aria-label="Customer support status">
-            <div class="chathead-left">
-              <div class="avatar" aria-hidden="true">CS</div>
-              <div class="chatmeta">
-                <div class="title">Customer Support</div>
-                <div class="sub">Typically replies within an hour</div>
-              </div>
-            </div>
-            <div class="chathead-right">
-              <span class="dotlive" aria-hidden="true"></span>
-              <button class="phone-settings-btn" id="phoneSettingsBtn" type="button"
-                aria-expanded="false" aria-controls="phoneSettingsPopover" aria-label="Phone preview settings">
-                <span aria-hidden="true">Aa</span>
-                <span class="phone-settings-count" id="phoneInteractionCount">0</span>
-              </button>
-              <div class="phone-settings-popover" id="phoneSettingsPopover" data-open="false" aria-hidden="true">
-                <div class="phone-settings-panel" role="group" aria-label="Phone preview settings">
-                  <div class="phone-settings-row">
-                    <span class="phone-settings-label">Text</span>
-                    <div class="phone-settings-segments">
-                      <button class="phone-settings-option" type="button" data-phone-setting="text" data-value="small">Small</button>
-                      <button class="phone-settings-option" type="button" data-phone-setting="text" data-value="normal">Base</button>
-                      <button class="phone-settings-option" type="button" data-phone-setting="text" data-value="large">Large</button>
-                    </div>
-                  </div>
-                  <div class="phone-settings-row">
-                    <span class="phone-settings-label">Spacing</span>
-                    <div class="phone-settings-segments">
-                      <button class="phone-settings-option" type="button" data-phone-setting="density" data-value="tight">Tight</button>
-                      <button class="phone-settings-option" type="button" data-phone-setting="density" data-value="normal">Base</button>
-                      <button class="phone-settings-option" type="button" data-phone-setting="density" data-value="airy">Airy</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="chat" id="phoneBody"></div>
-
-          <div class="phone-input">
-            <div class="mf-phone-input-stack">
-              <span class="mf-phone-coach-tip">Use the customer's name once - it helps it feel personal.</span>
-              <textarea id="customerInput" class="phone-input-field" rows="1"
-                placeholder="Type customer message here…"></textarea>
-            </div>
-            <button class="send-dot" id="phoneSendBtn" type="button" aria-label="Send customer message">
-              <svg fill="none" height="16" viewBox="0 0 24 24" width="16">
-                <path d="M3 11.5L21 3l-8.5 18-1.8-7.1L3 11.5z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"/>
-              </svg>
-            </button>
-          </div>
-
+  <!-- ===== RIGHT RAIL: suggestions, notes, optional customer message ===== -->
+  <aside class="mf-rail-right" id="railRight">
+    <section class="mf-customer-stage" id="customerPanel" aria-label="Customer message (optional)">
+      <div class="mf-notes-head">
+        <div>
+          <span class="mf-notes-eyebrow">Optional</span>
+          <strong class="mf-notes-title">Customer message</strong>
+        </div>
+        <div class="mf-notes-actions">
+          <button class="mf-note-add" id="customerPasteBtn" type="button">Paste</button>
+          <button class="mf-note-add" id="customerClearBtn" type="button">Clear</button>
         </div>
       </div>
-    </div>
+      <p class="mf-customer-hint">Paste what they wrote and the review will also check that your reply answers it. Every checker works without it.</p>
+      <textarea id="customerInput" class="mf-customer-input" rows="9" placeholder="Paste the customer's message here…"></textarea>
+      <div class="mf-customer-state" id="customerState" data-on="false">Not used: the reply is checked on its own.</div>
+    </section>
 
     <section class="mf-notes-stage" id="sideNotesPanel" aria-label="Side notes">
       <div class="mf-notes-head">
@@ -366,7 +305,7 @@
           <strong id="mfAssistRightScope">Draft</strong>
         </div>
         <div class="mf-assist-status-item">
-          <span>Score</span>
+          <span>Writing</span>
           <strong id="mfAssistRightScore">--</strong>
         </div>
         <div class="mf-assist-status-item">
@@ -419,13 +358,6 @@
         <span class="mf-assist-count" id="mfAssistDot" aria-hidden="true"></span>
         <span class="mf-dock-label">Assist</span>
       </button>
-      <button class="mf-dock-btn" id="tabPhone" type="button" data-panel-toggle="phone" aria-pressed="false" title="Phone panel">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect>
-          <line x1="11" y1="18" x2="13" y2="18"></line>
-        </svg>
-        <span class="mf-dock-label">Phone</span>
-      </button>
       <button class="mf-dock-btn" id="tabNotes" type="button" data-panel-toggle="notes" aria-pressed="false" title="Side notes panel">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M6 3h9l3 3v15H6z"></path>
@@ -434,6 +366,13 @@
           <path d="M9 15h6"></path>
         </svg>
         <span class="mf-dock-label">Side Notes</span>
+      </button>
+      <button class="mf-dock-btn" id="tabCustomer" type="button" data-panel-toggle="customer" aria-pressed="false" title="Customer message (optional)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span class="mf-dock-state" aria-hidden="true"></span>
+        <span class="mf-dock-label">Customer message</span>
       </button>
     </div>
   </aside>

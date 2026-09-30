@@ -4,7 +4,9 @@ Single-file, offline writing and reply assistant (`index.html`). No build step, 
 
 - **Editor** with a compact toolbar. Less-used tools live under **More**.
 - **Suggestions** (right panel): grammar, clarity and tone checks with one-click fixes.
-- **Review** (left panel, hidden by default): send-readiness and writing quality. Adapts to the message automatically; nothing to configure. Rule profiles and diagnostics sit under *Advanced*.
+- **Review** (left panel, hidden by default): send-readiness and writing quality from the reply alone. Adapts automatically; nothing to configure. Rule profiles and diagnostics sit under *Advanced*.
+- **Copy reply** copies the finished reply (plain text plus formatting) to paste into your helpdesk. This is not a live chat, so nothing is sent from here.
+- **Customer message** (right dock, optional): paste what they wrote and the review also checks that the reply answers it. Every checker works without it.
 - Everything runs locally; drafts are stored in the browser's `localStorage`.
 
 Open `index.html` in a browser to run it.

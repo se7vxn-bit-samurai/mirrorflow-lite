@@ -79,7 +79,7 @@ document.getElementById('shuffleBtn').addEventListener('click', () => {
 function syncRailControls() {
   const rightPanel = shell.dataset.rightPanel || 'assist';
   const insightsOpen = shell.dataset.insights !== 'collapsed';
-  const rightOpen = shell.dataset.phone !== 'collapsed';
+  const rightOpen = shell.dataset.right !== 'collapsed';
   const insightsBtn = document.getElementById('tabInsights');
   if (insightsBtn) {
     insightsBtn.dataset.state = insightsOpen ? 'open' : 'collapsed';
@@ -96,7 +96,7 @@ function syncRailControls() {
   }
   [
     ['tabAssist', 'assist', 'assist'],
-    ['tabPhone',  'phone',  'phone'],
+    ['tabCustomer', 'customer', 'customer message'],
     ['tabNotes',  'notes',  'side notes']
   ].forEach(([id, panel, label]) => {
     const btn = document.getElementById(id);
@@ -119,41 +119,35 @@ document.getElementById('tabInsights').addEventListener('click', (e) => {
 /* RIGHT PANEL — dock toggle */
 document.getElementById('tabRightPanel').addEventListener('click', (e) => {
   e.stopPropagation();
-  shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
-  if (!['assist', 'phone', 'notes'].includes(shell.dataset.rightPanel)) {
+  shell.dataset.right = shell.dataset.right === 'open' ? 'collapsed' : 'open';
+  if (!['assist', 'customer', 'notes'].includes(shell.dataset.rightPanel)) {
     shell.dataset.rightPanel = 'assist';
   }
-  if (shell.dataset.phone === 'open' && shell.dataset.rightPanel === 'assist') renderPingAssist();
+  if (shell.dataset.right === 'open' && shell.dataset.rightPanel === 'assist') renderPingAssist();
   syncRailControls();
-  if (shell.dataset.rightPanel === 'phone') beginPhonePanelMotion();
-  schedulePhoneScale();
 });
 
-/* PHONE — right dock mode */
-document.getElementById('tabPhone').addEventListener('click', (e) => {
+/* CUSTOMER MESSAGE — optional right panel */
+document.getElementById('tabCustomer').addEventListener('click', (e) => {
   e.stopPropagation();
-  shell.dataset.rightPanel = 'phone';
-  shell.dataset.phone = 'open';
+  shell.dataset.rightPanel = 'customer';
+  shell.dataset.right = 'open';
   syncRailControls();
-  beginPhonePanelMotion();
-  schedulePhoneScale();
 });
 
 document.getElementById('tabNotes').addEventListener('click', (e) => {
   e.stopPropagation();
   shell.dataset.rightPanel = 'notes';
-  shell.dataset.phone = 'open';
+  shell.dataset.right = 'open';
   syncRailControls();
-  schedulePhoneScale();
 });
 
 document.getElementById('tabAssist').addEventListener('click', (e) => {
   e.stopPropagation();
   shell.dataset.rightPanel = 'assist';
-  shell.dataset.phone = 'open';
+  shell.dataset.right = 'open';
   renderPingAssist();
   syncRailControls();
-  schedulePhoneScale();
 });
 
 /* drag-resize insights */
@@ -186,14 +180,10 @@ document.addEventListener('mouseup', () => {
 });
 
 /* =========================================================
-   LIVE WIRING — editor ← phone, counters, tone, persistence
+   LIVE WIRING — editor, customer message (optional), persistence
    ========================================================= */
 const editorEl   = document.getElementById('editorSurface');
 const customerEl = document.getElementById('customerInput');
-const phoneWrap  = document.getElementById('phoneWrap');
-const phoneBody  = document.getElementById('phoneBody');
-const phoneSettingsBtn = document.getElementById('phoneSettingsBtn');
-const phoneSettingsPopover = document.getElementById('phoneSettingsPopover');
 const sideNotesList = document.getElementById('sideNotesList');
 const sideNotesSearch = document.getElementById('sideNotesSearch');
 const sideNotesClearSearch = document.getElementById('sideNotesClearSearch');
@@ -203,76 +193,14 @@ const addNoteFromDraftBtn = document.getElementById('addNoteFromDraftBtn');
 /* counterEl removed */
 /* metaEl removed — auto-save status now lives in More popover */
 
-/* persistent draft bubbles (Lite-style) */
-const draftOut = document.createElement('div');
-draftOut.className = 'bubble preview';
-draftOut.dataset.role = 'agent';
-const draftIn  = document.createElement('div');
-draftIn.className  = 'bubble preview';
-draftIn.dataset.role = 'cust';
-
-const PHONE_IDLE_MSGS = [
-  { role: 'idle-cust',  text: 'Hi, I could do with some help.' },
-  { role: 'idle-agent', text: 'Hi,\nThanks for reaching out, how can I help?' }
-];
-
 let sideNotes = [];
 let sideNotesQuery = '';
 
-const PHONE_TEXT_SCALES = Object.freeze({
-  small: 0.92,
-  normal: 1,
-  large: 1.12
-});
-const VALID_PHONE_DENSITIES = new Set(['tight', 'normal', 'airy']);
-let phoneSettings = {
-  text: 'normal',
-  density: 'normal'
-};
 
-function normalizePhoneText(value) {
-  return Object.prototype.hasOwnProperty.call(PHONE_TEXT_SCALES, value) ? value : 'normal';
-}
 
-function normalizePhoneDensity(value) {
-  return VALID_PHONE_DENSITIES.has(value) ? value : 'normal';
-}
 
-function normalizePhoneSettings(value) {
-  const source = value && typeof value === 'object' ? value : {};
-  return {
-    text: normalizePhoneText(source.text),
-    density: normalizePhoneDensity(source.density)
-  };
-}
 
-function renderPhoneSettingsControls() {
-  if (!phoneSettingsPopover) return;
-  phoneSettingsPopover.querySelectorAll('[data-phone-setting]').forEach(btn => {
-    const key = btn.dataset.phoneSetting;
-    const active = phoneSettings[key] === btn.dataset.value;
-    btn.setAttribute('aria-pressed', String(active));
-  });
-}
 
-function setPhoneSettingsOpen(open) {
-  if (!phoneSettingsBtn || !phoneSettingsPopover) return;
-  const nextOpen = Boolean(open);
-  phoneSettingsPopover.dataset.open = nextOpen ? 'true' : 'false';
-  phoneSettingsPopover.setAttribute('aria-hidden', String(!nextOpen));
-  phoneSettingsBtn.setAttribute('aria-expanded', String(nextOpen));
-}
-
-function applyPhoneSettings(value = phoneSettings) {
-  phoneSettings = normalizePhoneSettings(value);
-  if (phoneWrap) {
-    phoneWrap.dataset.phoneText = phoneSettings.text;
-    phoneWrap.dataset.phoneDensity = phoneSettings.density;
-    phoneWrap.style.setProperty('--phone-font-scale', String(PHONE_TEXT_SCALES[phoneSettings.text]));
-  }
-  renderPhoneSettingsControls();
-  schedulePhoneScale();
-}
 
 function makeNote(text = '', options = {}) {
   return {
@@ -609,137 +537,20 @@ editorEl.addEventListener('keyup', captureEditorSelection);
 editorEl.addEventListener('mouseup', captureEditorSelection);
 editorEl.addEventListener('focus', captureEditorSelection);
 
-function updatePhoneDraft() {
-  clearPhoneIdle();
-  const t = getDraftPlain();
-  if (t) {
-    draftOut.textContent = t;
-    if (!draftOut.parentElement) phoneBody.appendChild(draftOut);
-    phoneBody.scrollTop = phoneBody.scrollHeight;
-  } else {
-    draftOut.remove();
-    syncPhoneIdle();
-  }
-}
 
-function updateCustomerDraft() {
-  clearPhoneIdle();
-  const t = customerEl.value;
-  if (t.trim()) {
-    draftIn.textContent = t;
-    if (!draftIn.parentElement) {
-      if (draftOut.parentElement) phoneBody.insertBefore(draftIn, draftOut);
-      else phoneBody.appendChild(draftIn);
-    }
-    phoneBody.scrollTop = phoneBody.scrollHeight;
-  } else {
-    draftIn.remove();
-    syncPhoneIdle();
-  }
-}
 
-function clearPhoneIdle() {
-  phoneBody.querySelectorAll('[data-idle="true"]').forEach(el => el.remove());
-}
 
-function hasRealPhoneContent() {
-  return Boolean(phoneBody.querySelector('.bubble:not([data-idle="true"]), .bubble-time:not([data-idle="true"])'));
-}
 
-function shouldShowPhoneIdle() {
-  return !getDraftPlain() && !customerEl.value.trim() && !hasRealPhoneContent();
-}
 
-function renderPhoneIdle() {
-  clearPhoneIdle();
-  PHONE_IDLE_MSGS.forEach(msg => {
-    const el = document.createElement('div');
-    el.className = 'bubble idle';
-    el.dataset.role = msg.role;
-    el.dataset.idle = 'true';
-    el.setAttribute('aria-hidden', 'true');
-    el.textContent = msg.text;
-    phoneBody.appendChild(el);
-  });
-  updatePhoneInteractionCount();
-}
 
-function syncPhoneIdle() {
-  if (shouldShowPhoneIdle()) renderPhoneIdle();
-  else clearPhoneIdle();
-  updatePhoneInteractionCount();
-}
 
-function getPersistablePhoneHTML() {
-  const clone = phoneBody.cloneNode(true);
-  clone.querySelectorAll('[data-idle="true"]').forEach(el => el.remove());
-  return clone.innerHTML;
-}
-
-/* =========================================================
-   MF PING: MirrorGlass Phone v2
-   Phone preview metadata
-   ========================================================= */
-function updatePhoneInteractionCount() {
-  const el = document.getElementById('phoneInteractionCount');
-  const count = phoneBody.querySelectorAll('.bubble:not(.preview):not([data-idle="true"])').length;
-  if (el) el.textContent = String(count);
-  if (phoneSettingsBtn) {
-    const label = `Phone preview settings, ${count} chat${count === 1 ? '' : 's'}`;
-    phoneSettingsBtn.title = label;
-    phoneSettingsBtn.setAttribute('aria-label', label);
-  }
-}
-
-if (phoneSettingsBtn) {
-  phoneSettingsBtn.addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    setPhoneSettingsOpen(phoneSettingsBtn.getAttribute('aria-expanded') !== 'true');
-  });
-}
-
-if (phoneSettingsPopover) {
-  phoneSettingsPopover.addEventListener('click', (ev) => {
-    ev.stopPropagation();
-    const btn = ev.target.closest('[data-phone-setting]');
-    if (!btn) return;
-    const key = btn.dataset.phoneSetting;
-    const value = btn.dataset.value;
-    if (key === 'text') phoneSettings.text = normalizePhoneText(value);
-    if (key === 'density') phoneSettings.density = normalizePhoneDensity(value);
-    applyPhoneSettings(phoneSettings);
-    save();
-  });
-}
-
-document.addEventListener('click', (ev) => {
-  const target = ev.target;
-  if (!phoneSettingsPopover || phoneSettingsPopover.dataset.open !== 'true') return;
-  if (target.closest('#phoneSettingsPopover') || target.closest('#phoneSettingsBtn')) return;
-  setPhoneSettingsOpen(false);
-});
-
-document.addEventListener('keydown', (ev) => {
-  if (ev.key === 'Escape') setPhoneSettingsOpen(false);
-});
-
-/* phone-input textarea auto-grow */
-function autosizeCustomer() {
-  customerEl.style.height = 'auto';
-  customerEl.style.height = Math.min(92, customerEl.scrollHeight) + 'px';
-}
 
 function updateCounter() { /* counter removed — keeping stub so refreshAll stays harmless */ }
 
+/* The customer message is optional. Everything works from the reply alone; this only adds
+   "does the reply answer them?" checks when something is pasted in. */
 function getCustomerContextText() {
-  const live = customerEl.value.trim();
-  if (live) return live;
-  const bubbles = Array.from(phoneBody.querySelectorAll('.bubble[data-role="cust"]'))
-    .filter(el => !el.classList.contains('typing') && !el.classList.contains('preview'))
-    .map(el => el.textContent.trim())
-    .filter(Boolean);
-  if (bubbles.length) return bubbles[bubbles.length - 1];
-  return '';
+  return customerEl.value.trim();
 }
 
 /* ========== INSIGHTS RENDER + DOM WIRING ========== */
@@ -819,7 +630,7 @@ function renderPingInsights() {
   mfSetText('mfReadyScore', result.reply.hasDraft ? responseState.score + '%' : '--');
   mfSetText('mfReadyLabel', result.reply.hasDraft ? responseState.label : 'Idle');
   const nextCard = document.getElementById('mfNextMoveCard');
-  if (nextCard) nextCard.hidden = !result.reply.hasDraft;
+  if (nextCard) nextCard.hidden = !result.reply.hasDraft || responseState.code === 'ready';
   if (stateCard && !result.reply.hasDraft) stateCard.dataset.responseState = 'idle';
   mfSetText('mfBriefWhy', result.reply.hasDraft
     ? [responseState.reason, responseState.next].filter(Boolean).join(' ')
@@ -864,10 +675,9 @@ function renderPingInsights() {
 document.getElementById('pingInsightEngine').addEventListener('click', (e) => {
   if (e.target.closest('[data-open-assist]')) {
     shell.dataset.rightPanel = 'assist';
-    shell.dataset.phone = 'open';
+    shell.dataset.right = 'open';
     renderPingAssist();
     syncRailControls();
-    schedulePhoneScale();
     return;
   }
   const btn = e.target.closest('[data-insight-insert]');
@@ -907,32 +717,7 @@ function mfExchangeSlug(text) {
   return slug || 'ping-session';
 }
 
-function mfPhoneTranscriptTurns() {
-  return Array.from(phoneBody.children).reduce((turns, el, index) => {
-    if (el.dataset.idle === 'true' || el.classList.contains('preview') || el.classList.contains('typing')) return turns;
-    const text = String(el.textContent || '').trim();
-    if (!text) return turns;
-    if (el.classList.contains('bubble-time')) {
-      turns.push({ index, type: 'time', label: text });
-      return turns;
-    }
-    if (!el.classList.contains('bubble')) return turns;
-    const role = el.dataset.role === 'agent' ? 'agent' : 'customer';
-    turns.push({
-      id: 'turn_' + String(turns.length + 1).padStart(2, '0'),
-      index,
-      type: 'message',
-      role,
-      text
-    });
-    return turns;
-  }, []);
-}
 
-function mfLatestTranscriptText(turns, role) {
-  const match = (turns || []).filter(turn => turn.type === 'message' && turn.role === role).pop();
-  return match ? match.text : '';
-}
 
 function mfCompactAssistForExchange(analysis) {
   if (!analysis) return null;
@@ -1038,11 +823,10 @@ function mfBuildExchangeTitle(insights, analysisText) {
 
 function mfBuildTheGuideExchangePacket() {
   const draftText = getDraftPlain();
-  const transcript = mfPhoneTranscriptTurns();
-  const finalText = mfLatestTranscriptText(transcript, 'agent');
-  const customerText = getCustomerContextText() || mfLatestTranscriptText(transcript, 'customer');
-  const analysisText = draftText || finalText || customerText;
-  const insightsDraft = draftText || finalText;
+  const finalText = '';
+  const customerText = getCustomerContextText();
+  const analysisText = draftText || customerText;
+  const insightsDraft = draftText;
   const hasAssist = Boolean(insightsDraft && window.MirrorFlowAssistEngine?.analyzeText);
   const assist = hasAssist
     ? window.MirrorFlowAssistEngine.analyzeText(insightsDraft, { surface: 'ping_exchange', mode: 'writing_only' })
@@ -1072,20 +856,20 @@ function mfBuildTheGuideExchangePacket() {
         text: note.text,
         pinned: Boolean(note.pinned)
       })),
-      chatTurns: transcript
+      chatTurns: []
     },
     analysis: {
       assist: assistPacket,
       insights: insightsPacket,
       drivers: {
         insightRows: mfExchangeClone(insights?.drivers || {}, {}),
-        assistRows: mfExchangeClone(mfBuildAssistDriverRows(), [])
+        assistRows: []
       },
       coachSeed: mfBuildCoachSeed(assistPacket, insightsPacket, analysisText, customerText)
     },
     privacy: {
       redacted: false,
-      containsCustomerText: Boolean(customerText || transcript.some(turn => turn.role === 'customer')),
+      containsCustomerText: Boolean(customerText),
       containsAgentText: Boolean(draftText || finalText),
       storage: 'local-download'
     }
@@ -1705,7 +1489,7 @@ mfIssueTip.addEventListener('click', e => {
     save();
   } else if (kind === 'open') {
     shell.dataset.rightPanel = 'assist';
-    shell.dataset.phone = 'open';
+    shell.dataset.right = 'open';
     syncRailControls();
     focusPingIssue(issue.id);
     const card = document.querySelector('.mf-assist-card[data-issue-id="' + issue.id + '"]');
@@ -2375,11 +2159,11 @@ const KEY = 'mf-ping-state';
 const STATE_VERSION = 4;
 const DEFAULT_LAYOUT_STATE = Object.freeze({
   insights: 'collapsed',
-  phone: 'open',
+  right: 'open',
   rightPanel: 'assist'
 });
 const VALID_PANEL_STATES = new Set(['open', 'collapsed']);
-const VALID_RIGHT_PANELS = new Set(['assist', 'phone', 'notes']);
+const VALID_RIGHT_PANELS = new Set(['assist', 'customer', 'notes']);
 
 function setAssistDiagnosticsOpen(open) {
   const box = document.getElementById('mfAssistDiagnostics');
@@ -2430,11 +2214,10 @@ function normalizeSavedState(raw) {
     theme,
     cursor: normalizeCursorState(source.cursor),
     insights: source.version >= 4 ? normalizePanelState(source.insights, DEFAULT_LAYOUT_STATE.insights) : DEFAULT_LAYOUT_STATE.insights,
-    phone: normalizePanelState(source.phone, DEFAULT_LAYOUT_STATE.phone),
+    right: normalizePanelState(source.right !== undefined ? source.right : source.phone, DEFAULT_LAYOUT_STATE.right),
     rightPanel: normalizeRightPanel(source.rightPanel),
-    phoneSettings: normalizePhoneSettings(source.phoneSettings),
     insightsWidth: railWidthValue(source.insightsWidth, 180, 520),
-    phoneWidth: railWidthValue(source.phoneWidth, 220, 560),
+    rightWidth: railWidthValue(source.rightWidth !== undefined ? source.rightWidth : source.phoneWidth, 220, 560),
     sideNotes: Array.isArray(source.sideNotes) ? normalizeSideNotes(source.sideNotes) : sideNotes,
     assistDiagnosticsOpen: source.assistDiagnosticsOpen === true,
     assistIgnore: Array.isArray(source.assistIgnore) ? source.assistIgnore : [],
@@ -2446,14 +2229,13 @@ function normalizeSavedState(raw) {
 
 function resetPingLayout() {
   shell.dataset.insights = DEFAULT_LAYOUT_STATE.insights;
-  shell.dataset.phone = DEFAULT_LAYOUT_STATE.phone;
+  shell.dataset.right = DEFAULT_LAYOUT_STATE.right;
   shell.dataset.rightPanel = DEFAULT_LAYOUT_STATE.rightPanel;
   shell.style.removeProperty('--mf-rail-insights-w');
-  shell.style.removeProperty('--mf-rail-phone-w');
+  shell.style.removeProperty('--mf-rail-right-w');
   syncRailControls();
   renderPingInsights();
   renderPingAssist();
-  schedulePhoneScale();
 }
 function save() {
   try {
@@ -2463,15 +2245,13 @@ function save() {
       cursor,
       insights: shell.dataset.insights,
       insightsWidth: getRailWidth('--mf-rail-insights-w'),
-      phone: shell.dataset.phone,
-      phoneWidth: getRailWidth('--mf-rail-phone-w'),
-      phoneSettings,
+      right: shell.dataset.right,
+      rightWidth: getRailWidth('--mf-rail-right-w'),
       rightPanel: shell.dataset.rightPanel,
       sideNotes,
       assistDiagnosticsOpen: document.getElementById('mfAssistDiagnostics')?.dataset.open === 'true',
       draft: editorEl.innerHTML,
       customer: customerEl.value,
-      chatHTML: getPersistablePhoneHTML(),
       assistIgnore: Array.from(mfAssistIgnore),
       assistLearnedWords: window.MirrorFlowSpell ? window.MirrorFlowSpell.learnedWords() : [],
       assistRuleProfile: typeof window.MirrorFlowAssistEngine !== 'undefined'
@@ -2489,9 +2269,8 @@ function load() {
     if (s.cursor) Object.assign(cursor, s.cursor);
     shell.dataset.insights = s.insights;
     restoreRailWidth('--mf-rail-insights-w', s.insightsWidth, 180, 520);
-    shell.dataset.phone = s.phone;
-    restoreRailWidth('--mf-rail-phone-w', s.phoneWidth, 220, 560);
-    applyPhoneSettings(s.phoneSettings);
+    shell.dataset.right = s.right;
+    restoreRailWidth('--mf-rail-right-w', s.rightWidth, 220, 560);
     shell.dataset.rightPanel = s.rightPanel;
     if (Array.isArray(s.assistIgnore)) mfAssistIgnore = new Set(s.assistIgnore);
     if (window.MirrorFlowSpell && Array.isArray(s.assistLearnedWords)) s.assistLearnedWords.forEach(w => window.MirrorFlowSpell.learn(w));
@@ -2509,7 +2288,6 @@ function load() {
     if (Array.isArray(s.sideNotes)) sideNotes = s.sideNotes;
     if (s.draft) editorEl.innerHTML = s.draft;
     if (s.customer) customerEl.value = s.customer;
-    if (s.chatHTML) phoneBody.innerHTML = s.chatHTML;
     return s;
   } catch (_) {
     try { localStorage.removeItem(KEY); } catch (_) {}
@@ -2561,9 +2339,6 @@ function saveDebounced(delay = 220) {
 function refreshAll(options = {}) {
   const immediate = options && options.immediate === true;
   syncEditorStatus();
-  updatePhoneDraft();
-  updateCustomerDraft();
-  updatePhoneInteractionCount();
   updateCounter();
   if (immediate) {
     clearTimeout(mfInsightsDebounce);
@@ -2583,7 +2358,7 @@ editorEl.addEventListener('input', () => {
   saveDebounced();
 });
 customerEl.addEventListener('input', () => {
-  updateCustomerDraft();
+  syncCustomerState();
   renderPingInsightsDebounced();
   renderPingAssistDebounced();
   saveDebounced();
@@ -2595,18 +2370,18 @@ applyTheme = function() { _applyTheme(); save(); };
 
 /* persist rail state changes */
 const isMobile = () => window.matchMedia('(max-width: 720px)').matches;
-let _prevPanels = { insights: shell.dataset.insights, phone: shell.dataset.phone };
+let _prevPanels = { insights: shell.dataset.insights, right: shell.dataset.right };
 const observer = new MutationObserver(() => {
   /* on small screens the panels are sheets: opening one closes the other */
-  if (isMobile() && shell.dataset.insights === 'open' && shell.dataset.phone === 'open') {
-    if (_prevPanels.insights !== 'open') shell.dataset.phone = 'collapsed';
+  if (isMobile() && shell.dataset.insights === 'open' && shell.dataset.right === 'open') {
+    if (_prevPanels.insights !== 'open') shell.dataset.right = 'collapsed';
     else shell.dataset.insights = 'collapsed';
   }
-  _prevPanels = { insights: shell.dataset.insights, phone: shell.dataset.phone };
+  _prevPanels = { insights: shell.dataset.insights, right: shell.dataset.right };
   syncRailControls();
   save();
 });
-observer.observe(shell, { attributes: true, attributeFilter: ['data-insights', 'data-phone', 'data-right-panel'] });
+observer.observe(shell, { attributes: true, attributeFilter: ['data-insights', 'data-right', 'data-right-panel'] });
 
 /* ========== FOCUS MODE — ⌘. ========== */
 document.addEventListener('keydown', (e) => {
@@ -2616,31 +2391,6 @@ document.addEventListener('keydown', (e) => {
     toast(shell.dataset.focus === 'editor' ? `Focus mode — ${MOD_KEY}+. to exit` : 'Focus off');
   }
 });
-
-/* ========== SEND — cmd+enter + click ========== */
-function doSend() {
-  const btn = document.querySelector('.mf-tb-btn.send');
-  btn.style.transform = 'scale(0.96)';
-  setTimeout(() => btn.style.transform = '', 140);
-  toast('Sent — draft cleared');
-  editorEl.innerHTML = '<p>Hi,</p><p><br></p>';
-  customerEl.value = '';
-  draftOut.remove(); draftIn.remove();
-  mfAssistIgnore.clear();
-  mfLastAssist = null;
-  mfActiveIssueId = null;
-  mfAssistSetUndoState(null);
-  lastEdit = Date.now();
-  refreshAll();
-  save();
-}
-document.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    e.preventDefault();
-    doSend();
-  }
-});
-document.querySelector('.mf-tb-btn.send').addEventListener('click', doSend);
 
 /* =========================================================
    shell features
@@ -2842,31 +2592,6 @@ popoverEl.addEventListener('click', (e) => {
   }
 });
 
-/* ---------- PHONE BODY RENDER ---------- */
-function appendBubble(m) {
-  clearPhoneIdle();
-  let el;
-  if (m.who === 'time') {
-    el = document.createElement('div');
-    el.className = 'bubble-time';
-    el.textContent = m.t;
-  } else if (m.who === 'typing') {
-    el = document.createElement('div');
-    el.className = 'bubble typing';
-    el.dataset.role = 'cust';
-    el.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
-  } else {
-    el = document.createElement('div');
-    el.className = 'bubble';
-    el.dataset.role = (m.who === 'out') ? 'agent' : 'cust';
-    el.textContent = m.t;
-  }
-  phoneBody.appendChild(el);
-  updatePhoneInteractionCount();
-  return el;
-}
-
-
 /* (insight cards + tone detail removed — placeholder until rebuild) */
 
 /* =========================================================
@@ -3048,192 +2773,86 @@ popoverEl.addEventListener('click', (e) => {
 function showHelp() {
   alert(
     'Keyboard shortcuts\n' +
-    `— ${MOD_KEY}+Enter   Send draft\n` +
+    `— ${MOD_KEY}+Enter   Copy reply\n` +
     `— ${MOD_KEY}+B/I/U   Bold / Italic / Underline\n` +
     `— ${MOD_KEY}+K       Insert link\n` +
     `— ${MOD_KEY}+.       Toggle focus mode\n` +
     '— Shift+Enter (in draft)          New line\n' +
-    '— Enter (in customer box)         Send as customer message\n' +
-    '— Shift+Enter (in customer box)   New line\n' +
     '— Esc                             Close popover'
   );
 }
 
-/* ---------- SEND — appends agent bubble, no auto-reply ---------- */
-function doSendV2() {
-  const text = getDraftPlain();
-  if (!text) { toast('Nothing to send'); return; }
-  const btn = document.querySelector('.mf-tb-btn.send');
+/* ---------- COPY REPLY — the reply is pasted into the helpdesk; nothing is sent from here ---------- */
+async function copyReply() {
+  const text = getDraftPlain().trim();
+  if (!text) { toast('Nothing to copy yet'); return; }
+  const btn = document.querySelector('.mf-tb-btn.primary');
   btn.style.transform = 'scale(0.96)';
   setTimeout(() => btn.style.transform = '', 140);
-  appendBubble({ who: 'out', t: text });
-  editorEl.innerHTML = '<p><br></p>';
-  customerEl.value = '';
-  draftOut.remove(); draftIn.remove();
-  mfAssistSetUndoState(null);
-  lastEdit = Date.now();
-  refreshAll();
-  phoneBody.scrollTop = phoneBody.scrollHeight;
-  toast('Sent');
-  save();
-}
-
-/* re-bind Send button and Cmd+Enter to V2 */
-const sendBtn = document.querySelector('.mf-tb-btn.send');
-sendBtn.replaceWith(sendBtn.cloneNode(true));
-const newSendBtn = document.querySelector('.mf-tb-btn.send');
-newSendBtn.addEventListener('click', doSendV2);
-
-document.addEventListener('keydown', (e) => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    doSendV2();
+  try {
+    if (window.ClipboardItem && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/plain': new Blob([text], { type: 'text/plain' }),
+        'text/html': new Blob([editorEl.innerHTML], { type: 'text/html' })
+      })]);
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+    toast('Reply copied - paste it into your helpdesk');
+  } catch (_) {
+    toast('Copy failed - select the text and copy manually');
   }
-}, true);
-
-/* ---------- CUSTOMER INJECT — appends customer bubble ---------- */
-function injectCustomer() {
-  const text = customerEl.value.trim();
-  if (!text) { toast('Type something first'); return; }
-  appendBubble({ who: 'in', t: text });
-  customerEl.value = '';
-  draftIn.remove();
-  autosizeCustomer();
-  refreshAll();
-  phoneBody.scrollTop = phoneBody.scrollHeight;
-  save();
 }
+document.querySelector('.mf-tb-btn.primary').addEventListener('click', copyReply);
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); copyReply(); }
+});
 
 /* ---------- NEW SESSION — wipe everything ---------- */
 function newSession() {
-  if (!confirm('Start a new session? This clears the draft, customer input, and chat.')) return;
+  if (!confirm('Start a new reply? This clears the draft and the customer message.')) return;
   editorEl.innerHTML = '<p><br></p>';
   customerEl.value = '';
-  phoneBody.innerHTML = '';
-  draftOut.remove(); draftIn.remove();
   mfAssistClearDraftState();
   lastEdit = Date.now();
-  autosizeCustomer();
+  syncCustomerState();
   refreshAll();
-  toast('New session');
+  toast('Cleared - ready for the next reply');
   save();
 }
 document.getElementById('newSessionBtn').addEventListener('click', newSession);
 
-/* phone-internal send button (replaces external inject) */
-document.getElementById('phoneSendBtn').addEventListener('click', injectCustomer);
-
-/* Enter sends, Shift+Enter inserts newline (iMessage-style) */
-customerEl.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    injectCustomer();
+/* ---------- CUSTOMER MESSAGE PANEL (optional) ---------- */
+function syncCustomerState() {
+  const has = Boolean(customerEl.value.trim());
+  const state = document.getElementById('customerState');
+  if (state) {
+    state.dataset.on = String(has);
+    state.textContent = has
+      ? 'In use: the review also checks that your reply answers this.'
+      : 'Not used: the reply is checked on its own.';
+  }
+  const tab = document.getElementById('tabCustomer');
+  if (tab) tab.dataset.has = String(has);
+}
+document.getElementById('customerPasteBtn').addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (!text) { toast('Clipboard empty'); return; }
+    customerEl.value = text;
+    customerEl.dispatchEvent(new Event('input'));
+  } catch (_) {
+    toast('Paste failed - use Ctrl+V in the box');
   }
 });
-
-/* auto-grow textarea + live preview already wired via input listener */
-customerEl.addEventListener('input', autosizeCustomer);
-
-/* ---------- LIVE PHONE CLOCK ---------- */
-function updatePhoneClock() {
-  const el = document.getElementById('phoneTime');
-  if (!el) return;
-  const d = new Date();
-  el.textContent = d.toTimeString().slice(0, 5);
-}
-updatePhoneClock();
-setInterval(updatePhoneClock, 30000);
-
-/* ---------- PHONE RAIL DRAG-RESIZE ---------- */
-const phoneResize = document.getElementById('phoneResize');
-let phoneDrag = false;
-phoneResize.addEventListener('mousedown', (e) => {
-  if (shell.dataset.phone === 'collapsed') return;
-  phoneDrag = true;
-  document.body.style.cursor = 'ew-resize';
-  document.body.style.userSelect = 'none';
-  e.preventDefault();
+document.getElementById('customerClearBtn').addEventListener('click', () => {
+  customerEl.value = '';
+  customerEl.dispatchEvent(new Event('input'));
 });
-document.addEventListener('mousemove', (e) => {
-  if (!phoneDrag) return;
-  const dockW = document.querySelector('.mf-right-dock')?.getBoundingClientRect().width || 0;
-  const w = window.innerWidth - e.clientX - dockW;
-  if (w < 100) {
-    shell.dataset.phone = 'collapsed';
-    phoneDrag = false;
-    document.body.style.cursor = ''; document.body.style.userSelect = '';
-    schedulePhoneScale();
-    return;
-  }
-  shell.dataset.phone = 'open';
-  const clamped = Math.max(220, Math.min(560, w));
-  shell.style.setProperty('--mf-rail-phone-w', clamped + 'px');
-  schedulePhoneScale();
-});
-document.addEventListener('mouseup', () => {
-  if (!phoneDrag) return;
-  phoneDrag = false;
-  document.body.style.cursor = ''; document.body.style.userSelect = '';
-  save();
-});
-
-phoneResize.addEventListener('dblclick', () => {
-  shell.dataset.phone = shell.dataset.phone === 'open' ? 'collapsed' : 'open';
-  shell.style.removeProperty('--mf-rail-phone-w');
-  beginPhonePanelMotion();
-  schedulePhoneScale();
-  save();
-});
-
-/* ---------- LITE-STYLE FLUID PHONE SCALING ---------- */
-let phoneScaleRaf = 0;
-let phoneMotionTimer = 0;
-
-function schedulePhoneScale() {
-  if (phoneScaleRaf) cancelAnimationFrame(phoneScaleRaf);
-  phoneScaleRaf = requestAnimationFrame(() => {
-    phoneScaleRaf = 0;
-    updatePhoneScale();
-  });
-}
-
-function beginPhonePanelMotion() {
-  if (shell.dataset.rightPanel !== 'phone' || shell.dataset.phone !== 'open') return;
-  shell.dataset.phoneMotion = 'true';
-  clearTimeout(phoneMotionTimer);
-  schedulePhoneScale();
-  phoneMotionTimer = setTimeout(() => {
-    delete shell.dataset.phoneMotion;
-    schedulePhoneScale();
-  }, 360);
-}
-
-function updatePhoneScale() {
-  const wrap = document.getElementById('phoneWrap');
-  const stage = wrap && wrap.parentElement;
-  if (!wrap || !stage) return;
-  const padX = 12, padY = 22;
-  const availW = Math.max(0, stage.clientWidth  - padX);
-  const availH = Math.max(0, stage.clientHeight - padY);
-  // Skip zero-dimension updates — happens before layout is flushed on init;
-  // the ResizeObserver fires again once real dimensions are available.
-  if (availW === 0 && availH === 0) return;
-  const style = getComputedStyle(wrap);
-  const baseW = parseFloat(style.getPropertyValue('--mf-phone-base-w')) || 372;
-  const baseH = parseFloat(style.getPropertyValue('--mf-phone-base-h')) || 724;
-  const s = Math.max(0.32, Math.min(1, availW / baseW, availH / baseH));
-  wrap.style.setProperty('--phone-scale', isFinite(s) ? s : 1);
-}
-window.addEventListener('resize', schedulePhoneScale);
-new ResizeObserver(schedulePhoneScale).observe(document.querySelector('.mf-phone-stage'));
-
-
 
 /* ========== INIT ========== */
 const _loaded = load();
-if (!_loaded && isMobile()) shell.dataset.phone = 'collapsed';
-applyPhoneSettings(_loaded?.phoneSettings || phoneSettings);
+if (!_loaded && isMobile()) shell.dataset.right = 'collapsed';
 applyTheme();            // sync: sets CSS vars on bubbles immediately
 syncRailControls();
 renderSideNotes();
@@ -3241,20 +2860,12 @@ refreshAll();
 renderPingAssistRules();
 renderPingAssistProfilePresets();
 renderPingAssistDiagnostics();
-syncPhoneIdle();
 tickMeta();
-autosizeCustomer();
-updatePhoneScale();
+syncCustomerState();
 requestAnimationFrame(() => {
   // Re-apply theme after browser's first layout/style pass — guarantees CSS
   // custom-property gradients on marble swatches resolve against inline values,
   // not the class-level defaults that were active before the first paint cycle.
   applyTheme();
-  updatePhoneScale();
   renderPingInsights();
-  requestAnimationFrame(() => {
-    updatePhoneScale();
-    // Final deferred scale call after all transitions have had one tick to start
-    setTimeout(updatePhoneScale, 0);
-  });
 });
